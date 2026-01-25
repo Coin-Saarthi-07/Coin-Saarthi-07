@@ -1,6 +1,8 @@
 package com.cdac.coin_saarthi.model;
 
 
+import com.cdac.coin_saarthi.enums.Role;
+import com.cdac.coin_saarthi.enums.Status;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -70,8 +72,13 @@ public class User {
 
     private LocalDate dob;
 
-    private Integer status = 1; // 1 = Active
-    private Integer role = 0;   // 0 = User
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)// 1 = Active
+    private Role role;   // 0 = User
 
 
 
@@ -123,19 +130,19 @@ public class User {
         this.dob = dob;
     }
 
-    public Integer getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
-    public Integer getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(Integer role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
