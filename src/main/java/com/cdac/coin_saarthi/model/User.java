@@ -59,11 +59,6 @@ public class User {
     private String email;
 
     @NotBlank
-    @Size(min = 8, max = 255)
-    @Pattern(
-            regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
-            message = "Must contain at least one capital letter, one number, and one special character."
-    )
     private String password;
 
     @NotBlank

@@ -1,4 +1,4 @@
-package com.cdac.coin_saarthi.contoller;
+package com.cdac.coin_saarthi.controller;
 
 import com.cdac.coin_saarthi.dto.CreateWatchListDto;
 import com.cdac.coin_saarthi.service.WatchListService;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/crypto/watchlist")
-public class WatchListController {
+public class WatchListController{
     private final WatchListService watchListService;
 
     public WatchListController(WatchListService watchListService) {
