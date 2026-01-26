@@ -1,5 +1,9 @@
 package com.cdac.coin_saarthi.enums;
 
 public enum PaymentStatus {
-	SUCCESS, CANCELLED
+
+    PENDING,
+    SUCCESS,
+    FAILED
+
 }

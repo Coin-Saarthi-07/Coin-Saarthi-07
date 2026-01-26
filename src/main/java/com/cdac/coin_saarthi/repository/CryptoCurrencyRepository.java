@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.cdac.coin_saarthi.model.CryptoCurrency;
 
 public interface CryptoCurrencyRepository extends JpaRepository<CryptoCurrency, Long>{
-	Optional<CryptoCurrency> findBySymbol(String symbol);
+	Optional<CryptoCurrency> findByCurrencySymbol(String symbol);
 
-    Optional<CryptoCurrency> findByName(String name);
+    //Optional<CryptoCurrency> findByCurrencyName(String name);
     
-    List<CryptoCurrency> findByNameContainingIgnoreCaseOrSymbolContainingIgnoreCase(String name, String symbol);
+    List<CryptoCurrency> findByCurrencyNameContainingIgnoreCaseOrCurrencySymbolContainingIgnoreCase(String name, String symbol);
 }

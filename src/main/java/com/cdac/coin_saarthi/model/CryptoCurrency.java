@@ -38,7 +38,7 @@ public class CryptoCurrency {
 	public String currencyName;
 	
 	@Column(nullable = false)
-	public String currencyPrice;
+	public Double currencyPrice;
 	
 	@Column(nullable = false, unique = true)
 	@Size(min=2, max=10, message="Currency symbol must between 2-10 characters")
@@ -51,12 +51,12 @@ public class CryptoCurrency {
 	@OneToMany(mappedBy="cryptoCurrency", cascade=CascadeType.ALL, orphanRemoval=true)
     private List<PriceHistory> priceHistories;
 
-    @OneToMany(mappedBy="cryptoCurrency", cascade=CascadeType.ALL, orphanRemoval=true)
-    private List<Alert> alerts;
+//    @OneToMany(mappedBy="cryptoCurrency", cascade=CascadeType.ALL, orphanRemoval=true)
+//    private List<Alert> alerts;
 
     @OneToMany(mappedBy="cryptoCurrency", cascade=CascadeType.ALL, orphanRemoval=true)
     private List<WatchList> watchLists;
 
-    @OneToMany(mappedBy="cryptoCurrency", cascade=CascadeType.ALL, orphanRemoval=true)
-    private List<Portfolio> portfolios;
+//    @OneToMany(mappedBy="cryptoCurrency", cascade=CascadeType.ALL, orphanRemoval=true)
+//    private List<Portfolio> portfolios;
 }
