@@ -25,8 +25,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "user_subscription")
-@Getter 
+@Table(name = "user_subscriptions")
+@Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,8 +50,8 @@ public class UserSubscription {
     @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date")
     @NotNull
+    @Column(nullable = false)
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
@@ -61,4 +61,5 @@ public class UserSubscription {
     // One subscription can generate many invoices
     @OneToMany(mappedBy = "userSubscription",cascade = CascadeType.ALL,orphanRemoval=true)
     private List<Invoice> invoices;
+
 }

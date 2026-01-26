@@ -46,7 +46,7 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 	//get by user id
 	@Override
 	public List<UserSubscription> getByUserId(Long userId) {
-		List<UserSubscription> subscriptions = userSubscriptionRepository.findByUserId(userId);
+		List<UserSubscription> subscriptions = userSubscriptionRepository.findByUser_UserId(userId);
 		
 		if(subscriptions.isEmpty()) {
 			throw new RuntimeException("Subscription of given user not found");

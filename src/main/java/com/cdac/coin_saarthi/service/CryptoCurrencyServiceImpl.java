@@ -39,7 +39,7 @@ public class CryptoCurrencyServiceImpl implements CryptoCurrencyService {
 	//3.get by symbol
 	@Override
 	public CryptoCurrency getBySymbol(String symbol) {
-		 return cryptoCurrencyRepository.findBySymbol(symbol)
+		 return cryptoCurrencyRepository.findByCurrencySymbol(symbol)
 	                .orElseThrow(()->new RuntimeException("CryptoCurrency not found with symbol"));
 	}
 	
@@ -76,7 +76,7 @@ public class CryptoCurrencyServiceImpl implements CryptoCurrencyService {
 	@Override
 	public List<CryptoCurrency> searchCrypto(String keyword) {
         return cryptoCurrencyRepository
-                .findByNameContainingIgnoreCaseOrSymbolContainingIgnoreCase(keyword, keyword);
+                .findByCurrencyNameContainingIgnoreCaseOrCurrencySymbolContainingIgnoreCase(keyword, keyword);
     }
 
 	//8.top gainers

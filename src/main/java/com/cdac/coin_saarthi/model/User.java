@@ -1,3 +1,4 @@
+
 package com.cdac.coin_saarthi.model;
 
 
@@ -90,7 +91,7 @@ public class User {
 //
 //  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 //  private List<WatchList> watchlists;
-//
+
 //  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 //  private List<UserSubscription> subscriptions;
 //
