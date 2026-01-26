@@ -1,4 +1,4 @@
-package com.cdac.coin_saarthi.contoller;
+package com.cdac.coin_saarthi.controller;
 
 import com.cdac.coin_saarthi.dto.UpdateDTO;
 import com.cdac.coin_saarthi.model.User;
