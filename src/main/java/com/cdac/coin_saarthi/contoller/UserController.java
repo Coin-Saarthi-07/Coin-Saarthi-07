@@ -1,19 +1,16 @@
 package com.cdac.coin_saarthi.contoller;
 
 import com.cdac.coin_saarthi.dto.UpdateDTO;
+
 import com.cdac.coin_saarthi.model.User;
 import com.cdac.coin_saarthi.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
 @RestController
 @RequestMapping("/crypto/admin")
-
-
 public class UserController {
-
-
 
         private final UserService userService;
 
