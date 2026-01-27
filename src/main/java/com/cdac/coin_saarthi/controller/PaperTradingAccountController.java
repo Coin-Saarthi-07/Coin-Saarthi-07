@@ -1,5 +1,6 @@
 package com.cdac.coin_saarthi.controller;
 
+import com.cdac.coin_saarthi.service.PaperTradingAccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,8 @@ public class PaperTradingAccountController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<?> get(@PathVariable Long userId) {
-        return ResponseEntity.ok(service.getAccount(userId));
+        return ResponseEntity.ok(service.getAccountByUserId(userId));
+
     }
 
 }

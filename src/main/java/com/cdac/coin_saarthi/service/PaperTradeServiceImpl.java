@@ -11,21 +11,21 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
-public class PaperTradeServiceImpl {
+public class PaperTradeServiceImpl implements PaperTradeService{
 
     private final PaperTradingAccountRepository accountRepo;
     private final CryptoCurrencyRepository cryptoRepo;
-    private final PaperPortfolioRepository portfolioRepo;
+//    private final PaperPortfolioRepository portfolioRepo;
     private final PaperTradeOrderRepository orderRepo;
 
     public PaperTradeServiceImpl(
             PaperTradingAccountRepository accountRepo,
             CryptoCurrencyRepository cryptoRepo,
-            PaperPortfolioRepository portfolioRepo,
+//            PaperPortfolioRepository portfolioRepo,
             PaperTradeOrderRepository orderRepo) {
         this.accountRepo = accountRepo;
         this.cryptoRepo = cryptoRepo;
-        this.portfolioRepo = portfolioRepo;
+//        this.portfolioRepo = portfolioRepo;
         this.orderRepo = orderRepo;
     }
 
@@ -38,7 +38,10 @@ public class PaperTradeServiceImpl {
         CryptoCurrency crypto = cryptoRepo.findById(cryptoId)
                 .orElseThrow(() -> new RuntimeException("Crypto not found"));
 
-        BigDecimal cost = crypto.getCurrencyPrice().multiply(quantity);
+        BigDecimal price =
+                BigDecimal.valueOf(crypto.getCurrencyPrice());
+
+        BigDecimal cost = price.multiply(quantity);
 
         if (account.getVirtualBalance().compareTo(cost) < 0) {
             throw new RuntimeException("Insufficient virtual balance");
@@ -47,20 +50,20 @@ public class PaperTradeServiceImpl {
         account.setLastUpdated(LocalDateTime.now());
         accountRepo.save(account);
 
-        PaperPortfolio portfolio = portfolioRepo
-                .findByAccount_AccountIdAndCrypto_CryptoId(
-                        account.getAccountId(), cryptoId)
-                .orElse(new PaperPortfolio());
-        portfolio.setAccount(account);
-        portfolio.setCrypto(crypto);
-        portfolio.setTotalQuantity(
-                portfolio.getTotalQuantity() == null
-                        ? quantity
-                        : portfolio.getTotalQuantity().add(quantity));
-        portfolio.setAverageBuyPrice(crypto.getCurrencyPrice());
-        portfolio.setLastUpdated(LocalDateTime.now());
+//        PaperPortfolio portfolio = portfolioRepo
+//                .findByAccount_AccountIdAndCrypto_CryptoId(
+//                        account.getAccountId(), cryptoId)
+//                .orElse(new PaperPortfolio());
+//        portfolio.setAccount(account);
+//        portfolio.setCrypto(crypto);
+//        portfolio.setTotalQuantity(
+//                portfolio.getTotalQuantity() == null
+//                        ? quantity
+//                        : portfolio.getTotalQuantity().add(quantity));
+//        portfolio.setAverageBuyPrice(crypto.getCurrencyPrice());
+//        portfolio.setLastUpdated(LocalDateTime.now());
 
-        portfolioRepo.save(portfolio);
+//        portfolioRepo.save(portfolio);
     }
 
 //    @Override
@@ -69,17 +72,19 @@ public class PaperTradeServiceImpl {
         PaperTradingAccount account = accountRepo.findByUser_UserId(userId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        PaperPortfolio portfolio = portfolioRepo
-                .findByAccount_AccountIdAndCrypto_CryptoId(
-                        account.getAccountId(), cryptoId)
-                .orElseThrow(() -> new RuntimeException("Crypto not in portfolio"));
+//        PaperPortfolio portfolio = portfolioRepo
+//                .findByAccount_AccountIdAndCrypto_CryptoId(
+//                        account.getAccountId(), cryptoId)
+//                .orElseThrow(() -> new RuntimeException("Crypto not in portfolio"));
 
-        if (portfolio.getTotalQuantity().compareTo(quantity) < 0) {
-            throw new RuntimeException("Insufficient quantity");
-        }
+//        if (portfolio.getTotalQuantity().compareTo(quantity) < 0) {
+//            throw new RuntimeException("Insufficient quantity");
+//        }
 
         CryptoCurrency crypto = cryptoRepo.findById(cryptoId).orElseThrow();
-        BigDecimal amount = crypto.getCurrencyPrice().multiply(quantity);
+        BigDecimal amount =
+                BigDecimal.valueOf(crypto.getCurrencyPrice())
+                        .multiply(quantity);
 
         // Update balance
         account.setVirtualBalance(account.getVirtualBalance().add(amount));
@@ -87,10 +92,10 @@ public class PaperTradeServiceImpl {
         accountRepo.save(account);
 
         // Update portfolio
-        portfolio.setTotalQuantity(portfolio.getTotalQuantity().subtract(quantity));
-        portfolio.setLastUpdated(LocalDateTime.now());
-
-        portfolioRepo.save(portfolio);
+//        portfolio.setTotalQuantity(portfolio.getTotalQuantity().subtract(quantity));
+//        portfolio.setLastUpdated(LocalDateTime.now());
+//
+//        portfolioRepo.save(portfolio);
     }
 
 }

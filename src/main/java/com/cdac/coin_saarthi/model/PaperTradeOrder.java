@@ -1,5 +1,7 @@
 package com.cdac.coin_saarthi.model;
 
+import com.cdac.coin_saarthi.enums.OrderStatus;
+import com.cdac.coin_saarthi.enums.OrderType;
 import jakarta.persistence.*;
 import lombok.Data;
 

@@ -1,11 +1,9 @@
 package com.cdac.coin_saarthi.controller;
 
 
+import com.cdac.coin_saarthi.service.PaperTradeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
@@ -25,7 +23,19 @@ public class PaperTradeController {
             @RequestParam Long cryptoId,
             @RequestParam BigDecimal quantity) {
 
-        service.buy(userId, cryptoId, quantity);
+        service.buyCrypto(userId, cryptoId, quantity);
         return ResponseEntity.ok("Buy order executed");
+    }
+
+
+
+    @PostMapping("/sell")
+    public ResponseEntity<?> sell(
+            @RequestParam Long userId,
+            @RequestParam Long cryptoId,
+            @RequestParam BigDecimal quantity) {
+
+        service.sellCrypto(userId, cryptoId, quantity);
+        return ResponseEntity.ok("Sell order executed");
     }
 }
