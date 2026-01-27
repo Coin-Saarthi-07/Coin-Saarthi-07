@@ -29,8 +29,8 @@ public class CryptoCurrency {
 	public Long cryptoId;
 	
 	@Column(nullable = false)
-	@Size(max=100, message="coinGeckoId must be at least 100 characters")
-	public Long coinGeckoId;
+	private String coinGeckoId;
+
 	
 	@Column(nullable = false, unique = true)
 	@Size(min=2, max=50, message="Currency name must between 2-50 characters")
@@ -40,11 +40,15 @@ public class CryptoCurrency {
 	@Column(nullable = false)
 	public Double currencyPrice;
 	
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	@Size(min=2, max=10, message="Currency symbol must between 2-10 characters")
-	@Pattern(regexp = "^[A-Z]+$", message = "Currency symbol must be in capital letters only")
-	public String currencySymbol;
-	
+	@Pattern(
+			  regexp = "^[A-Z0-9-]+$",
+			  message = "Currency symbol must be uppercase letters, numbers or hyphen"
+			)
+
+			public String currencySymbol;
+
 	@NotNull
 	public LocalDateTime lastUpdated;
 	

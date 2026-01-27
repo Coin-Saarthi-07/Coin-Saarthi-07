@@ -88,8 +88,19 @@
 			<version>1.18.32</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- Email-->
+           <dependency>
+                <groupId>org.springframework.boot</groupId>
+                 <artifactId>spring-boot-starter-mail</artifactId>
+           </dependency>
 
-
+<!-- Twilio SMS & WhatsApp -->
+<dependency>
+    <groupId>com.twilio.sdk</groupId>
+    <artifactId>twilio</artifactId>
+    <version>9.3.0</version>
+</dependency>
 
 	</dependencies>
 
