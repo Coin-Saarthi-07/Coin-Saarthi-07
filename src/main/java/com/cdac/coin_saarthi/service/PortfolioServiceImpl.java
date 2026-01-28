@@ -24,7 +24,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     //get holdings
     public List<HoldingDTO> getHoldings(Long accountId) {
 
-        List<Portfolio> list = portfolioRepo.findByAccountId(accountId);
+        List<Portfolio> list = portfolioRepo.findByPaperTradingAccount_AccountId(accountId);
         List<HoldingDTO> result = new ArrayList<>();
 
         for (Portfolio p : list) {
@@ -47,7 +47,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     //get summary
     public PortfolioSummaryDTO getSummary(Long accountId) {
 
-        List<Portfolio> list = portfolioRepo.findByAccountId(accountId);
+        List<Portfolio> list = portfolioRepo.findByPaperTradingAccount_AccountId(accountId);
 
         double invested = 0;
         double current = 0;

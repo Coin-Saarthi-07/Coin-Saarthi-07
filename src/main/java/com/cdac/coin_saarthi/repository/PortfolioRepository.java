@@ -9,7 +9,7 @@ import com.cdac.coin_saarthi.model.Portfolio;
 
 public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
 
-    List<Portfolio> findByAccountId(Long accountId);
+    List<Portfolio> findByPaperTradingAccount_AccountId(Long accountId);
 
     Optional<Portfolio> findByPaperTradingAccount_AccountIdAndCryptoCurrency_CryptoId(Long accountId, Long cryptoId);
     
