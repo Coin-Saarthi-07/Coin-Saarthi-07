@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cdac.coin_saarthi.dto.AuthResponse;
 import com.cdac.coin_saarthi.dto.SubscriptionPlanDTO;
 import com.cdac.coin_saarthi.model.SubscriptionPlan;
 import com.cdac.coin_saarthi.model.UserSubscription;
@@ -27,12 +28,10 @@ public class SubscriptionController {
 
     // Create subscription plan
     @PostMapping("/plan")
-    public ResponseEntity<SubscriptionPlan> createPlan(
+    public ResponseEntity<AuthResponse> createPlan(
             @RequestBody SubscriptionPlanDTO dto) {
         return ResponseEntity.ok(subscriptionService.createPlan(dto));
     }
-
-
     // Subscribe user
     @PostMapping("/subscribe")
     public UserSubscription subscribeUser(
@@ -46,6 +45,4 @@ public class SubscriptionController {
     public List<UserSubscription> getUserSubscriptions(@PathVariable Long userId) {
         return subscriptionService.getUserSubscriptions(userId);
     }
-
-
 }

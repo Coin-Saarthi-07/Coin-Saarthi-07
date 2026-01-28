@@ -2,10 +2,10 @@ package com.cdac.coin_saarthi.service;
 
 
 import java.math.BigDecimal;
+
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.cdac.coin_saarthi.dto.AuthResponse;

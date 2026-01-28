@@ -23,15 +23,15 @@ public class PriceHistory{
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Long priceHistoryId;
+	private Long priceHistoryId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crypto_id", nullable = false)
-	public CryptoCurrency cryptoCurrency;
+	private CryptoCurrency cryptoCurrency;
 	
 	@Column(nullable=false)
-	public Double price;
+	private Double price;
 
 	@Column(nullable=false)
-	public LocalTime recordedTime;
+	private LocalTime recordedTime;
 }

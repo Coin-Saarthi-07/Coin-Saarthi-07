@@ -3,6 +3,7 @@ package com.cdac.coin_saarthi.model;
 import java.time.LocalDateTime;
 
 import com.cdac.coin_saarthi.enums.InvoicePaymentStatus;
+import com.cdac.coin_saarthi.enums.PaymentStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -53,6 +54,7 @@ public class Invoice{
     @Column(name = "payment_status", nullable = false)
     @NotNull
     private InvoicePaymentStatus invoicePaymentStatus = InvoicePaymentStatus.SUCCESS;
+    private PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
     
     @Column(nullable = false)
     private LocalDateTime createdAt;

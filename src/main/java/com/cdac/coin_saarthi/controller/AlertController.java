@@ -1,6 +1,7 @@
 package com.cdac.coin_saarthi.controller;
 
 import com.cdac.coin_saarthi.dto.AlertRequestDTO;
+
 import com.cdac.coin_saarthi.dto.UpdateAlertDTO;
 import com.cdac.coin_saarthi.model.Alert;
 import com.cdac.coin_saarthi.service.AlertService;
@@ -18,7 +19,6 @@ public class AlertController {
     public AlertController(AlertService alertService) {
         this.alertService = alertService;
     }
-
     //create alert
     @PostMapping
     public Alert createAlert(@Valid @RequestBody AlertRequestDTO request) {
@@ -37,6 +37,7 @@ public class AlertController {
         return alertService.getById(id);
     }
 
+
     //update alert
     @PutMapping("/{id}")
     public Alert updateAlert(
@@ -45,6 +46,7 @@ public class AlertController {
     ) {
         return alertService.updateAlert(id, dto);
     }
+
 
    //delete alert
     @DeleteMapping("/{id}")

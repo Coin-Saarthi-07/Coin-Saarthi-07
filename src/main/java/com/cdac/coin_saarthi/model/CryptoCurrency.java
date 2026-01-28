@@ -20,43 +20,43 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name="crypto_currency")
+@Table(name = "crypto_currency")
 public class CryptoCurrency {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="crypto_id")
-	public Long cryptoId;
-	
+	@Column(name = "crypto_id")
+	private Long cryptoId;
+
 	@Column(nullable = false)
-	@Size(max=100, message="coinGeckoId must be at least 100 characters")
-	public Long coinGeckoId;
-	
+	@Size(max = 100, message = "coinGeckoId must be at least 100 characters")
+	private String coinGeckoId;
+
 	@Column(nullable = false, unique = true)
-	@Size(min=2, max=50, message="Currency name must between 2-50 characters")
+	@Size(min = 2, max = 50, message = "Currency name must between 2-50 characters")
 	@Pattern(regexp = "^[A-Za-z ]+$", message = "Currency name must contain letters only")
-	public String currencyName;
-	
+	private String currencyName;
+
 	@Column(nullable = false)
-	public Double currencyPrice;
-	
+	private Double currencyPrice;
+
 	@Column(nullable = false, unique = true)
-	@Size(min=2, max=10, message="Currency symbol must between 2-10 characters")
+	@Size(min = 2, max = 10, message = "Currency symbol must between 2-10 characters")
 	@Pattern(regexp = "^[A-Z]+$", message = "Currency symbol must be in capital letters only")
-	public String currencySymbol;
-	
+	private String currencySymbol;
+
 	@NotNull
-	public LocalDateTime lastUpdated;
-	
-	@OneToMany(mappedBy="cryptoCurrency", cascade=CascadeType.ALL, orphanRemoval=true)
-    private List<PriceHistory> priceHistories;
+	private LocalDateTime lastUpdated;
 
-//    @OneToMany(mappedBy="cryptoCurrency", cascade=CascadeType.ALL, orphanRemoval=true)
-//    private List<Alert> alerts;
+	@OneToMany(mappedBy = "cryptoCurrency", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<PriceHistory> priceHistories;
 
-    @OneToMany(mappedBy="cryptoCurrency", cascade=CascadeType.ALL, orphanRemoval=true)
-    private List<WatchList> watchLists;
+	@OneToMany(mappedBy = "cryptoCurrency", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Alert> alerts;
 
-//    @OneToMany(mappedBy="cryptoCurrency", cascade=CascadeType.ALL, orphanRemoval=true)
-//    private List<Portfolio> portfolios;
+	@OneToMany(mappedBy = "cryptoCurrency", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<WatchList> watchLists;
+
+	@OneToMany(mappedBy = "cryptoCurrency", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Portfolio> portfolios;
 }
