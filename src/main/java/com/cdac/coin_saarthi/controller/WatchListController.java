@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/crypto/watchlist")
+
 public class WatchListController {
+
     private final WatchListService watchListService;
 
     public WatchListController(WatchListService watchListService) {

@@ -30,7 +30,7 @@ public class NotificationScheduler {
         this.dispatcherService = dispatcherService;
         this.userRepository = userRepository;
     }
-
+     //scheduling the notification
     @Scheduled(fixedDelay = 10_000)
     public void processPendingNotifications() {
 

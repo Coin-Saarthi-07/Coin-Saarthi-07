@@ -29,7 +29,9 @@ public class CryptoCurrency {
 	public Long cryptoId;
 	
 	@Column(nullable = false)
+
 	private String coinGeckoId;
+
 
 	
 	@Column(nullable = false, unique = true)
@@ -40,6 +42,7 @@ public class CryptoCurrency {
 	@Column(nullable = false)
 	public Double currencyPrice;
 	
+
 	@Column(nullable = false)
 	@Size(min=2, max=10, message="Currency symbol must between 2-10 characters")
 	@Pattern(
@@ -48,6 +51,7 @@ public class CryptoCurrency {
 			)
 
 			public String currencySymbol;
+
 
 	@NotNull
 	public LocalDateTime lastUpdated;

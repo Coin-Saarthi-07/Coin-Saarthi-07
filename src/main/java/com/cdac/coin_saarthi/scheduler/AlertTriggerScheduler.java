@@ -1,3 +1,4 @@
+
 package com.cdac.coin_saarthi.scheduler;
 
 import com.cdac.coin_saarthi.model.CryptoCurrency;
@@ -58,3 +59,4 @@ public class AlertTriggerScheduler {
         }
     }
 }
+
