@@ -1,15 +1,17 @@
 package com.cdac.coin_saarthi.service;
 
-import com.cdac.coin_saarthi.model.PaperTradingAccount;
-import com.cdac.coin_saarthi.model.User;
-import com.cdac.coin_saarthi.repository.UserRepository;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.springframework.stereotype.Service;
+
+import com.cdac.coin_saarthi.model.PaperTradingAccount;
+import com.cdac.coin_saarthi.model.User;
+import com.cdac.coin_saarthi.repository.PaperTradingAccountRepository;
+import com.cdac.coin_saarthi.repository.UserRepository;
+
 @Service
-public class PaperTradingAccountServiceImpl {
+public class PaperTradingAccountServiceImpl implements PaperTradingAccountService{
 
     private final PaperTradingAccountRepository accountRepository;
     private final UserRepository userRepository;

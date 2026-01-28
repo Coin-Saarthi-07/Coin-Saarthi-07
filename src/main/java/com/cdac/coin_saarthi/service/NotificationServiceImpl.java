@@ -26,7 +26,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Notification getById(Long id) {
-        return notificationRepository.findById(id).orElse(null);
+        return notificationRepository.findById(id).orElseThrow(()->new RuntimeException("Notification of given id not found"));
     }
 
     @Override
@@ -46,7 +46,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public Notification updateStatus(Long id, UpdateNotificationDTO dto) {
 
-        Notification notification = notificationRepository.findById(id).orElse(null);
+        Notification notification = notificationRepository.findById(id)
+        		.orElseThrow(()->new RuntimeException("Notification of given id not found"));
         if (notification == null) return null;
 
         notification.setStatus(dto.getStatus());

@@ -26,10 +26,13 @@ public class SubscriptionService {
         this.userSubRepo = userSubRepo;
         this.userRepo = userRepo;
     }
+    
+    //create subscription plan
     public SubscriptionPlan createPlan(SubscriptionPlan plan) {
         return planRepo.save(plan);
     }
-
+    
+    //subscribe the user
     public UserSubscription subscribeUser(Long userId,Long planId){
         User user=userRepo.findById(userId)
                 .orElseThrow(()->new RuntimeException("user not found"));
@@ -43,6 +46,8 @@ public class SubscriptionService {
         subscription.setStatus(SubscriptionStatus.ACTIVE);
         return userSubRepo.save(subscription);
     }
+    
+    //get user subscription
     public List<UserSubscription> getUserSubscriptions(Long userId) {
         return userSubRepo.findByUser_UserId(userId);
     }

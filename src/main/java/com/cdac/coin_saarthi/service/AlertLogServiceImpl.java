@@ -16,7 +16,7 @@ public class AlertLogServiceImpl implements AlertLogService {
         this.alertLogRepository = alertLogRepository;
     }
 
-    // 1️⃣ Logs by alert
+    // 1️.Logs by alert
     @Override
     public List<Map<String, Object>> getLogsByAlert(Long alertId) {
 
@@ -39,7 +39,7 @@ public class AlertLogServiceImpl implements AlertLogService {
     }
 
 
-    // 2️⃣ Logs by user
+    // 2️.Logs by user
     @Override
     public List<Map<String, Object>> getLogsByUser(Long userId) {
 
@@ -63,7 +63,7 @@ public class AlertLogServiceImpl implements AlertLogService {
     }
 
 
-    // 3️⃣ Latest log
+    // 3️.Latest log
     @Override
     public Map<String, Object> getLatestLog(Long alertId) {
 

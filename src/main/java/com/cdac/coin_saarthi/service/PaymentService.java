@@ -2,6 +2,7 @@ package com.cdac.coin_saarthi.service;
 
 import com.cdac.coin_saarthi.dto.PaymentDTO;
 import com.cdac.coin_saarthi.enums.PaymentStatus;
+import com.cdac.coin_saarthi.enums.UserRole;
 import com.cdac.coin_saarthi.model.Payment;
 import com.cdac.coin_saarthi.model.SubscriptionPlan;
 import com.cdac.coin_saarthi.model.User;
@@ -44,7 +45,8 @@ public class PaymentService {
         payment.setTransactionId(dto.getTransactionId());
         payment.setStatus(PaymentStatus.SUCCESS); // or PENDING
         payment.setCurrencyCode("INR");
-
+        
+        user.setRole(UserRole.SUBSCRIBER);
         return paymentRepository.save(payment);
     }
 

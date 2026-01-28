@@ -20,24 +20,28 @@ public class NotificationController {
     }
 
     // GET: /api/notification
+    //Get all
     @GetMapping
     public List<Notification> getAll() {
         return notificationService.getAll();
     }
 
     // GET: /api/notification/{id}
+    //get by id
     @GetMapping("/{id}")
     public Notification get(@PathVariable Long id) {
         return notificationService.getById(id);
     }
 
     // POST: /api/notification
+    //create notification
     @PostMapping
     public Notification create(@Valid @RequestBody CreateNotificationDTO dto) {
         return notificationService.create(dto);
     }
 
     // PUT: /api/notification/{id}/status
+    // update notification status
     @PutMapping("/{id}/status")
     public Notification updateStatus(
             @PathVariable Long id,
@@ -47,6 +51,7 @@ public class NotificationController {
     }
 
     // DELETE: /api/notification/{id}
+    //delete notification
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         notificationService.delete(id);

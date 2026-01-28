@@ -19,25 +19,25 @@ public class AlertController {
         this.alertService = alertService;
     }
 
-    
+    //create alert
     @PostMapping
     public Alert createAlert(@Valid @RequestBody AlertRequestDTO request) {
         return alertService.createAlert(request);
     }
 
-    
+    //get all alerts
     @GetMapping
     public List<Alert> getAllAlerts() {
         return alertService.getAllAlerts();
     }
 
-    
+    //get by id
     @GetMapping("/{id}")
     public Alert getAlertById(@PathVariable Long id) {
         return alertService.getById(id);
     }
 
-    
+    //update alert
     @PutMapping("/{id}")
     public Alert updateAlert(
             @PathVariable Long id,
@@ -46,7 +46,7 @@ public class AlertController {
         return alertService.updateAlert(id, dto);
     }
 
-   
+   //delete alert
     @DeleteMapping("/{id}")
     public void deleteAlert(@PathVariable Long id) {
         alertService.deleteAlert(id);
