@@ -9,7 +9,10 @@ import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Subscription from "./components/subscription";
 import AdminRoute from "./routes/AdminRoute";
-
+import PaperTradingDashboard from "./components/PaperTradingDashboard";
+import PaperTrading from "./components/PaperTrading";
+import PortfolioDetail from "./components/PortfolioDetail";
+import TransactionHistory from "./components/TransactionHistory";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleRoute from "./routes/RoleRoute";
@@ -32,6 +35,30 @@ function App() {
           <ProtectedRoute>
             <UserDashboard />
           </ProtectedRoute>
+        } />
+        {/* Paper Trading Routes */}
+        <Route path="/paper-trading/dashboard" element={
+
+          <PaperTradingDashboard />
+
+        } />
+
+        <Route path="/paper-trading/trade" element={
+
+          <PaperTrading />
+
+        } />
+
+        <Route path="/paper-trading/portfolio" element={
+
+          <PortfolioDetail />
+
+        } />
+
+        <Route path="/paper-trading/transactions" element={
+
+          <TransactionHistory />
+
         } />
 
         {/* 🔐 Admin Dashboard */}
