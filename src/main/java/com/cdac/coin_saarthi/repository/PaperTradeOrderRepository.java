@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface PaperTradeOrderRepository extends JpaRepository<PaperTradeOrder, Long> {
 
-    List<PaperTradeOrder> findByAccount_AccountId(Long accountId);
+	List<PaperTradeOrder> findByAccount_AccountId(Long accountId);
+
+    List<PaperTradeOrder> findByAccount_User_UserId(Long userId);
 
 }

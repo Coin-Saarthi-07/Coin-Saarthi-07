@@ -17,40 +17,29 @@ import java.util.List;
 @EnableScheduling
 public class NotificationScheduler {
 
-    private final NotificationRepository notificationRepository;
-    private final NotificationDispatcherService dispatcherService;
-    private final UserRepository userRepository;
+	private final NotificationRepository notificationRepository;
+	private final NotificationDispatcherService dispatcherService;
+	private final UserRepository userRepository;
 
-    public NotificationScheduler(
-            NotificationRepository notificationRepository,
-            NotificationDispatcherService dispatcherService,
-            UserRepository userRepository
-    ) {
-        this.notificationRepository = notificationRepository;
-        this.dispatcherService = dispatcherService;
-        this.userRepository = userRepository;
-    }
+	public NotificationScheduler(NotificationRepository notificationRepository,
+			NotificationDispatcherService dispatcherService, UserRepository userRepository) {
+		this.notificationRepository = notificationRepository;
+		this.dispatcherService = dispatcherService;
+		this.userRepository = userRepository;
+	}
 
-    @Scheduled(fixedDelay = 10_000)
-    public void processPendingNotifications() {
+	@Scheduled(fixedDelay = 10_000)
+	public void processPendingNotifications() {
 
-        List<Notification> pending =
-                notificationRepository.findAll().stream()
-                        .filter(n -> n.getStatus() == NotificationStatus.Pending)
-                        .toList();
+		List<Notification> pending = notificationRepository.findAll().stream()
+				.filter(n -> n.getStatus() == NotificationStatus.Pending).toList();
 
-        for (Notification notification : pending) {
+		for (Notification notification : pending) {
 
-            User user = userRepository
-                    .findById(notification.getUserId())
-                    .orElseThrow(() ->
-                            new RuntimeException("User not found"));
+			User user = userRepository.findById(notification.getUser().getUserId())
+					.orElseThrow(() -> new RuntimeException("User not found"));
 
-            dispatcherService.dispatch(
-                    notification,
-                    user.getEmail(),
-                    user.getPhoneNo()
-            );
-        }
-    }
+			dispatcherService.dispatch(notification, user.getEmail(), user.getPhoneNo());
+		}
+	}
 }

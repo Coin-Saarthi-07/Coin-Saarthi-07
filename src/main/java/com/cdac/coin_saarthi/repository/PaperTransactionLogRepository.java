@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface PaperTransactionLogRepository extends JpaRepository<PaperTransactionLog, Long> {
 
-    List<PaperTransactionLog> findByAccount_AccountId(Long accountId);
+	List<PaperTransactionLog> findByAccount_AccountId(Long accountId);
+
+    List<PaperTransactionLog> findByAccount_User_UserId(Long userId);
 }

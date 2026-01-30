@@ -1,5 +1,6 @@
 package com.cdac.coin_saarthi.service;
 
+import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.repository.AlertLogRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +22,10 @@ public class AlertLogServiceImpl implements AlertLogService {
     public List<Map<String, Object>> getLogsByAlert(Long alertId) {
 
         var logs = alertLogRepository
-                .findByAlertIdOrderByTriggeredTimeDesc(alertId);
+                .findByAlert_AlertIdOrderByTriggeredTimeDesc(alertId);
 
         if (logs.isEmpty()) {
-            throw new RuntimeException("No logs found for this alert");
+            throw new ResourceNotFoundException("No logs found for this alert");
         }
 
         return logs.stream()
@@ -43,17 +44,17 @@ public class AlertLogServiceImpl implements AlertLogService {
     public List<Map<String, Object>> getLogsByUser(Long userId) {
 
         var logs = alertLogRepository
-                .findByAlert_UserIdOrderByTriggeredTimeDesc(userId);
+                .findByAlert_User_UserIdOrderByTriggeredTimeDesc(userId);
 
         if (logs.isEmpty()) {
-            throw new RuntimeException("No alert logs found for this user");
+            throw new ResourceNotFoundException("No alert logs found for this user");
         }
 
         return logs.stream()
                 .map(l -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("alertLogId", l.getAlertLogId());
-                    map.put("alertId", l.getAlertId());
+                    map.put("alertId", l.getAlert().getAlertId());
                     map.put("triggeredPrice", l.getTriggeredPrice());
                     map.put("triggeredTime", l.getTriggeredTime());
                     return map;
@@ -66,8 +67,8 @@ public class AlertLogServiceImpl implements AlertLogService {
     public Map<String, Object> getLatestLog(Long alertId) {
 
         var log = alertLogRepository
-                .findFirstByAlertIdOrderByTriggeredTimeDesc(alertId)
-                .orElseThrow(() -> new RuntimeException("No trigger history found"));
+                .findFirstByAlert_AlertIdOrderByTriggeredTimeDesc(alertId)
+                .orElseThrow(() -> new ResourceNotFoundException("No trigger history found"));
 
         return Map.of(
                 "alertLogId", log.getAlertLogId(),

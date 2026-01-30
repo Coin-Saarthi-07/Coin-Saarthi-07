@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.cdac.coin_saarthi.dto.CreateWatchListDto;
 import com.cdac.coin_saarthi.dto.WatchListResponseDto;
+import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.CryptoCurrency;
 import com.cdac.coin_saarthi.model.User;
 import com.cdac.coin_saarthi.model.WatchList;
@@ -54,10 +55,10 @@ public class WatchListServiceImpl implements WatchListService{
         if (exists) return false;
 
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         CryptoCurrency crypto = cryptoRepository.findById(dto.getCryptoId())
-                .orElseThrow(() -> new RuntimeException("Crypto not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Crypto not found"));
 
         WatchList watchList = new WatchList();
         watchList.setUser(user);

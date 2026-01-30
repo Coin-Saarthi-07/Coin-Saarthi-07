@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.CryptoCurrency;
 import com.cdac.coin_saarthi.model.PriceHistory;
 import com.cdac.coin_saarthi.repository.CryptoCurrencyRepository;
@@ -33,14 +34,14 @@ public class CryptoCurrencyServiceImpl implements CryptoCurrencyService {
 	@Override
 	public CryptoCurrency getById(Long cryptoId) {
 		return cryptoCurrencyRepository.findById(cryptoId)
-				.orElseThrow(()->new RuntimeException("Cryptocurrency of given id not found"));
+				.orElseThrow(()->new ResourceNotFoundException("Cryptocurrency of given id not found"));
 	}
 
 	//3.get by symbol
 	@Override
 	public CryptoCurrency getBySymbol(String symbol) {
 		 return cryptoCurrencyRepository.findByCurrencySymbol(symbol)
-	                .orElseThrow(()->new RuntimeException("CryptoCurrency not found with symbol"));
+	                .orElseThrow(()->new ResourceNotFoundException("CryptoCurrency not found with symbol"));
 	}
 	
 	//4.get all cryptocurrency
@@ -54,7 +55,7 @@ public class CryptoCurrencyServiceImpl implements CryptoCurrencyService {
 	public CryptoCurrency updateCrypto(Long cryptoId, CryptoCurrency cryptoCurrency) {
 		CryptoCurrency crypto = getById(cryptoId);
 		if(crypto==null) {
-			throw new RuntimeException("Cryptocurrency of given id not found");
+			throw new ResourceNotFoundException("Cryptocurrency of given id not found");
 		}
 		crypto.setCurrencyName(cryptoCurrency.getCurrencyName());
 		crypto.setCurrencySymbol(cryptoCurrency.getCurrencySymbol());
@@ -67,7 +68,7 @@ public class CryptoCurrencyServiceImpl implements CryptoCurrencyService {
 	public void deleteCrypto(Long cryptoId) {
 		CryptoCurrency crypto = getById(cryptoId);
 		if(crypto==null) {
-			throw new RuntimeException("Cryptocurrency of given id not found");
+			throw new ResourceNotFoundException("Cryptocurrency of given id not found");
 		}
         cryptoCurrencyRepository.delete(crypto);
 	}
@@ -75,27 +76,39 @@ public class CryptoCurrencyServiceImpl implements CryptoCurrencyService {
 	//7.search by symbol
 	@Override
 	public List<CryptoCurrency> searchCrypto(String keyword) {
-        return cryptoCurrencyRepository
+		List<CryptoCurrency> foundCrypto = cryptoCurrencyRepository
                 .findByCurrencyNameContainingIgnoreCaseOrCurrencySymbolContainingIgnoreCase(keyword, keyword);
+		if(foundCrypto.isEmpty()) {
+			throw new ResourceNotFoundException("No crypto found of provided keyword");
+		}
+		return foundCrypto;
     }
 
 	//8.top gainers
 	@Override
 	public List<Map<String, Object>> getTopGainers() {
-		return calculateMovers(true);
+		List<Map<String, Object>> topGainer= calculateMovers(true);
+		if(topGainer.isEmpty()) {
+			throw new ResourceNotFoundException("No crypto found!");
+		}
+		return topGainer;
 	}
 
 	//9.top losers
 	@Override
 	public List<Map<String, Object>> getTopLosers() {
-		return calculateMovers(false);
+		List<Map<String, Object>> topLoser= calculateMovers(false);
+		if(topLoser.isEmpty()) {
+			throw new ResourceNotFoundException("No crypto found!");
+		}
+		return topLoser;
 	}
 	
 	//10.live prices
 	@Override
 	public List<Map<String, Object>> getLivePrices() {
 
-	    return cryptoCurrencyRepository.findAll()
+		List<Map<String, Object>> livePrices = cryptoCurrencyRepository.findAll()
 	            .stream()
 	            .map(c -> {
 	                Map<String, Object> map = new HashMap<>();
@@ -106,12 +119,21 @@ public class CryptoCurrencyServiceImpl implements CryptoCurrencyService {
 	                return map;
 	            })
 	            .collect(Collectors.toList());
+		if(livePrices.isEmpty()) {
+			throw new ResourceNotFoundException("Live prices not found!");
+		}
+		return livePrices;
+
 	}
 	
 	//11.price history
 	@Override
 	public List<PriceHistory> getPriceHistory(Long cryptoId) {
-        return priceHistoryRepository.findByCryptoCurrency_CryptoIdOrderByRecordedTimeAsc(cryptoId);
+        List<PriceHistory> priceHist =  priceHistoryRepository.findByCryptoCurrency_CryptoIdOrderByRecordedTimeAsc(cryptoId);
+        if(priceHist.isEmpty()) {
+			throw new ResourceNotFoundException("No crypto price history found!");
+		}
+		return priceHist;
 	}
 	
 	//calculate movers

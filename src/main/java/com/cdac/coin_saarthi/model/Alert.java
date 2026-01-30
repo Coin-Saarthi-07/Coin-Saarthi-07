@@ -18,37 +18,33 @@ public class Alert {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "AlertId")
+    @Column(name = "alert_id")
     private Long alertId;
 
-    @Column(name = "UserId", nullable = false)
-    private Long userId;
-
-    // ---------- FK COLUMN ----------
-    @Column(name = "CryptoId", nullable = false)
-    private Long cryptoId;
-
-    // ---------- RELATION ----------
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CryptoId", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "crypto_id", updatable = false,nullable=false)
     private CryptoCurrency cryptoCurrency;
 
-    @Column(name = "Duration", nullable = false)
+    @Column(name = "duration", nullable = false)
     private Integer duration;
 
-    @Column(name = "TargetPrice", precision = 65, scale = 30, nullable = false)
+    @Column(name = "target_price", precision = 65, scale = 30, nullable = false)
     private BigDecimal targetPrice;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Alert_Condition", nullable = false)
+    @Column(name = "alert_condition", nullable = false)
     private ConditionType condition;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
+    @Column(name = "status", nullable = false)
     private AlertStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Type", nullable = false)
+    @Column(name = "type", nullable = false)
     private AlertType type;
 
     @Column(name = "CreatedAt", nullable = false)

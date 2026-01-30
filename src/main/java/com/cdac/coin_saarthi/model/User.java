@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.cdac.coin_saarthi.enums.UserRole;
 import com.cdac.coin_saarthi.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -17,6 +18,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -51,14 +53,14 @@ public class User {
 	@NotBlank
 	@Email
 	@Size(max = 100)
-	@Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]*@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$", message = "Email must start with a letter and may contain numbers")
+	@Email(message = "Invalid email format")
 	@Column(unique = true)
 	private String email;
 
 	@NotBlank
-
+	@JsonIgnore
 	@Size(min = 8, max = 255)
-	@Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "Must contain at least one capital letter, one number, and one special character.")
+	@Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).+$", message = "Password Must contain at least one capital letter, one number, and one special character.")
 	private String password;
 
 	@NotBlank
@@ -70,6 +72,13 @@ public class User {
 	@Past
 	private LocalDate dob;
 
+	@AssertTrue(message = "User must be at least 18 years old")
+	public boolean isAdult() {
+	    if (dob == null) return false;
+	    return dob.plusYears(18).isBefore(LocalDate.now())
+	            || dob.plusYears(18).isEqual(LocalDate.now());
+	}	
+
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private UserStatus status = UserStatus.ACTIVE;
@@ -77,15 +86,20 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private UserRole role = UserRole.USER;
+	
+	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Alert> alerts;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<WatchList> watchlists;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserSubscription> subscriptions;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Payment> payments;
 

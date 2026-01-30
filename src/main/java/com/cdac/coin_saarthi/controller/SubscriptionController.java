@@ -3,6 +3,7 @@ package com.cdac.coin_saarthi.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cdac.coin_saarthi.dto.AuthResponse;
 import com.cdac.coin_saarthi.dto.SubscriptionPlanDTO;
-import com.cdac.coin_saarthi.model.SubscriptionPlan;
 import com.cdac.coin_saarthi.model.UserSubscription;
 import com.cdac.coin_saarthi.service.SubscriptionService;
 
 @RestController
 @RequestMapping("/api/subscriptions")
+@PreAuthorize("hasRole('ADMIN')")
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 

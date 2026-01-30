@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.Invoice;
 import com.cdac.coin_saarthi.repository.InvoiceRepository;
 
@@ -29,6 +30,6 @@ public class InvoiceServiceImpl implements InvoiceService{
     // Get Invoice By ID
     public Invoice getInvoiceById(Long id){
         return invoiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice Not Found"));
     }
 }

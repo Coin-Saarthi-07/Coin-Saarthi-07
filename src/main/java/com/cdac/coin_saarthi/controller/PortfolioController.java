@@ -2,12 +2,16 @@ package com.cdac.coin_saarthi.controller;
 
 import com.cdac.coin_saarthi.dto.*; 
 import com.cdac.coin_saarthi.service.PortfolioService;
+
+import jakarta.annotation.security.PermitAll;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/portfolio")
+@PermitAll
 public class PortfolioController {
 
     

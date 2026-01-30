@@ -11,6 +11,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "subscription_plans")
 @Getter
@@ -45,6 +47,11 @@ public class SubscriptionPlan {
     private String features;
 
     // Relationships
+    @JsonIgnore
     @OneToMany(mappedBy = "subscriptionPlan", cascade = CascadeType.ALL)
     private List<UserSubscription> userSubscriptions;
+    
+    @JsonIgnore
+    @OneToMany(mappedBy = "subscriptionPlan", cascade = CascadeType.ALL)
+    private List<Payment> payments;
 }

@@ -3,6 +3,8 @@ package com.cdac.coin_saarthi.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,10 +42,10 @@ public class CryptoCurrency {
 	@Column(nullable = false)
 	private Double currencyPrice;
 
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	@Size(min = 2, max = 10, message = "Currency symbol must between 2-10 characters")
-	@Pattern(regexp = "^[A-Z]+$", message = "Currency symbol must be in capital letters only")
-	private String currencySymbol;
+	@Pattern(regexp = "^[A-Z0-9-]+$", message = "Currency symbol must be uppercase letters, numbers or hyphen")
+	public String currencySymbol;
 
 	@NotNull
 	private LocalDateTime lastUpdated;
@@ -51,12 +53,15 @@ public class CryptoCurrency {
 	@OneToMany(mappedBy = "cryptoCurrency", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<PriceHistory> priceHistories;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "cryptoCurrency", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Alert> alerts;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "cryptoCurrency", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<WatchList> watchLists;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "cryptoCurrency", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Portfolio> portfolios;
 }

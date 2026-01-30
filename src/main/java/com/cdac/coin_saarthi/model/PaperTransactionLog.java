@@ -1,12 +1,25 @@
 package com.cdac.coin_saarthi.model;
 
-import com.cdac.coin_saarthi.enums.TransactionType;
-import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.cdac.coin_saarthi.enums.TransactionType;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
+@Getter
+@Setter
 @Table(name = "paper_transaction_log")
 public class PaperTransactionLog {
 

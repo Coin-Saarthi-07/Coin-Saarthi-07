@@ -2,7 +2,6 @@ package com.cdac.coin_saarthi.service;
 
 
 import java.math.BigDecimal;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.cdac.coin_saarthi.dto.AuthResponse;
 import com.cdac.coin_saarthi.dto.SubscriptionPlanDTO;
 import com.cdac.coin_saarthi.enums.SubscriptionStatus;
+import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.SubscriptionPlan;
 import com.cdac.coin_saarthi.model.User;
 import com.cdac.coin_saarthi.model.UserSubscription;
@@ -34,11 +34,11 @@ public class SubscriptionServiceImpl implements SubscriptionService{
     //create subscription plan
     public AuthResponse createPlan(SubscriptionPlanDTO dto) {
         if (planRepo.existsByPlanName(dto.getPlanName())) {
-            throw new IllegalArgumentException("Plan already exists");
+            throw new ResourceNotFoundException("Plan already exists");
         }
 
         if (dto.getPlanPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Price must be positive");
+            throw new ResourceNotFoundException("Price must be positive");
         }
         SubscriptionPlan plan = new SubscriptionPlan();
         plan.setPlanName(dto.getPlanName());
@@ -53,15 +53,15 @@ public class SubscriptionServiceImpl implements SubscriptionService{
 //        plan.setMaxAlerts(dto.getMaxAlerts());
 //        plan.setMaxWatchlistItems(dto.getMaxWatchlistItems());
         planRepo.save(plan);
-        return new AuthResponse(plan.getPlanName(),"User registered successfully");
+        return new AuthResponse(plan.getPlanName(),"Plan added successfully");
     }
     
     //subscribe the user
     public UserSubscription subscribeUser(Long userId,Long planId){
         User user=userRepo.findById(userId)
-                .orElseThrow(()->new RuntimeException("user not found"));
+                .orElseThrow(()->new ResourceNotFoundException("user not found"));
         SubscriptionPlan plan=planRepo.findById(planId)
-                .orElseThrow(()-> new RuntimeException("plan not found"));
+                .orElseThrow(()-> new ResourceNotFoundException("plan not found"));
         UserSubscription subscription = new UserSubscription();
         subscription.setUser(user);
         subscription.setSubscriptionPlan(plan);

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Table(name = "notifications")
 @Getter
 @Setter
-public class Notification {
+public class Notification{
 
     
     @Id
@@ -20,23 +20,14 @@ public class Notification {
     @Column(name = "NotificationId")
     private Long notificationId;
 
-   
-    @Column(name = "UserId", nullable = false)
-    private Long userId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "UserId", insertable = false, updatable = false)
+    @JoinColumn(name = "UserId", updatable = false)
     private User user;
 
-    
-    @Column(name = "AlertId", nullable = false)
-    private Long alertId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "AlertId", insertable = false, updatable = false)
+    @JoinColumn(name = "AlertId", updatable = false)
     private Alert alert;
 
-    
     @Enumerated(EnumType.STRING)
     @Column(name = "Medium", nullable = false)
     private NotificationMedium medium = NotificationMedium.APP;
@@ -44,7 +35,6 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
     private NotificationStatus status = NotificationStatus.Sent;
-
    
     @Column(name = "SentAt", nullable = false)
     private LocalDateTime sentAt = LocalDateTime.now();

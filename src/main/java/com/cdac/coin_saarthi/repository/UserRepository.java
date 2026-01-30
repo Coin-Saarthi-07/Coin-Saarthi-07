@@ -1,5 +1,6 @@
 package com.cdac.coin_saarthi.repository;
 
+import com.cdac.coin_saarthi.model.CryptoCurrency;
 import com.cdac.coin_saarthi.model.User;
 
 import java.util.Optional;
@@ -14,5 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     boolean existsByUserName(String email);
     boolean existsByEmailAndUserIdNot(String email, Long userId);
+    User findByUserId(Long id);
 }
 

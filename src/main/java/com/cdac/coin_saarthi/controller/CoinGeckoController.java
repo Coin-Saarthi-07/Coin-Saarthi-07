@@ -1,10 +1,14 @@
 package com.cdac.coin_saarthi.controller;
 
 import com.cdac.coin_saarthi.service.CoinGeckoService;
+
+import jakarta.annotation.security.PermitAll;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/coingecko")
+@PermitAll
 public class CoinGeckoController {
 
     private final CoinGeckoService coinGeckoService;

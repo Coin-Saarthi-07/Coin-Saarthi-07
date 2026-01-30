@@ -8,6 +8,7 @@ import com.cdac.coin_saarthi.dto.LoginRequestDTO;
 import com.cdac.coin_saarthi.dto.RegisterRequestDTO;
 import com.cdac.coin_saarthi.enums.UserRole;
 import com.cdac.coin_saarthi.enums.UserStatus;
+import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.User;
 import com.cdac.coin_saarthi.repository.UserRepository;
 
@@ -27,10 +28,10 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public AuthResponse register(RegisterRequestDTO request) {
 		if (userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Email already registered");
+            throw new ResourceNotFoundException("Email already registered");
         }
 		if (userRepository.existsByUserName(request.getUserName())){
-            throw new RuntimeException("Email already registered");
+            throw new ResourceNotFoundException("Email already registered");
         }
 		
 		User user = new User();
@@ -41,7 +42,11 @@ public class AuthServiceImpl implements AuthService {
 		user.setDob(request.getDob());
 		
 		//default
-		user.setRole(UserRole.USER);
+		if (request.getEmail()!=null && request.getEmail().toLowerCase().contains("coinsaarthi.admin@gmail.com")) {
+	        user.setRole(UserRole.ADMIN);
+	    } else {
+	        user.setRole(UserRole.USER);
+	    }
         user.setStatus(UserStatus.ACTIVE);
 
         userRepository.save(user);
@@ -52,14 +57,14 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public AuthResponse login(LoginRequestDTO request) {
 		User user = userRepository.findByUserName(request.getUserName())
-                .orElseThrow(()->new RuntimeException("Invalid username or password"));
+                .orElseThrow(()->new ResourceNotFoundException("Invalid username or password"));
 		
 		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-	        throw new RuntimeException("Invalid username or password");
+	        throw new ResourceNotFoundException("Invalid username or password");
 	    }
 
 		if (user.getStatus()!=UserStatus.ACTIVE){
-            throw new RuntimeException("User account is not active");
+            throw new ResourceNotFoundException("User account is not active");
 		}
 
         String token=jwtService.generateToken(

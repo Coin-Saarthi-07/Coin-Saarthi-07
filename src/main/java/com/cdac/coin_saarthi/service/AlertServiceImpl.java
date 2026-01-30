@@ -1,63 +1,83 @@
 package com.cdac.coin_saarthi.service;
 
-import com.cdac.coin_saarthi.dto.AlertRequestDTO;
-import com.cdac.coin_saarthi.dto.UpdateAlertDTO;
-import com.cdac.coin_saarthi.model.Alert;
-import com.cdac.coin_saarthi.model.AlertEnums;
-import com.cdac.coin_saarthi.repository.AlertRepository;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.cdac.coin_saarthi.dto.AlertRequestDTO;
+import com.cdac.coin_saarthi.dto.UpdateAlertDTO;
+import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
+import com.cdac.coin_saarthi.model.Alert;
+import com.cdac.coin_saarthi.model.AlertEnums;
+import com.cdac.coin_saarthi.model.CryptoCurrency;
+import com.cdac.coin_saarthi.model.User;
+import com.cdac.coin_saarthi.repository.AlertRepository;
+import com.cdac.coin_saarthi.repository.CryptoCurrencyRepository;
+import com.cdac.coin_saarthi.repository.UserRepository;
 
 @Service
 public class AlertServiceImpl implements AlertService {
 
-    private final AlertRepository alertRepository;
+	private final AlertRepository alertRepository;
+	private final UserRepository userRepository;
+	private final CryptoCurrencyRepository cryptoCurrencyRepository;
 
-    public AlertServiceImpl(AlertRepository alertRepository) {
-        this.alertRepository = alertRepository;
-    }
+	public AlertServiceImpl(AlertRepository alertRepository,UserRepository userRepository,CryptoCurrencyRepository cryptoCurrencyRepository) {
+		this.alertRepository = alertRepository;
+		this.cryptoCurrencyRepository=cryptoCurrencyRepository;
+		this.userRepository=userRepository;
+	}
 
-    @Override
-    public Alert createAlert(AlertRequestDTO request) {
+	@Override
+	public Alert createAlert(AlertRequestDTO request) {
 
-        Alert alert = new Alert();
-        alert.setUserId(request.getUserId());
-        alert.setCryptoId(request.getCryptoId());
-        alert.setDuration(request.getDuration());
-        alert.setTargetPrice(request.getTargetPrice());
-        alert.setCondition(request.getAlert_condition());
-        alert.setType(request.getType());
-        alert.setStatus(AlertEnums.AlertStatus.Active);
+		User user = userRepository.findByUserId(request.getUserId());
+		if (user == null) {
+			throw new ResourceNotFoundException("User not found of given id");
+		}
 
-        return alertRepository.save(alert);
-    }
+		CryptoCurrency crypto = cryptoCurrencyRepository.findByCryptoId(request.getCryptoId());
+		if (crypto == null) {
+			throw new ResourceNotFoundException("Crypto not found of given id");
+		}
 
-    @Override
-    public List<Alert> getAllAlerts() {
-        return alertRepository.findAll();
-    }
+		Alert alert = new Alert();
+		alert.setUser(user);
+		alert.setCryptoCurrency(crypto);
+		alert.setDuration(request.getDuration());
+		alert.setTargetPrice(request.getTargetPrice());
+		alert.setCondition(request.getAlert_condition());
+		alert.setType(request.getType());
+		alert.setStatus(AlertEnums.AlertStatus.Active);
 
-    @Override
-    public void deleteAlert(Long alertId) {
-        alertRepository.deleteById(alertId);
-    }
-    @Override
-    public Alert getById(Long id) {
-        return alertRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Alert not found"));
-    }
+		return alertRepository.save(alert);
+	}
 
-    @Override
-    public Alert updateAlert(Long id, UpdateAlertDTO dto) {
+	@Override
+	public List<Alert> getAllAlerts() {
+		return alertRepository.findAll();
+	}
 
-        Alert alert = getById(id);
+	@Override
+	public void deleteAlert(Long alertId) {
+		alertRepository.deleteById(alertId);
+	}
 
-        alert.setTargetPrice(dto.getTargetPrice());
-        alert.setCondition(dto.getCondition());
-        alert.setStatus(dto.getStatus());
-        alert.setType(dto.getType());
+	@Override
+	public Alert getById(Long id) {
+		return alertRepository.findById(id).orElseThrow(() -> new RuntimeException("Alert not found"));
+	}
 
-        return alertRepository.save(alert);
-    }
+	@Override
+	public Alert updateAlert(Long id, UpdateAlertDTO dto) {
+
+		Alert alert = getById(id);
+
+		alert.setTargetPrice(dto.getTargetPrice());
+		alert.setCondition(dto.getCondition());
+		alert.setStatus(dto.getStatus());
+		alert.setType(dto.getType());
+
+		return alertRepository.save(alert);
+	}
 }

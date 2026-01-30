@@ -3,6 +3,7 @@ package com.cdac.coin_saarthi.service;
 import com.cdac.coin_saarthi.dto.PaymentDTO;
 import com.cdac.coin_saarthi.enums.PaymentStatus;
 import com.cdac.coin_saarthi.enums.UserRole;
+import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.Payment;
 import com.cdac.coin_saarthi.model.SubscriptionPlan;
 import com.cdac.coin_saarthi.model.User;
@@ -30,10 +31,10 @@ public class PaymentServiceImpl implements PaymentService {
     public Payment createPayment(PaymentDTO dto) {
 
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         SubscriptionPlan plan = subscriptionPlanRepository.findById(dto.getSubscriptionPlanId())
-                .orElseThrow(() -> new RuntimeException("Subscription plan not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
 
         Payment payment = new Payment();
         payment.setUser(user);
@@ -45,7 +46,11 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setCurrencyCode("INR");
         
         user.setRole(UserRole.SUBSCRIBER);
-        return paymentRepository.save(payment);
+        Payment pay = paymentRepository.save(payment);
+        if(pay==null) {
+        	throw new ResourceNotFoundException("Payment failed");
+        }
+        return pay;
     }
 
     // Get payments by user

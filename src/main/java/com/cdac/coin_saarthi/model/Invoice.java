@@ -1,9 +1,10 @@
 package com.cdac.coin_saarthi.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.cdac.coin_saarthi.enums.InvoicePaymentStatus;
-import com.cdac.coin_saarthi.enums.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,6 +36,7 @@ public class Invoice{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long invoiceId;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -48,13 +50,12 @@ public class Invoice{
     private UserSubscription userSubscription;
 
     @Column(nullable = false)
-    private Double amount;
+    private BigDecimal amount;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)
     @NotNull
     private InvoicePaymentStatus invoicePaymentStatus = InvoicePaymentStatus.SUCCESS;
-    private PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
     
     @Column(nullable = false)
     private LocalDateTime createdAt;
