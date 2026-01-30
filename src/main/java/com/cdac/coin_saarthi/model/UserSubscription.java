@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.cdac.coin_saarthi.enums.SubscriptionStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -38,11 +39,13 @@ public class UserSubscription {
     private Long userSubscriptionId;
 
     // Many subscriptions belong to one user
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     // Many subscriptions can use same plan
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subplan_id", nullable = false)
     private SubscriptionPlan subscriptionPlan;

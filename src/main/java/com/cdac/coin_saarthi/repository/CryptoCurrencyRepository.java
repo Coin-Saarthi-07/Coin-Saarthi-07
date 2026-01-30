@@ -18,7 +18,7 @@ public interface CryptoCurrencyRepository
             String name,
             String symbol
     );
-
+    CryptoCurrency findByCryptoId(Long id);
     Optional<CryptoCurrency> findByCoinGeckoId(String geckoId);
 
 }

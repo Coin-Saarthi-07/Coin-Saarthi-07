@@ -17,40 +17,31 @@ import java.util.List;
 @EnableScheduling
 public class NotificationScheduler {
 
-    private final NotificationRepository notificationRepository;
-    private final NotificationDispatcherService dispatcherService;
-    private final UserRepository userRepository;
+	private final NotificationRepository notificationRepository;
+	private final NotificationDispatcherService dispatcherService;
+	private final UserRepository userRepository;
 
-    public NotificationScheduler(
-            NotificationRepository notificationRepository,
-            NotificationDispatcherService dispatcherService,
-            UserRepository userRepository
-    ) {
-        this.notificationRepository = notificationRepository;
-        this.dispatcherService = dispatcherService;
-        this.userRepository = userRepository;
-    }
-     //scheduling the notification
-    @Scheduled(fixedDelay = 10_000)
-    public void processPendingNotifications() {
 
-        List<Notification> pending =
-                notificationRepository.findAll().stream()
-                        .filter(n -> n.getStatus() == NotificationStatus.Pending)
-                        .toList();
+	public NotificationScheduler(NotificationRepository notificationRepository,
+			NotificationDispatcherService dispatcherService, UserRepository userRepository) {
+		this.notificationRepository = notificationRepository;
+		this.dispatcherService = dispatcherService;
+		this.userRepository = userRepository;
+	}
 
-        for (Notification notification : pending) {
+	@Scheduled(fixedDelay = 10_000)
+	public void processPendingNotifications() {
 
-            User user = userRepository
-                    .findById(notification.getUserId())
-                    .orElseThrow(() ->
-                            new RuntimeException("User not found"));
 
-            dispatcherService.dispatch(
-                    notification,
-                    user.getEmail(),
-                    user.getPhoneNo()
-            );
-        }
-    }
+		List<Notification> pending = notificationRepository.findAll().stream()
+				.filter(n -> n.getStatus() == NotificationStatus.Pending).toList();
+
+		for (Notification notification : pending) {
+
+			User user = userRepository.findById(notification.getUser().getUserId())
+					.orElseThrow(() -> new RuntimeException("User not found"));
+
+			dispatcherService.dispatch(notification, user.getEmail(), user.getPhoneNo());
+		}
+	}
 }

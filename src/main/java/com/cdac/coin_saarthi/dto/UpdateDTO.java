@@ -1,6 +1,9 @@
 package com.cdac.coin_saarthi.dto;
 
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
@@ -15,5 +18,8 @@ public class UpdateDTO {
 
     @Pattern(regexp = "^[6-9]\\d{9}$")
     private String phoneNo;
+    
+    @Past
+    private LocalDate dob;
 
 }

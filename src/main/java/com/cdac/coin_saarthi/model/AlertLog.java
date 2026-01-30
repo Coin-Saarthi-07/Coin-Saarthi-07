@@ -19,16 +19,10 @@ public class AlertLog {
     @Column(name = "AlertLogId")
     private Long alertLogId;
 
-    
-    @Column(name = "AlertId", nullable = false)
-    private Long alertId;
-
-    // ---------- RELATION ----------
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "AlertId", insertable = false, updatable = false)
+    @JoinColumn(name = "AlertId", updatable = false)
     private Alert alert;
 
-    // ---------- DATA ----------
     @Column(name = "TriggeredPrice", precision = 65, scale = 30, nullable = false)
     private BigDecimal triggeredPrice;
 

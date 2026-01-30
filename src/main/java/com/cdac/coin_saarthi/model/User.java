@@ -1,12 +1,14 @@
 
 package com.cdac.coin_saarthi.model;
 
-
 import java.time.LocalDate;
+import java.util.List;
 
 import com.cdac.coin_saarthi.enums.UserRole;
 import com.cdac.coin_saarthi.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,7 +16,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,67 +41,68 @@ import lombok.Setter;
 
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long userId;
 
-    @NotBlank
-    @Size(min = 6, max = 50)
-    @Pattern(
-            regexp = "^(?=.*[A-Z])[A-Za-z0-9_@]+$",
-            message = "Username must contain at least one capital letter and may include letters, numbers, _ ,@ only."
-    )
-    private String userName;
+	@NotBlank
+	@Size(min = 6, max = 50)
+	@Pattern(regexp = "^(?=.*[A-Z])[A-Za-z0-9_@]+$", message = "Username must contain at least one capital letter and may include letters, numbers, _ ,@ only.")
+	private String userName;
 
-    @NotBlank
-    @Email
-    @Size(max = 100)
-    @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]*@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$",
-            message = "Email must start with a letter and may contain numbers"
-    )
-    @Column(unique = true)
-    private String email;
+	@NotBlank
+	@Email
+	@Size(max = 100)
+	@Email(message = "Invalid email format")
+	@Column(unique = true)
+	private String email;
 
-    @NotBlank
 
-    @Size(min = 8, max = 255)
-    @Pattern(
-            regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
-            message = "Must contain at least one capital letter, one number, and one special character."
-    )
+	@NotBlank
+	@JsonIgnore
+	@Size(min = 8, max = 255)
+	@Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).+$", message = "Password Must contain at least one capital letter, one number, and one special character.")
+	private String password;
 
-    private String password;
 
-    @NotBlank
-    @Pattern(
-            regexp = "^[6-9]\\d{9}$",
-            message = "Enter valid 10 digit Indian mobile number"
-    )
-    @Column(length = 10, unique = true)
-    private String phoneNo;
+	@NotBlank
+	@Pattern(regexp = "^[6-9]\\d{9}$", message = "Enter valid 10 digit Indian mobile number")
+	@Column(length = 10, unique = true)
+	private String phoneNo;
 
-    @NotNull
-    @Past
-    private LocalDate dob;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserStatus status = UserStatus.ACTIVE;  
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role = UserRole.USER;  
+	@NotNull
+	@Past
+	private LocalDate dob;
 
-//  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//  private List<Alert> alerts;
-//
-//  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//  private List<WatchList> watchlists;
+	@AssertTrue(message = "User must be at least 18 years old")
+	public boolean isAdult() {
+	    if (dob == null) return false;
+	    return dob.plusYears(18).isBefore(LocalDate.now())
+	            || dob.plusYears(18).isEqual(LocalDate.now());
+	}	
 
-//  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//  private List<UserSubscription> subscriptions;
-//
-//  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//  private List<Payment> payments;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private UserStatus status = UserStatus.ACTIVE;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private UserRole role = UserRole.USER;
+	
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Alert> alerts;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<WatchList> watchlists;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserSubscription> subscriptions;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Payment> payments;
 
 }

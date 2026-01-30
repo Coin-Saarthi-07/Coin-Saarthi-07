@@ -6,6 +6,8 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "watchlist")
 @Data
@@ -15,6 +17,7 @@ public class WatchList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long watchListId;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crypto_id", nullable = false)
     private CryptoCurrency cryptoCurrency;

@@ -16,47 +16,39 @@ import java.util.List;
 @EnableScheduling
 public class AlertTriggerScheduler {
 
-    private final CryptoPriceService cryptoPriceService;
-    private final AlertTriggerService alertTriggerService;
-    private final CryptoCurrencyRepository cryptoRepo;
+	private final CryptoPriceService cryptoPriceService;
+	private final AlertTriggerService alertTriggerService;
+	private final CryptoCurrencyRepository cryptoRepo;
 
-    public AlertTriggerScheduler(
-            CryptoPriceService cryptoPriceService,
-            AlertTriggerService alertTriggerService,
-            CryptoCurrencyRepository cryptoRepo
-    ) {
-        this.cryptoPriceService = cryptoPriceService;
-        this.alertTriggerService = alertTriggerService;
-        this.cryptoRepo = cryptoRepo;
-    }
+	public AlertTriggerScheduler(CryptoPriceService cryptoPriceService, AlertTriggerService alertTriggerService,
+			CryptoCurrencyRepository cryptoRepo) {
+		this.cryptoPriceService = cryptoPriceService;
+		this.alertTriggerService = alertTriggerService;
+		this.cryptoRepo = cryptoRepo;
+	}
 
-    /**
-     * Runs every 30 seconds:
-     * 1. Refresh prices from CoinGecko
-     * 2. Read DB prices
-     * 3. Evaluate alerts
-     */
-    @Scheduled(fixedDelay = 30_000)
-    public void triggerAlerts() {
+	/**
+	 * Runs every 30 seconds: 1. Refresh prices from CoinGecko 2. Read DB prices 3.
+	 * Evaluate alerts
+	 */
+	@Scheduled(fixedDelay = 30_000)
+	public void triggerAlerts() {
 
-        // 1️⃣ Update prices
-        cryptoPriceService.refreshPrices();
+		// 1️. Update prices
+		cryptoPriceService.refreshPrices();
 
-        // 2️⃣ Read latest prices from DB
-        List<CryptoCurrency> cryptos = cryptoRepo.findAll();
+		// 2️. Read latest prices from DB
+		List<CryptoCurrency> cryptos = cryptoRepo.findAll();
 
-        // 3️⃣ Trigger alerts
-        for (CryptoCurrency crypto : cryptos) {
+		// 3.Trigger alerts
+		for (CryptoCurrency crypto : cryptos) {
 
-            if (crypto.getCurrencyPrice() == null) {
-                continue; // 🔒 Absolute safety
-            }
+			if (crypto.getCurrencyPrice() == null) {
+				continue;
+			}
 
-            alertTriggerService.evaluateAlerts(
-                    crypto.getCryptoId(),
-                    BigDecimal.valueOf(crypto.getCurrencyPrice())
-            );
-        }
-    }
+			alertTriggerService.evaluateAlerts(crypto.getCryptoId(), BigDecimal.valueOf(crypto.getCurrencyPrice()));
+		}
+	}
 }
 

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.cdac.coin_saarthi.enums.SubscriptionStatus;
+import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.UserSubscription;
 import com.cdac.coin_saarthi.repository.UserRepository;
 import com.cdac.coin_saarthi.repository.UserSubscriptionRepository;
@@ -34,7 +35,7 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 	@Override
 	public UserSubscription getById(Long id) {
 		return userSubscriptionRepository.findById(id)
-				.orElseThrow(()-> new RuntimeException("Subscription of given id not found"));
+				.orElseThrow(()-> new ResourceNotFoundException("Subscription of given id not found"));
 	}
 	
 	//get all
@@ -49,7 +50,7 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 		List<UserSubscription> subscriptions = userSubscriptionRepository.findByUser_UserId(userId);
 		
 		if(subscriptions.isEmpty()) {
-			throw new RuntimeException("Subscription of given user not found");
+			throw new ResourceNotFoundException("Subscription of given user not found");
 		}
 		return subscriptions;
 	}
@@ -62,7 +63,7 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 			SubscriptionStatus subscriptionStatus  = SubscriptionStatus.valueOf(status.toUpperCase());
 		}
 		catch(IllegalArgumentException e) {
-			throw new RuntimeException("Invalid subscription status: " + status);
+			throw new ResourceNotFoundException("Invalid subscription status: " + status);
 		}
 		return userSubscriptionRepository.save(userSubscription);
 	}
@@ -72,7 +73,7 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 	public void deleteSubscription(Long id) {
 		UserSubscription userSubscription = getById(id);
 		if(userSubscription==null) {
-			throw new RuntimeException("Subscription of given user not found");
+			throw new ResourceNotFoundException("Subscription of given user not found");
 		}
 		userSubscriptionRepository.delete(userSubscription);
 		

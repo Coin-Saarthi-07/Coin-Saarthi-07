@@ -1,6 +1,8 @@
 package com.cdac.coin_saarthi.controller;
 
 import com.cdac.coin_saarthi.service.AlertLogService;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/alert-logs")
+@PreAuthorize("hasAnyRole('USER','SUBSCRIBER','ADMIN')")
 public class AlertLogController {
 
     private final AlertLogService alertLogService;

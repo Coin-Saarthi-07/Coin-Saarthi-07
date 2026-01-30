@@ -12,11 +12,13 @@ import com.cdac.coin_saarthi.dto.LoginRequestDTO;
 import com.cdac.coin_saarthi.dto.RegisterRequestDTO;
 import com.cdac.coin_saarthi.service.AuthService;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
+@PermitAll
 public class AuthController{
 	private final AuthService authService;
 	

@@ -3,6 +3,7 @@ package com.cdac.coin_saarthi.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import com.cdac.coin_saarthi.service.InvoiceService;
 
 @RestController
 @RequestMapping("/crypto/admin/invoices")
+@PreAuthorize("hasRole('SUBSCRIBER')")
 public class InvoiceController {
 
     private final InvoiceService invoiceService;

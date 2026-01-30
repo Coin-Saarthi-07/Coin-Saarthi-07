@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface AlertLogRepository extends JpaRepository<AlertLog, Long> {
 
-    List<AlertLog> findByAlertIdOrderByTriggeredTimeDesc(Long alertId);
+	List<AlertLog> findByAlert_AlertIdOrderByTriggeredTimeDesc(Long alertId);
 
-    List<AlertLog> findByAlert_UserIdOrderByTriggeredTimeDesc(Long userId);
+    List<AlertLog> findByAlert_User_UserIdOrderByTriggeredTimeDesc(Long userId);
 
-    Optional<AlertLog> findFirstByAlertIdOrderByTriggeredTimeDesc(Long alertId);
+    Optional<AlertLog> findFirstByAlert_AlertIdOrderByTriggeredTimeDesc(Long alertId);
 }

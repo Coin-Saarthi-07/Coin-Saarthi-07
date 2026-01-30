@@ -18,8 +18,11 @@ import com.cdac.coin_saarthi.dto.ApiResponseDTO;
 import com.cdac.coin_saarthi.model.CryptoCurrency;
 import com.cdac.coin_saarthi.service.CryptoCurrencyService;
 
+import jakarta.annotation.security.PermitAll;
+
 @RestController
 @RequestMapping("/crypto/crypto-currency")
+@PermitAll
 public class CryptoCurrencyController {
 	private final CryptoCurrencyService cryptoCurrencyService;
 	
