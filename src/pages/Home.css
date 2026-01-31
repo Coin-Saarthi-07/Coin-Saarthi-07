@@ -1,0 +1,434 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+.body {
+  background-color: #0b0f1a;
+  color: #ffffff;
+}
+
+.home {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0b0f1a 0%, #0e1529 100%);
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 60px;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 25px;
+  align-items: center;
+}
+
+.nav-links li {
+  cursor: pointer;
+  color: #cbd5f5;
+  transition: 0.3s;
+}
+
+.nav-links li:hover {
+  color: #ffffff;
+}
+
+.nav-btn {
+  padding: 8px 16px;
+  background: #1e2a52;
+  border-radius: 6px;
+  color: #ffffff;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  margin-top: 80px;
+  padding: 0 20px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.hero h1 {
+  
+  font-size: 42px;
+  font-weight: bold;
+  line-height: 1.3;
+}
+
+.hero p {
+  margin-top: 15px;
+  color: #a5b4fc;
+  font-size: 16px;
+}
+
+.hero-buttons {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login {
+  background-color: #2563eb;
+  color: white;
+}
+
+.login:hover {
+  background-color: #1d4ed8;
+}
+
+.register {
+  background-color: #f97316;
+  color: white;
+}
+
+.register:hover {
+  background-color: #ea580c;
+}
+
+/* Features Section */
+.features {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 80px;
+  padding-bottom: 80px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: linear-gradient(180deg, #121a34, #0f172a);
+  padding: 30px;
+  width: 280px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+}
+
+.card h3 {
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.card p {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Market Section */
+.market-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-top: 70px;
+  padding: 0 60px;
+}
+
+/* Market Card */
+.market-card {
+  background: linear-gradient(180deg, #1a1f26, #141922);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Header */
+.market-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.market-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.more {
+  font-size: 13px;
+  color: #facc15;
+  cursor: pointer;
+}
+
+/* Rows */
+.market-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.8fr;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #cbd5f5;
+}
+
+.market-row.header {
+  font-size: 12px;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+  margin-bottom: 6px;
+}
+
+/* Price change */
+.positive {
+  color: #22c55e;
+  font-weight: 500;
+}
+
+.negative {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .market-section {
+    padding: 0 20px;
+  }
+}
+/* Search bar */
+.search-bar {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+/* Crypto table */
+.crypto-table {
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 1300px;
+  margin: 0 auto;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.crypto-header,
+.crypto-row {
+  display: grid;
+  grid-template-columns: 40px 60px 2.5fr 1.2fr 1fr 1fr 1fr 1.5fr 1.5fr 1fr;
+  padding: 16px 20px;
+  align-items: center;
+  gap: 12px;
+}
+
+.crypto-header {
+  background: rgba(2,6,23,.9);
+  font-weight: 600;
+  color: #94a3b8;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.crypto-row {
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.crypto-row:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.crypto-row:last-child {
+  border-bottom: none;
+}
+
+/* Star icon */
+.star-icon {
+  color: #64748b;
+  cursor: pointer;
+  font-size: 18px;
+  transition: color 0.3s ease;
+}
+
+.star-icon:hover {
+  color: #facc15;
+}
+
+.star-icon.starred {
+  color: #facc15;
+}
+
+/* Coin info */
+.coin-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coin-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  font-size: 16px;
+}
+
+.coin-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.coin-name {
+  font-weight: 600;
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+.coin-symbol {
+  color: #94a3b8;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+/* Price styling */
+.price-value {
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+/* Percentage changes */
+.percentage-change {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+
+
+/* Watchlist button */
+.watchlist-btn {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #3b82f6;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.watchlist-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
+.watchlist-btn.watching {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+.watchlist-btn.watching:hover {
+  background: rgba(34, 197, 94, 0.25);
+}
+
+.coin-name small {
+  display: block;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.price-up {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.price-down {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.muted {
+  color: #94a3b8;
+}
+
+/* Container for crypto section */
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 60px;
+}
+
+.container h3 {
+  color: #e5e7eb;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Search input */
+.search-input {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.search-input::placeholder {
+  color: #64748b;
+}
+
+.search-input:hover,
+.search-input:focus{
+  background: rgba(30, 41, 59, 0.7) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: none !important;
+}
+
+.hero {
+  position: relative;
+  min-height: 75vh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  padding-top: 120px; /* navbar height */
+  padding-bottom: 40px; /* REDUCED */
+
+  background: 
+    linear-gradient(
+      rgba(5, 10, 25, 0.65),
+      rgba(5, 10, 25, 0.85)
+    ),
+    url("/assets/crypto-chart-bg.png"); /* your image */
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
