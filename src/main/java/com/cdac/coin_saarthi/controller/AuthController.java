@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cdac.coin_saarthi.dto.AuthResponse;
 import com.cdac.coin_saarthi.dto.LoginRequestDTO;
+import com.cdac.coin_saarthi.dto.LoginResponseDTO;
 import com.cdac.coin_saarthi.dto.RegisterRequestDTO;
 import com.cdac.coin_saarthi.service.AuthService;
 
@@ -35,8 +36,8 @@ public class AuthController{
 
     //Login
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequestDTO request) {
-        AuthResponse response=authService.login(request);
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
+    	LoginResponseDTO response=authService.login(request);
         return ResponseEntity.ok(response);
     }
 }

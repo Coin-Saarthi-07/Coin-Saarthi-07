@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.cdac.coin_saarthi.dto.AuthResponse;
 import com.cdac.coin_saarthi.dto.LoginRequestDTO;
+import com.cdac.coin_saarthi.dto.LoginResponseDTO;
 import com.cdac.coin_saarthi.dto.RegisterRequestDTO;
 import com.cdac.coin_saarthi.enums.UserRole;
 import com.cdac.coin_saarthi.enums.UserStatus;
@@ -55,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
 
 	//login
 	@Override
-	public AuthResponse login(LoginRequestDTO request) {
+	public LoginResponseDTO login(LoginRequestDTO request) {
 		User user = userRepository.findByUserName(request.getUserName())
                 .orElseThrow(()->new ResourceNotFoundException("Invalid username or password"));
 		
@@ -73,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
                 user.getRole().name()
         );
 
-		return new AuthResponse(token, user.getRole().name(),"Login successfull");
+		return new LoginResponseDTO(token,user.getUserId(),user.getUserName(), user.getRole().name());
 	}
 
 }
