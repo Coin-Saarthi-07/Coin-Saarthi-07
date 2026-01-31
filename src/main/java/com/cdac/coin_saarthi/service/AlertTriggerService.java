@@ -139,4 +139,6 @@ public class AlertTriggerService {
 		notificationRepository.save(notification);
 	}
 
+
 }
+

@@ -16,7 +16,7 @@ import jakarta.annotation.security.PermitAll;
 
 @RestController
 @RequestMapping("/api/paper/transactions")
-@PreAuthorize("hasAnyRole('ADMIN','SUBSCRIBER')")
+@PreAuthorize("hasAnyAuthority('ADMIN','SUBSCRIBER')")
 public class PaperTransactionLogController {
 
     private final PaperTransactionLogRepository transactionRepo;

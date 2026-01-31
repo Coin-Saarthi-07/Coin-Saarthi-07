@@ -47,6 +47,7 @@ public class CryptoCurrency {
 	@Pattern(regexp = "^[A-Z0-9-]+$", message = "Currency symbol must be uppercase letters, numbers or hyphen")
 	public String currencySymbol;
 
+
 	@NotNull
 	private LocalDateTime lastUpdated;
 

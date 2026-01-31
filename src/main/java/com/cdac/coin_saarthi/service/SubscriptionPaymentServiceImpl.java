@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cdac.coin_saarthi.authutil.SecurityUtil;
 import com.cdac.coin_saarthi.dto.CreateOrderResponseDTO;
 import com.cdac.coin_saarthi.dto.VerifyPaymentDTO;
 import com.cdac.coin_saarthi.enums.InvoicePaymentStatus;
@@ -16,6 +17,7 @@ import com.cdac.coin_saarthi.enums.PaymentMethod;
 import com.cdac.coin_saarthi.enums.PaymentStatus;
 import com.cdac.coin_saarthi.enums.SubscriptionStatus;
 import com.cdac.coin_saarthi.enums.UserRole;
+import com.cdac.coin_saarthi.exception.AccessDeniedCustomException;
 import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.Invoice;
 import com.cdac.coin_saarthi.model.Payment;
@@ -45,11 +47,12 @@ public class SubscriptionPaymentServiceImpl implements SubscriptionPaymentServic
 	private final UserSubscriptionRepository userSubscriptionRepository;
 	private final InvoiceService invoiceService;
 	private final InvoiceRepository invoiceRepository;
+	private final SecurityUtil securityUtil;
 
 	public SubscriptionPaymentServiceImpl(RazorpayClient razorpayClient, UserRepository userRepository,
 			SubscriptionPlanRepository planRepository, PaymentRepository paymentRepository,
 			UserSubscriptionRepository userSubscriptionRepository, InvoiceService invoiceService,
-			InvoiceRepository invoiceRepository) {
+			InvoiceRepository invoiceRepository, SecurityUtil securityUtil) {
 		this.razorpayClient = razorpayClient;
 		this.userRepository = userRepository;
 		this.planRepository = planRepository;
@@ -57,6 +60,7 @@ public class SubscriptionPaymentServiceImpl implements SubscriptionPaymentServic
 		this.userSubscriptionRepository = userSubscriptionRepository;
 		this.invoiceService = invoiceService;
 		this.invoiceRepository = invoiceRepository;
+		this.securityUtil=securityUtil;
 	}
 
 	// 1.CREATE RAZORPAY ORDER + SAVE PAYMENT (PENDING)
@@ -68,7 +72,12 @@ public class SubscriptionPaymentServiceImpl implements SubscriptionPaymentServic
 
 		SubscriptionPlan plan = planRepository.findById(planId)
 				.orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
-
+		
+		User currentUser = securityUtil.getCurrentUser();
+		if((!currentUser.getUserId().equals(user.getUserId()))) {
+			throw new AccessDeniedCustomException("User can't set alert for another user");
+		}
+		
 		BigDecimal amountInPaise = plan.getPlanPrice().multiply(BigDecimal.valueOf(100));
 
 		JSONObject orderRequest = new JSONObject();

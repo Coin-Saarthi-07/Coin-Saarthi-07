@@ -22,7 +22,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/alerts")
-@PermitAll
+@PreAuthorize("hasAnyAuthority('USER','SUBSCRIBER')")
 public class AlertController {
 
     private final AlertService alertService;

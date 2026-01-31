@@ -16,7 +16,7 @@ import com.cdac.coin_saarthi.service.InvoiceService;
 
 @RestController
 @RequestMapping("/crypto/admin/invoices")
-@PreAuthorize("hasRole('SUBSCRIBER')")
+@PreAuthorize("hasAnyAuthority('SUBSCRIBER')")
 public class InvoiceController {
 
     private final InvoiceService invoiceService;

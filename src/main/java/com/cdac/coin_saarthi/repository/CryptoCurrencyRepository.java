@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.cdac.coin_saarthi.model.CryptoCurrency;
 
+
 public interface CryptoCurrencyRepository
         extends JpaRepository<CryptoCurrency, Long> {
 
@@ -19,4 +20,5 @@ public interface CryptoCurrencyRepository
     );
     CryptoCurrency findByCryptoId(Long id);
     Optional<CryptoCurrency> findByCoinGeckoId(String geckoId);
+
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.cdac.coin_saarthi.authutil.SecurityUtil;
 import com.cdac.coin_saarthi.dto.CreateWatchListDto;
 import com.cdac.coin_saarthi.dto.WatchListResponseDto;
 import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
@@ -40,6 +41,7 @@ public class WatchListServiceImpl implements WatchListService{
     }
 
     public List<WatchListResponseDto> getByUserId(Long userId) {
+
         return watchListRepository.findByUser_UserId(userId)
                 .stream()
                 .map(this::mapToDto)

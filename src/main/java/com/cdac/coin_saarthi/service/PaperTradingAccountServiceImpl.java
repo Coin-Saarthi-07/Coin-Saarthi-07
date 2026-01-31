@@ -5,7 +5,9 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
+import com.cdac.coin_saarthi.authutil.SecurityUtil;
 import com.cdac.coin_saarthi.dto.AccountResponseDTO;
+import com.cdac.coin_saarthi.exception.AccessDeniedCustomException;
 import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.PaperTradingAccount;
 import com.cdac.coin_saarthi.model.User;
@@ -17,11 +19,13 @@ public class PaperTradingAccountServiceImpl implements PaperTradingAccountServic
 
 	private final PaperTradingAccountRepository accountRepository;
 	private final UserRepository userRepository;
+	private final SecurityUtil securityUtil;
 
 	public PaperTradingAccountServiceImpl(PaperTradingAccountRepository accountRepository,
-			UserRepository userRepository) {
+			UserRepository userRepository, SecurityUtil securityUtil) {
 		this.accountRepository = accountRepository;
 		this.userRepository = userRepository;
+		this.securityUtil=securityUtil;
 	}
 
 	@Override
@@ -33,6 +37,11 @@ public class PaperTradingAccountServiceImpl implements PaperTradingAccountServic
 
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+		User currentUser = securityUtil.getCurrentUser();
+		if((!currentUser.getUserId().equals(user.getUserId()))) {
+			throw new AccessDeniedCustomException("User can't set alert for another user");
+		}
+		
 		PaperTradingAccount account = new PaperTradingAccount();
 		account.setUser(user);
 		account.setVirtualBalance(new BigDecimal("100000"));

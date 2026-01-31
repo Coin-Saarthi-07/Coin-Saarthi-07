@@ -21,6 +21,7 @@ public class NotificationScheduler {
 	private final NotificationDispatcherService dispatcherService;
 	private final UserRepository userRepository;
 
+
 	public NotificationScheduler(NotificationRepository notificationRepository,
 			NotificationDispatcherService dispatcherService, UserRepository userRepository) {
 		this.notificationRepository = notificationRepository;
@@ -30,6 +31,7 @@ public class NotificationScheduler {
 
 	@Scheduled(fixedDelay = 10_000)
 	public void processPendingNotifications() {
+
 
 		List<Notification> pending = notificationRepository.findAll().stream()
 				.filter(n -> n.getStatus() == NotificationStatus.Pending).toList();

@@ -1,6 +1,7 @@
 package com.cdac.coin_saarthi.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,11 +13,9 @@ import com.cdac.coin_saarthi.enums.PaymentMethod;
 import com.cdac.coin_saarthi.service.SubscriptionPaymentService;
 import com.razorpay.RazorpayException;
 
-import jakarta.annotation.security.PermitAll;
-
 @RestController
 @RequestMapping("/api/payments/subscription")
-@PermitAll
+@PreAuthorize("hasAnyAuthority('ADMIN','SUBSCRIBER','USER')")
 public class SubscriptionPaymentController {
 
     private final SubscriptionPaymentService paymentService;

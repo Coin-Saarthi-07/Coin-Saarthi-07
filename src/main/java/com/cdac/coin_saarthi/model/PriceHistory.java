@@ -1,7 +1,10 @@
 package com.cdac.coin_saarthi.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,6 +28,7 @@ public class PriceHistory{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long priceHistoryId;
 	
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crypto_id", nullable = false)
 	private CryptoCurrency cryptoCurrency;
@@ -33,5 +37,5 @@ public class PriceHistory{
 	private Double price;
 
 	@Column(nullable=false)
-	private LocalTime recordedTime;
+	private LocalDateTime recordedTime;
 }

@@ -57,11 +57,13 @@ public class User {
 	@Column(unique = true)
 	private String email;
 
+
 	@NotBlank
 	@JsonIgnore
 	@Size(min = 8, max = 255)
 	@Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).+$", message = "Password Must contain at least one capital letter, one number, and one special character.")
 	private String password;
+
 
 	@NotBlank
 	@Pattern(regexp = "^[6-9]\\d{9}$", message = "Enter valid 10 digit Indian mobile number")

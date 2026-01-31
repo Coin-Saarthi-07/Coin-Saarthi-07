@@ -19,7 +19,7 @@ import com.cdac.coin_saarthi.service.SubscriptionService;
 
 @RestController
 @RequestMapping("/api/subscriptions")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyAuthority('ADMIN')")
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 

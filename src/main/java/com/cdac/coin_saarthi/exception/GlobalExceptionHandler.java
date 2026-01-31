@@ -1,5 +1,6 @@
 package com.cdac.coin_saarthi.exception;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.apache.coyote.BadRequestException;
@@ -71,5 +72,17 @@ public class GlobalExceptionHandler {
                         "error", "PAYMENT_GATEWAY_ERROR",
                         "message", ex.getMessage()
                 ));
+    }
+    
+    @ExceptionHandler(AccessDeniedCustomException.class)
+    public ResponseEntity<?> handleAccessDenied(AccessDeniedCustomException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+            Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", 403,
+                "error", "Forbidden",
+                "message", ex.getMessage()
+            )
+        );
     }
 }

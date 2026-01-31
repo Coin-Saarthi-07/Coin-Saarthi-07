@@ -17,7 +17,7 @@ import jakarta.annotation.security.PermitAll;
 
 @RestController
 @RequestMapping("/paper/trade")
-@PermitAll
+@PreAuthorize("hasAuthority('SUBSCRIBER')")
 public class PaperTradeController {
 
 	private final PaperTradeService service;

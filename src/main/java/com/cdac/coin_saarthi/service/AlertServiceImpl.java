@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.cdac.coin_saarthi.authutil.SecurityUtil;
 import com.cdac.coin_saarthi.dto.AlertRequestDTO;
 import com.cdac.coin_saarthi.dto.UpdateAlertDTO;
+import com.cdac.coin_saarthi.exception.AccessDeniedCustomException;
 import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.Alert;
 import com.cdac.coin_saarthi.model.AlertEnums;
@@ -21,11 +23,13 @@ public class AlertServiceImpl implements AlertService {
 	private final AlertRepository alertRepository;
 	private final UserRepository userRepository;
 	private final CryptoCurrencyRepository cryptoCurrencyRepository;
+	private final SecurityUtil securityUtil;
 
-	public AlertServiceImpl(AlertRepository alertRepository,UserRepository userRepository,CryptoCurrencyRepository cryptoCurrencyRepository) {
+	public AlertServiceImpl(AlertRepository alertRepository,UserRepository userRepository,CryptoCurrencyRepository cryptoCurrencyRepository,SecurityUtil securityUtil) {
 		this.alertRepository = alertRepository;
 		this.cryptoCurrencyRepository=cryptoCurrencyRepository;
 		this.userRepository=userRepository;
+		this.securityUtil=securityUtil;
 	}
 
 	@Override
@@ -34,6 +38,11 @@ public class AlertServiceImpl implements AlertService {
 		User user = userRepository.findByUserId(request.getUserId());
 		if (user == null) {
 			throw new ResourceNotFoundException("User not found of given id");
+		}
+		
+		User currentUser = securityUtil.getCurrentUser();
+		if((!currentUser.getUserId().equals(user.getUserId()))) {
+			throw new AccessDeniedCustomException("User can't set alert for another user");
 		}
 
 		CryptoCurrency crypto = cryptoCurrencyRepository.findByCryptoId(request.getCryptoId());

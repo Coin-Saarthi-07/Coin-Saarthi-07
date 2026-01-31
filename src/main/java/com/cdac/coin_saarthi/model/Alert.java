@@ -3,6 +3,8 @@ package com.cdac.coin_saarthi.model;
 import com.cdac.coin_saarthi.model.AlertEnums.AlertStatus;
 import com.cdac.coin_saarthi.model.AlertEnums.AlertType;
 import com.cdac.coin_saarthi.model.AlertEnums.ConditionType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +23,7 @@ public class Alert {
     @Column(name = "alert_id")
     private Long alertId;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
