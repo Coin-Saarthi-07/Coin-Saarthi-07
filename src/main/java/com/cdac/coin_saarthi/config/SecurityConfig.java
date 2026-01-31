@@ -25,31 +25,30 @@ public class SecurityConfig{
 	}
 	
 	@Bean
-	
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-      
-        http
-        .cors(withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> {})
-            .authorizeHttpRequests(auth -> auth
-            		.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(
-                    "/api/**",
-                    "/crypto/**",
-                    "/paper/**",
-                    "/swagger-ui/**",
-                    "/crypto/**",   
-                    "/v3/api-docs/**"
-                ).permitAll()
-                .anyRequest().authenticated()
-             )
-            .sessionManagement(session ->
-            	session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .formLogin(form -> form.disable())   //disable default login page
-            .httpBasic(basic -> basic.disable()); //disable basic auth
+	public SecurityFilterChain securityFilterChain(HttpSecurity http,
+	                                               JwtAuthenticationFilter jwtFilter) throws Exception {
 
-        return http.build();
-    }
+	    http
+	        .csrf(csrf -> csrf.disable())
+	        .authorizeHttpRequests(auth -> auth
+	            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+	            .requestMatchers(
+	                "/swagger-ui/**",
+	                "/v3/api-docs/**",
+	                "/api/auth/**",
+	                "/api/crypto/**",
+	                "/api/paper/**"
+	                
+	            ).permitAll()
+	            .anyRequest().authenticated()
+	        )
+	        .sessionManagement(session ->
+	            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+	        )
+	        .addFilterBefore(jwtFilter,
+	            org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+
+	    return http.build();
+	}
+
 }

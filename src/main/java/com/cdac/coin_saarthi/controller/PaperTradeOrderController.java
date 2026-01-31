@@ -16,7 +16,7 @@ import jakarta.annotation.security.PermitAll;
 
 @RestController
 @RequestMapping("/api/paper/orders")
-@PreAuthorize("hasAnyRole('ADMIN','SUBSCRIBER')")
+@PreAuthorize("hasAnyAuthority('ADMIN','SUBSCRIBER')")
 public class PaperTradeOrderController {
 
     private final PaperTradeOrderRepository orderRepo;

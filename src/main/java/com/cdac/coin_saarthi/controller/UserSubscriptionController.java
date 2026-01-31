@@ -21,7 +21,7 @@ import com.cdac.coin_saarthi.service.UserSubscriptionService;
 
 @RestController
 @RequestMapping("/crypto/user-subscription")
-@PreAuthorize("hasAnyRole('USER','SUBSCRIBER','ADMIN')")
+@PreAuthorize("hasAnyAuthority('USER','SUBSCRIBER','ADMIN')")
 public class UserSubscriptionController {
 	
 	private final UserSubscriptionService userSubscriptionService;

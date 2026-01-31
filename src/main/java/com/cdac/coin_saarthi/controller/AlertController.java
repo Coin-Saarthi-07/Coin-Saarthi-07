@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/alerts")
-@PreAuthorize("hasAnyRole('USER','SUBSCRIBER')")
+@PreAuthorize("hasAnyAuthority('USER','SUBSCRIBER')")
 public class AlertController {
 
     private final AlertService alertService;

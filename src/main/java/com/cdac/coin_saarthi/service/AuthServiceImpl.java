@@ -31,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceNotFoundException("Email already registered");
         }
 		if (userRepository.existsByUserName(request.getUserName())){
-            throw new ResourceNotFoundException("Email already registered");
+            throw new ResourceNotFoundException("Username already registered");
         }
 		
 		User user = new User();

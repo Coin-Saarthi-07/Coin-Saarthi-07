@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/notification")
-@PreAuthorize("hasAnyRole('USER','SUBSCRIBER')")
+@PreAuthorize("hasAnyAuthority('USER','SUBSCRIBER')")
 public class NotificationController {
 
     private final NotificationService notificationService;

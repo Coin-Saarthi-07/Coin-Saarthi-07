@@ -13,7 +13,7 @@ import com.cdac.coin_saarthi.service.PaperTradingAccountService;
 
 @RestController
 @RequestMapping("/paper/account")
-@PreAuthorize("hasRole('SUBSCRIBER')")
+@PreAuthorize("hasAnyAuthority('SUBSCRIBER')")
 public class PaperTradingAccountController {
 
     private final PaperTradingAccountService service;

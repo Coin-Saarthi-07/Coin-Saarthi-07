@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/crypto/watchlist")
 
-@PreAuthorize("hasAnyRole('ADMIN','SUBSCRIBER','USER')")
+@PreAuthorize("hasAnyAuthority('ADMIN','SUBSCRIBER','USER')")
 public class WatchListController {
     private final WatchListService watchListService;
 

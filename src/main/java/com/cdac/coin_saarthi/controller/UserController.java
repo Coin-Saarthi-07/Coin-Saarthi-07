@@ -20,7 +20,7 @@ import jakarta.annotation.security.PermitAll;
 
 @RestController
 @RequestMapping("/crypto/admin")
-@PermitAll
+@PreAuthorize("hasAnyAuthority('ADMIN')")
 public class UserController {
 
         private final UserService userService;

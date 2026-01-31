@@ -1,6 +1,7 @@
 package com.cdac.coin_saarthi.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import jakarta.persistence.Column;
@@ -33,5 +34,5 @@ public class PriceHistory{
 	private Double price;
 
 	@Column(nullable=false)
-	private LocalTime recordedTime;
+	private LocalDateTime recordedTime;
 }

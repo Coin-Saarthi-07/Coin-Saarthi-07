@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/alert-logs")
-@PreAuthorize("hasAnyRole('USER','SUBSCRIBER','ADMIN')")
+@PreAuthorize("hasAnyAuthority('USER','SUBSCRIBER','ADMIN')")
 public class AlertLogController {
 
     private final AlertLogService alertLogService;
