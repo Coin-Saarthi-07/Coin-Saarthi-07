@@ -1,0 +1,37 @@
+/* Bootstrap Navbar Styling Override */
+.navbar {
+  background: linear-gradient(90deg, #0b0f1a, #0e1529) !important;
+  padding: 6px 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 22px;
+  color: #ffffff !important;
+}
+
+.navbar-nav .nav-link {
+  color: #cbd5f5 !important;
+  margin-right: 18px;
+  transition: 0.3s;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #ffffff !important;
+}
+
+.navbar-text {
+  color: #e5e7eb;
+}
+
+/* Logout Button */
+.navbar .btn-outline-light {
+  border-color: #6366f1;
+  color: #ffffff;
+}
+
+.navbar .btn-outline-light:hover {
+  background-color: #6366f1;
+  border-color: #6366f1;
+}
