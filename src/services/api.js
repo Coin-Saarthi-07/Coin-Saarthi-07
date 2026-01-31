@@ -2,14 +2,17 @@ import axios from "axios";
 import authService from "./authService";
 
 const api = axios.create({
-  baseURL: "https://localhost:7294/api",
+  baseURL: "http://localhost:8080",
+
 });
 
 api.interceptors.request.use((config) => {
-  const token = authService.getToken();
+  const token = localStorage.getItem("token");
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 

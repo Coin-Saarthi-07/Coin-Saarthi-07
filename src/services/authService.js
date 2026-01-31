@@ -1,19 +1,15 @@
-
 import axios from "axios";
 
 const TOKEN_KEY = "token";
 const USER_KEY = "user";
-const ROLE_CLAIM =
-  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
-
 
 const api = axios.create({
-  baseURL: "https://localhost:7294/crypto",
+  baseURL: "http://localhost:8080/api", // ✅ SPRING BOOT
 });
 
 /* REGISTER */
 const register = async (data) => {
-  await api.post("/auth/register", data);
+  return api.post("/auth/register", data);
 };
 
 /* LOGIN */
@@ -26,7 +22,7 @@ const login = async (credentials) => {
     const userData = {
       userId: res.data.userId,
       userName: res.data.userName,
-      role: res.data.role
+      role: res.data.role // USER / ADMIN / SUBSCRIBER
     };
 
     localStorage.setItem(USER_KEY, JSON.stringify(userData));
@@ -34,28 +30,19 @@ const login = async (credentials) => {
 
   return res.data;
 };
-const isAdmin = () => {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (!token) return false;
 
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload?.[ROLE_CLAIM] === "1";
-  } catch {
-    return false;
-  }
-};
-
-
-
-
+/* LOGOUT */
+// const logout = () => {
+//   localStorage.clear();
+//   sessionStorage.clear();
+//   window.location.href = "/login";
+// };
 const logout = () => {
-  localStorage.clear();
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
   sessionStorage.clear();
-  window.location.href = "/login";
+  window.location.replace("/login");
 };
-
-
 
 /* TOKEN */
 const getToken = () => localStorage.getItem(TOKEN_KEY);
@@ -64,39 +51,59 @@ const getToken = () => localStorage.getItem(TOKEN_KEY);
 const getCurrentUser = () => {
   try {
     const user = localStorage.getItem(USER_KEY);
-    if (!user || user === "undefined") return null;
+    if (!user) return null;
     return JSON.parse(user);
   } catch {
     return null;
   }
 };
-/* USER ID (FOR ALERT ONLY) */
+
+/* USER ID */
 const getUserId = () => {
   const user = getCurrentUser();
   return user ? user.userId : null;
 };
 
-
 /* AUTH CHECK */
-// const isAuthenticated = () => {
-//   return !!(getToken() && getCurrentUser());
-// };
-const isAuthenticated = () => {
-  const token = localStorage.getItem("token");
-  const user = localStorage.getItem("user");
-
-  if (!token || !user) return false;
-
+// 
+const decodeJwt = (token) => {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const now = Math.floor(Date.now() / 1000);
+    return JSON.parse(
+      decodeURIComponent(
+        atob(token.split(".")[1])
+          .split("")
+          .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      )
+    );
+  } catch {
+    return null;
+  }
+};
 
-    return payload.exp > now;
+const isAuthenticated = () => {
+  const token = getToken();
+  if (!token) return false;
+
+  const payload = decodeJwt(token);
+  if (!payload?.exp) return false;
+
+  return payload.exp > Math.floor(Date.now() / 1000);
+};
+
+
+/* ROLE CHECKS */
+const hasRole = (role) => {
+  try {
+    const user = getCurrentUser();
+    return user?.role === role;
   } catch {
     return false;
   }
 };
 
+const isAdmin = () => hasRole("ADMIN");
+const isSubscriber = () => hasRole("SUBSCRIBER");
 
 export default {
   register,
@@ -106,7 +113,6 @@ export default {
   getUserId,
   getToken,
   isAuthenticated,
-  isAdmin
+  isAdmin,
+  isSubscriber
 };
-
-

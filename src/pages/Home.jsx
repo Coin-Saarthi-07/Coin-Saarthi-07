@@ -2,7 +2,8 @@ import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
+
 import authService from '../services/authService';
 import "./Home.css";
 import "../components/NavBar.css";
@@ -35,19 +36,19 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
   useEffect(() => {
-  const loadUserWatchlist = async () => {
-    const user = authService.getCurrentUser();
-    if (!user) return;
+    const loadUserWatchlist = async () => {
+      const user = authService.getCurrentUser();
+      if (!user) return;
 
-    try {
-      const res = await getMyWatchlist(user.userId);
-      const ids = new Set(res.data.map(w => w.cryptoId));
-      setWatchlistItems(ids);
-    } catch {}
-  };
+      try {
+        const res = await getMyWatchlist(user.userId);
+        const ids = new Set(res.data.map(w => w.cryptoId));
+        setWatchlistItems(ids);
+      } catch { }
+    };
 
-  loadUserWatchlist();
-}, []);
+    loadUserWatchlist();
+  }, []);
 
 
   const fetchAllData = () => {
@@ -67,26 +68,37 @@ const Home = () => {
 
   const fetchLive = async () => {
     try {
-      const res = await axios.get('https://localhost:7294/api/crypto/live');
-      setLiveCoins(res.data);
+      const res = await api.get("/crypto/crypto-currency/live");
+
+      const data = Array.isArray(res.data) ? res.data : [];
+      const mapped = data.map(c => ({
+        cryptoId: c.cryptoId,
+        currencySymbol: c.symbol,
+        currencyPrice: c.price,
+        lastUpdated: new Date().toISOString()
+      }));
+
+      setLiveCoins(mapped);
     } catch (err) {
       console.error("Live prices error", err);
     }
   };
 
+
   const fetchGainers = async () => {
     try {
-      const res = await axios.get('https://localhost:7294/api/crypto/top-gainers');
-      setTopGainers(res.data);
+      const res = await api.get("/crypto/crypto-currency/top-gainers");
+      setTopGainers(Array.isArray(res.data) ? res.data : []); // ✅ FIX
     } catch (err) {
       console.error("Top gainers error", err);
     }
   };
 
+
   const fetchLosers = async () => {
     try {
-      const res = await axios.get('https://localhost:7294/api/crypto/top-losers');
-      setTopLosers(res.data);
+      const res = await api.get("/crypto/crypto-currency/top-losers");
+      setTopLosers(Array.isArray(res.data) ? res.data : []); // ✅ FIX
     } catch (err) {
       console.error("Top losers error", err);
     }
@@ -94,12 +106,25 @@ const Home = () => {
 
   const fetchCryptoList = async () => {
     try {
-      const res = await axios.get('https://localhost:7294/api/crypto');
-      setCryptoList(res.data);
+      const res = await api.get("/crypto/crypto-currency");
+
+      const flatList = Array.isArray(res.data)
+        ? res.data.map(c => ({
+          cryptoId: c.cryptoId,
+          currencyName: c.currencyName,
+          currencySymbol: c.currencySymbol,
+          currencyPrice: c.currencyPrice
+        }))
+        : [];
+
+      setCryptoList(flatList);
     } catch (err) {
       console.error("Crypto list error", err);
+      setCryptoList([]);
     }
   };
+
+
 
   const mergeWithLive = (list) =>
     list.map(item => {
@@ -119,10 +144,12 @@ const Home = () => {
   const volume = hotCoins;
 
 
-  const filteredCoins = cryptoList.filter(c =>
-    c.currencyName.toLowerCase().includes(search.toLowerCase()) ||
-    c.currencySymbol.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredCoins = cryptoList.filter(c => {
+    const name = String(c.currencyName || "").toLowerCase();
+    const symbol = String(c.currencySymbol || "").toLowerCase();
+    return name.includes(search.toLowerCase()) || symbol.includes(search.toLowerCase());
+  });
+
 
   const visibleCoins = filteredCoins.slice(0, visibleCount);
 
@@ -158,19 +185,22 @@ const Home = () => {
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    if (typeof price !== "number" || isNaN(price)) return "—";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(price);
   };
 
-  const formatVolume = (volume) => {
-    if (volume >= 1e12) return `$${(volume / 1e12).toFixed(2)}T`;
-    if (volume >= 1e9) return `$${(volume / 1e9).toFixed(2)}B`;
-    if (volume >= 1e6) return `$${(volume / 1e6).toFixed(2)}M`;
-    return `$${volume?.toFixed(2) || 0}`;
+
+  const formatVolume = (value) => {
+    if (typeof value !== "number" || isNaN(value)) return "—";
+    if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
+    if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+    if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+    return `$${value.toFixed(2)}`;
   };
 
 
@@ -178,7 +208,7 @@ const Home = () => {
     <>
       <NavBar />
 
-      <div className="home" style={{ paddingTop: '80px' }}>
+      <div className="home" style={{ paddingTop: '200px' }}>
         {/* Hero */}
         <div style={{
           textAlign: 'center',
@@ -197,7 +227,7 @@ const Home = () => {
 
 
         {/* Market Cards */}
-        <section className="market-section container">
+        <section className="market-section container-fluid">
           <div className="row">
 
             <MarketCard
@@ -261,7 +291,7 @@ const Home = () => {
 
         {/* Crypto List */}
         {/* Crypto List Section */}
-        <section className="container mt-5">
+        <section className="container-fluid mt-5">
           <h3 className="mb-3">All Cryptocurrencies</h3>
 
           {/* Search */}
@@ -293,13 +323,16 @@ const Home = () => {
             {visibleCoins.map((c, index) => {
               const prev = previousPrices[c.cryptoId];
               const movement =
-                prev === undefined
+                typeof c.currencyPrice !== "number" || typeof prev !== "number"
                   ? "—"
                   : c.currencyPrice > prev
                     ? "up"
                     : c.currencyPrice < prev
                       ? "down"
                       : "same";
+
+              console.log("CRYPTO LIST:", cryptoList);
+              console.log("VISIBLE COINS:", visibleCoins);
 
               return (
                 <div className="crypto-row" key={c.cryptoId}>

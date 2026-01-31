@@ -20,22 +20,40 @@ const UserDashboard = () => {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
+  // const loadWatchlist = async () => {
+  //   const res = await getMyWatchlist(user.userId);
+  //   setWatchlist(res.data.map(w => ({
+  //     id: w.watchListId,
+  //     cryptoId: w.cryptoId,
+  //     name: w.currencyName,
+  //     symbol: w.symbol,
+  //     price: `$${w.currentPrice}`,
+  //     change: "+0.0%",
+  //     isPositive: true,
+  //     isWatching: true,
+  //     starred: true
+  //   })));
+  // };
   const loadWatchlist = async () => {
-    const res = await getMyWatchlist(user.userId);
-    setWatchlist(res.data.map(w => ({
-      id: w.watchListId,
-      cryptoId: w.cryptoId,
-      name: w.currencyName,
-      symbol: w.symbol,
-      price: `$${w.currentPrice}`,
-      change: "+0.0%",
-      isPositive: true,
-      isWatching: true,
-      starred: true
-    })));
-  };
+  const userId = authService.getUserId();
 
-  useEffect(() => { loadWatchlist(); }, []);
+  if (!userId) {
+    console.warn("User ID missing. Skipping watchlist call.");
+    return;
+  }
+
+  const res = await api.get(`/api/WatchList/user/${userId}`);
+  setWatchlist(res.data);
+};
+
+  useEffect(() => {
+  const userId = authService.getUserId();
+  if (userId) {
+    loadWatchlist();
+  }
+}, []);
+
+
 
   const handleConfirmRemove = async () => {
     await deleteWatch(itemToRemove.id);

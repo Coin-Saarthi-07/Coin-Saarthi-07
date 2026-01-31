@@ -7,7 +7,7 @@ import './Register.css'
 
 const Register = () => {
     const [formData, setFormData] = useState({
-        username: '',
+        userName: '',
         email: '',
         phoneNo: '',
         password: '',
@@ -47,14 +47,14 @@ const Register = () => {
         const newErrors = {};
 
         // Username validation
-        if (!formData.username) {
-            newErrors.username = 'Username is required';
-        } else if (formData.username.length < 6) {
-            newErrors.username = 'Must contain minimum 6 characters';
-        } else if (formData.username.length > 50) {
-            newErrors.username = 'Maximum 50 characters allowed';
-        } else if (!/^(?=.*[A-Z])[A-Za-z0-9_@]+$/.test(formData.username)) {
-            newErrors.username = 'Username must contain at least one capital letter and may include letters, numbers, _ ,@ only.';
+        if (!formData.userName) {
+            newErrors.userName = 'Username is required';
+        } else if (formData.userName.length < 6) {
+            newErrors.userName = 'Must contain minimum 6 characters';
+        } else if (formData.userName.length > 50) {
+            newErrors.userName = 'Maximum 50 characters allowed';
+        } else if (!/^(?=.*[A-Z])[A-Za-z0-9_@]+$/.test(formData.userName)) {
+            newErrors.userName = 'Username must contain at least one capital letter and may include letters, numbers, _ ,@ only.';
         }
 
         // Email validation
@@ -120,9 +120,14 @@ const Register = () => {
             setSuccess('Registration successful! Redirecting to login...');
             setTimeout(() => navigate('/login'), 1500);
         } catch (err) {
-            const serverMsg = err.response?.data;
-            setError(serverMsg || err.message || "Registration failed");
-        } finally {
+            const message =
+                err.response?.data?.message ||
+                err.response?.data?.error ||
+                "Something went wrong";
+
+            setError(message);
+        }
+        finally {
             setLoading(false);
         }
     };
@@ -141,14 +146,14 @@ const Register = () => {
                                 <Form.Label>Username</Form.Label>
                                 <Form.Control
                                     type="text"
-                                    name="username"
-                                    value={formData.username}
+                                    name="userName"
+                                    value={formData.userName}
                                     onChange={handleChange}
                                     placeholder="Enter username"
-                                    isInvalid={!!errors.username}
+                                    isInvalid={!!errors.userName}
                                 />
                                 <Form.Control.Feedback type="invalid">
-                                    {errors.username}
+                                    {errors.userName}
                                 </Form.Control.Feedback>
                             </Form.Group>
 
