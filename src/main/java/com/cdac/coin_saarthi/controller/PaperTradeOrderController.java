@@ -3,7 +3,6 @@ package com.cdac.coin_saarthi.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +15,7 @@ import jakarta.annotation.security.PermitAll;
 
 @RestController
 @RequestMapping("/api/paper/orders")
-@PreAuthorize("hasAnyRole('ADMIN','SUBSCRIBER')")
+@PermitAll
 public class PaperTradeOrderController {
 
     private final PaperTradeOrderRepository orderRepo;

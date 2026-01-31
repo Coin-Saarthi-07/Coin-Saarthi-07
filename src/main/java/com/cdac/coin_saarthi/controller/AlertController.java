@@ -17,11 +17,12 @@ import com.cdac.coin_saarthi.dto.UpdateAlertDTO;
 import com.cdac.coin_saarthi.model.Alert;
 import com.cdac.coin_saarthi.service.AlertService;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/alerts")
-@PreAuthorize("hasAnyRole('USER','SUBSCRIBER')")
+@PermitAll
 public class AlertController {
 
     private final AlertService alertService;

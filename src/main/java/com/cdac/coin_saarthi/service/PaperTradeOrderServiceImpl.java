@@ -19,41 +19,35 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class PaperTradeOrderServiceImpl implements PaperTradeOrderService {
 
-    private final PaperTradeOrderRepository orderRepo;
+	private final PaperTradeOrderRepository orderRepo;
 
-    public PaperTradeOrderServiceImpl(PaperTradeOrderRepository orderRepo) {
-        this.orderRepo = orderRepo;
-    }
+	public PaperTradeOrderServiceImpl(PaperTradeOrderRepository orderRepo) {
+		this.orderRepo = orderRepo;
+	}
 
-    @Override
-    public PaperTradeOrder createOrder(
-            PaperTradingAccount account,
-            CryptoCurrency crypto,
-            OrderType orderType,
-            BigDecimal quantity,
-            BigDecimal price,
-            OrderStatus status
-    ) {
+	@Override
+	public PaperTradeOrder createOrder(PaperTradingAccount account, CryptoCurrency crypto, OrderType orderType,
+			BigDecimal quantity, BigDecimal price, OrderStatus status) {
 
-        PaperTradeOrder order = new PaperTradeOrder();
-        order.setAccount(account);
-        order.setCrypto(crypto);
-        order.setOrderType(orderType);
-        order.setQuantity(quantity);
-        order.setPriceAtOrder(price);
-        order.setStatus(status);
-        order.setCreatedAt(LocalDateTime.now());
+		PaperTradeOrder order = new PaperTradeOrder();
+		order.setAccount(account);
+		order.setCrypto(crypto);
+		order.setOrderType(orderType);
+		order.setQuantity(quantity);
+		order.setPriceAtOrder(price);
+		order.setStatus(status);
+		order.setCreatedAt(LocalDateTime.now());
 
-        return orderRepo.save(order);
-    }
+		return orderRepo.save(order);
+	}
 
-    @Override
-    public List<PaperTradeOrder> getOrdersByUser(Long userId) {
-        return orderRepo.findByAccount_User_UserId(userId);
-    }
+	@Override
+	public List<PaperTradeOrder> getOrdersByUser(Long userId) {
+		return orderRepo.findByAccount_User_UserId(userId);
+	}
 
-    @Override
-    public List<PaperTradeOrder> getOrdersByAccount(Long accountId) {
-        return orderRepo.findByAccount_AccountId(accountId);
-    }
+	@Override
+	public List<PaperTradeOrder> getOrdersByAccount(Long accountId) {
+		return orderRepo.findByAccount_AccountId(accountId);
+	}
 }

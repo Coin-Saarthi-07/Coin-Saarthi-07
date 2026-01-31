@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cdac.coin_saarthi.dto.SellRequestDTO;
 import com.cdac.coin_saarthi.service.PaperTradeService;
 
+import jakarta.annotation.security.PermitAll;
+
 @RestController
 @RequestMapping("/paper/trade")
-@PreAuthorize("hasRole('SUBSCRIBER')")
+@PermitAll
 public class PaperTradeController {
 
 	private final PaperTradeService service;

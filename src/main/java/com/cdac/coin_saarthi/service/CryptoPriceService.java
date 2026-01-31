@@ -33,7 +33,7 @@ public class CryptoPriceService {
             Double price =
                     coinGeckoClient.fetchUsdPrice(currency.getCoinGeckoId());
 
-            // 🚨 HARD GUARD
+            //HARD GUARD
             if (price == null) {
                 continue; // DO NOT UPDATE DB
             }

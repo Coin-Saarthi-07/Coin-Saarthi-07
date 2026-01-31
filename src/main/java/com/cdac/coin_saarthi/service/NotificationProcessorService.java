@@ -10,30 +10,23 @@ import java.util.List;
 @Service
 public class NotificationProcessorService {
 
-    private final NotificationRepository notificationRepository;
-    private final NotificationDispatcherService dispatcherService;
+	private final NotificationRepository notificationRepository;
+	private final NotificationDispatcherService dispatcherService;
 
-    public NotificationProcessorService(
-            NotificationRepository notificationRepository,
-            NotificationDispatcherService dispatcherService
-    ) {
-        this.notificationRepository = notificationRepository;
-        this.dispatcherService = dispatcherService;
-    }
+	public NotificationProcessorService(NotificationRepository notificationRepository,
+			NotificationDispatcherService dispatcherService) {
+		this.notificationRepository = notificationRepository;
+		this.dispatcherService = dispatcherService;
+	}
 
-    public void processPendingNotifications() {
+	public void processPendingNotifications() {
 
-        List<Notification> pendingNotifications =
-                notificationRepository.findAll().stream()
-                        .filter(n -> n.getStatus() == NotificationStatus.Pending)
-                        .toList();
+		List<Notification> pendingNotifications = notificationRepository.findAll().stream()
+				.filter(n -> n.getStatus() == NotificationStatus.Pending).toList();
 
-        for (Notification notification : pendingNotifications) {
-            dispatcherService.dispatch(
-                    notification,
-                    notification.getUser().getEmail(),
-                    notification.getUser().getPhoneNo()
-            );
-        }
-    }
+		for (Notification notification : pendingNotifications) {
+			dispatcherService.dispatch(notification, notification.getUser().getEmail(),
+					notification.getUser().getPhoneNo());
+		}
+	}
 }
