@@ -190,7 +190,7 @@ const PaperTrading = () => {
     paperTrading: {
       padding: '24px',
       color: '#fff',
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Segoe UI', sans-serif",
     },
     header: {
       display: 'flex',
@@ -231,11 +231,12 @@ const PaperTrading = () => {
       transition: 'all 0.2s',
     },
     btnPrimary: {
-      background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-      color: 'white',
+      background: 'rgba(255, 255, 255, 0.05)',
+      color: '#3b82f6',
+      border: '1px solid rgba(59, 130, 246, 0.2)',
     },
     btnDanger: {
-      background: 'rgba(239, 68, 68, 0.15)',
+      background: 'rgba(255, 255, 255, 0.05)',
       color: '#ef4444',
       border: '1px solid rgba(239, 68, 68, 0.2)',
     },
@@ -251,14 +252,14 @@ const PaperTrading = () => {
       marginBottom: '32px',
     },
     statCard: {
-      background: 'linear-gradient(145deg, #1e293b, #0f172a)',
+      background: 'linear-gradient(180deg, #1a1f26, #141922)',
       borderRadius: '16px',
       padding: '24px',
       display: 'flex',
       alignItems: 'center',
       gap: '20px',
-      border: '1px solid #334155',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      border: 'none',
+      boxShadow: '0 15px 40px rgba(0, 0, 0, 0.5)',
     },
     statIcon: {
       width: '56px',
@@ -290,9 +291,10 @@ const PaperTrading = () => {
       marginBottom: '24px',
     },
     card: {
-      background: '#1e293b',
+      background: 'linear-gradient(180deg, #1a1f26, #141922)',
       borderRadius: '16px',
-      border: '1px solid #334155',
+      border: 'none', // Removed border to match Home theme or keep subtle
+      boxShadow: '0 15px 40px rgba(0, 0, 0, 0.5)',
       overflow: 'hidden',
     },
     cardHeader: {
@@ -386,17 +388,17 @@ const PaperTrading = () => {
       padding: '20px',
     },
     modal: {
-      background: '#1e293b',
+      background: 'linear-gradient(180deg, #1a1f26, #141922)',
       borderRadius: '16px',
       width: '480px',
       maxWidth: '100%',
-      border: '1px solid #334155',
+      border: 'none',
       boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
       overflow: 'hidden',
     },
     modalHeader: {
       padding: '20px 24px',
-      borderBottom: '1px solid #334155',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -407,7 +409,7 @@ const PaperTrading = () => {
     },
     modalFooter: {
       padding: '20px 24px',
-      borderTop: '1px solid #334155',
+      borderTop: '1px solid rgba(255, 255, 255, 0.08)',
       display: 'flex',
       justifyContent: 'flex-end',
       gap: '12px',
@@ -419,8 +421,8 @@ const PaperTrading = () => {
       width: '100%',
       padding: '10px 14px',
       borderRadius: '8px',
-      background: '#0f172a',
-      border: '1px solid #334155',
+      background: 'rgba(30, 41, 59, 0.7)',
+      border: '1px solid rgba(255, 255, 255, 0.12)',
       color: '#fff',
       fontSize: '14px',
       outline: 'none',

@@ -8,7 +8,8 @@ import "./Home.css";
 import "../components/NavBar.css";
 import { addToWatchlist } from "../services/watchlistService";
 import { getMyWatchlist } from "../services/watchlistService";
-
+import HomeCarousel from '../components/HomeCarousel';
+import heroBg from '../assets/hero-bg.png';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -21,9 +22,7 @@ const Home = () => {
   const [visibleCount, setVisibleCount] = useState(15);
   const [previousPrices, setPreviousPrices] = useState({});
   const [watchlistItems, setWatchlistItems] = useState(new Set());
-  const [alertItems, setAlertItems] = useState(new Set());
-
-
+  const [isHeroVisible, setIsHeroVisible] = useState(false);
 
   useEffect(() => {
     fetchAllData();
@@ -34,21 +33,29 @@ const Home = () => {
 
     return () => clearInterval(interval);
   }, []);
+
   useEffect(() => {
-  const loadUserWatchlist = async () => {
-    const user = authService.getCurrentUser();
-    if (!user) return;
+    const loadUserWatchlist = async () => {
+      const user = authService.getCurrentUser();
+      if (!user) return;
 
-    try {
-      const res = await getMyWatchlist(user.userId);
-      const ids = new Set(res.data.map(w => w.cryptoId));
-      setWatchlistItems(ids);
-    } catch {}
-  };
+      try {
+        const res = await getMyWatchlist(user.userId);
+        const ids = new Set(res.data.map(w => w.cryptoId));
+        setWatchlistItems(ids);
+      } catch { }
+    };
 
-  loadUserWatchlist();
-}, []);
+    loadUserWatchlist();
+  }, []);
 
+  // Trigger hero animation after component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsHeroVisible(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const fetchAllData = () => {
     fetchLive();
@@ -56,6 +63,7 @@ const Home = () => {
     fetchLosers();
     fetchCryptoList();
   };
+
   useEffect(() => {
     const map = {};
     cryptoList.forEach(c => {
@@ -63,7 +71,6 @@ const Home = () => {
     });
     setPreviousPrices(map);
   }, [cryptoList]);
-
 
   const fetchLive = async () => {
     try {
@@ -118,15 +125,12 @@ const Home = () => {
   const losers = mergeWithLive(topLosers).slice(0, 3);
   const volume = hotCoins;
 
-
   const filteredCoins = cryptoList.filter(c =>
     c.currencyName.toLowerCase().includes(search.toLowerCase()) ||
     c.currencySymbol.toLowerCase().includes(search.toLowerCase())
   );
 
   const visibleCoins = filteredCoins.slice(0, visibleCount);
-
-
 
   const handleAddToWatchlist = async (coin) => {
     const user = authService.getCurrentUser();
@@ -146,7 +150,6 @@ const Home = () => {
       alert("Already added to watchlist");
     }
   };
-
 
   const getCoinIcon = (symbol) => {
     const icons = {
@@ -173,30 +176,16 @@ const Home = () => {
     return `$${volume?.toFixed(2) || 0}`;
   };
 
-
   return (
     <>
       <NavBar />
 
-      <div className="home" style={{ paddingTop: '80px' }}>
-        {/* Hero */}
-        <div style={{
-          textAlign: 'center',
-          width: '100%',
-          padding: '40px 0',
-          color: '#ffffff'   // 🔥 force white
-        }}>
-          <h1 style={{ fontSize: 38, fontWeight: 800 }}>
-            Real-Time Crypto Monitoring <br /> & Smart Alerts
-          </h1>
-          <p style={{ color: '#ffffff', opacity: 0.9 }}>
-            Real-time crypto monitoring platform built with enterprise-grade tools.
-          </p>
-        </div>
+      <div className="home" style={{ paddingTop: '80px', backgroundColor: '#0f172a', minHeight: '100vh' }}>
 
+        {/* New Hero Carousel Section */}
+        <HomeCarousel />
 
-
-        {/* Market Cards */}
+        {/* Existing Market Content */}
         <section className="market-section container">
           <div className="row">
 

@@ -47,7 +47,7 @@
 //             </svg>
 //             Back to Dashboard
 //           </Link>
-          
+
 //           <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
 //           <p className="text-gray-300">Upgrade to unlock premium features and maximize your crypto trading potential</p>
 //         </div>
@@ -84,7 +84,7 @@
 //               </div>
 //               <span className="px-4 py-1 bg-blue-500 rounded-full text-sm">Popular</span>
 //             </div>
-            
+
 //             <ul className="space-y-3 mb-8">
 //               {plans.basic.features.map((feature, index) => (
 //                 <li key={index} className="flex items-center gap-3">
@@ -95,7 +95,7 @@
 //                 </li>
 //               ))}
 //             </ul>
-            
+
 //             <button className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-all">
 //               Get Started
 //             </button>
@@ -113,7 +113,7 @@
 //               </div>
 //               <span className="px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full text-sm">Premium</span>
 //             </div>
-            
+
 //             <ul className="space-y-3 mb-8">
 //               {plans.pro.features.map((feature, index) => (
 //                 <li key={index} className="flex items-center gap-3">
@@ -124,7 +124,7 @@
 //                 </li>
 //               ))}
 //             </ul>
-            
+
 //             <button className="w-full py-3 gradient-bg-premium hover:opacity-90 rounded-lg font-semibold transition-all transform hover:-translate-y-1">
 //               Upgrade to Pro
 //             </button>
@@ -184,9 +184,6 @@ import Footer from './Footer';
 
 export default function SubscriptionPage() {
   const [selectedPlan, setSelectedPlan] = useState('pro');
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState(null);
   const navigate = useNavigate();
 
   const plans = {
@@ -417,20 +414,9 @@ export default function SubscriptionPage() {
     }
   };
 
-  const handleSubscribe = (plan) => {
-    setCurrentPlan(plans[plan]);
-    setShowPaymentForm(true);
-  };
-
-  const handlePayment = () => {
-    setShowPaymentForm(false);
-    setShowPaymentSuccess(true);
-  };
-
-  const handlePaymentSuccess = () => {
-    setShowPaymentSuccess(false);
-    localStorage.setItem('paymentSuccess', 'true');
-    navigate('/dashboard');
+  const handleSubscribe = (planKey) => {
+    const plan = plans[planKey];
+    navigate('/payment', { state: { plan } });
   };
 
   const handleMouseEnter = (e) => {
@@ -445,7 +431,7 @@ export default function SubscriptionPage() {
 
   const handleButtonHover = (e, isBasic) => {
     e.target.style.transform = 'translateY(-2px)';
-    e.target.style.boxShadow = isBasic 
+    e.target.style.boxShadow = isBasic
       ? '0 10px 25px rgba(59, 130, 246, 0.3)'
       : '0 10px 25px rgba(139, 92, 246, 0.3)';
   };
@@ -459,356 +445,160 @@ export default function SubscriptionPage() {
     <>
       <NavBar />
       <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0f1e,#141c2e)', padding: window.innerWidth <= 768 ? 12 : 24, paddingTop: window.innerWidth <= 768 ? 68 : 80, color: 'white' }}>
-      <div style={styles.container}>
-        {/* Header */}
-        <div style={styles.header}>
-          <h1 style={styles.title}>Choose Your Plan</h1>
-          <p style={styles.subtitle}>Upgrade to unlock premium features and maximize your crypto trading potential</p>
-        </div>
+        <div style={styles.container}>
+          {/* Header */}
+          <div style={styles.header}>
+            <h1 style={styles.title}>Choose Your Plan</h1>
+            <p style={styles.subtitle}>Upgrade to unlock premium features and maximize your crypto trading potential</p>
+          </div>
 
-        {/* Toggle Switch */}
-        {/* <div style={styles.toggleContainer}>
-          <div style={styles.toggleWrapper}>
-            <button
-              onClick={() => setSelectedPlan('basic')}
+          {/* Plan Cards */}
+          <div style={styles.plansGrid}>
+            {/* Basic Plan */}
+            <div
               style={{
-                ...styles.toggleButton,
-                ...(selectedPlan === 'basic' ? styles.activeToggle : {})
+                ...styles.planCard,
+                ...(selectedPlan === 'basic' ? { ...styles.highlightedCard, borderColor: '#3b82f6' } : {}),
+                opacity: selectedPlan === 'basic' ? 1 : 0.8
               }}
               onMouseEnter={(e) => {
                 if (selectedPlan !== 'basic') {
-                  e.target.style.background = '#374151';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.2)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (selectedPlan !== 'basic') {
-                  e.target.style.background = 'transparent';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
                 }
               }}
             >
-              Basic Plan
-            </button>
-            <button
-              onClick={() => setSelectedPlan('pro')}
+              <div style={styles.planHeader}>
+                <div>
+                  <h3 style={styles.planTitle}>Basic Plan</h3>
+                  <div style={styles.priceContainer}>
+                    <span style={styles.price}>$9.99</span>
+                    <span style={styles.period}>/month</span>
+                  </div>
+                </div>
+                <span style={{ ...styles.badge, ...styles.basicBadge }}>Popular</span>
+              </div>
+
+              <ul style={styles.featuresList}>
+                {plans.basic.features.map((feature, index) => (
+                  <li key={index} style={styles.featureItem}>
+                    <span style={styles.checkIcon}>✓</span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                style={{ ...styles.planButton, ...styles.basicButton }}
+                onClick={() => handleSubscribe('basic')}
+                onMouseEnter={(e) => handleButtonHover(e, true)}
+                onMouseLeave={handleButtonLeave}
+              >
+                Get Started
+              </button>
+            </div>
+
+            {/* Pro Plan */}
+            <div
               style={{
-                ...styles.toggleButton,
-                ...(selectedPlan === 'pro' ? styles.activeToggle : {})
+                ...styles.planCard,
+                ...(selectedPlan === 'pro' ? { ...styles.highlightedCard, borderColor: '#8b5cf6' } : {}),
+                opacity: selectedPlan === 'pro' ? 1 : 0.8
               }}
               onMouseEnter={(e) => {
                 if (selectedPlan !== 'pro') {
-                  e.target.style.background = '#374151';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.2)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (selectedPlan !== 'pro') {
-                  e.target.style.background = 'transparent';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
                 }
               }}
             >
-              Pro Plan
-            </button>
-          </div>
-        </div> */}
-
-        {/* Plan Cards */}
-        <div style={styles.plansGrid}>
-          {/* Basic Plan */}
-          <div 
-            style={{
-              ...styles.planCard,
-              ...(selectedPlan === 'basic' ? { ...styles.highlightedCard, borderColor: '#3b82f6' } : {}),
-              opacity: selectedPlan === 'basic' ? 1 : 0.8
-            }}
-            onMouseEnter={(e) => {
-              if (selectedPlan !== 'basic') {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.2)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (selectedPlan !== 'basic') {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
-          >
-            <div style={styles.planHeader}>
-              <div>
-                <h3 style={styles.planTitle}>Basic Plan</h3>
-                <div style={styles.priceContainer}>
-                  <span style={styles.price}>$9.99</span>
-                  <span style={styles.period}>/month</span>
+              <div style={styles.planHeader}>
+                <div>
+                  <h3 style={styles.planTitle}>Pro Plan</h3>
+                  <div style={styles.priceContainer}>
+                    <span style={styles.price}>$29.99</span>
+                    <span style={styles.period}>/month</span>
+                  </div>
                 </div>
+                <span style={{ ...styles.badge, ...styles.proBadge }}>Premium</span>
               </div>
-              <span style={{ ...styles.badge, ...styles.basicBadge }}>Popular</span>
-            </div>
-            
-            <ul style={styles.featuresList}>
-              {plans.basic.features.map((feature, index) => (
-                <li key={index} style={styles.featureItem}>
-                  <span style={styles.checkIcon}>✓</span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            
-            <button 
-              style={{ ...styles.planButton, ...styles.basicButton }}
-              onClick={() => handleSubscribe('basic')}
-              onMouseEnter={(e) => handleButtonHover(e, true)}
-              onMouseLeave={handleButtonLeave}
-            >
-              Get Started
-            </button>
-          </div>
 
-          {/* Pro Plan */}
-          <div 
-            style={{
-              ...styles.planCard,
-              ...(selectedPlan === 'pro' ? { ...styles.highlightedCard, borderColor: '#8b5cf6' } : {}),
-              opacity: selectedPlan === 'pro' ? 1 : 0.8
-            }}
-            onMouseEnter={(e) => {
-              if (selectedPlan !== 'pro') {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.2)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (selectedPlan !== 'pro') {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
-          >
-            <div style={styles.planHeader}>
-              <div>
-                <h3 style={styles.planTitle}>Pro Plan</h3>
-                <div style={styles.priceContainer}>
-                  <span style={styles.price}>$29.99</span>
-                  <span style={styles.period}>/month</span>
-                </div>
-              </div>
-              <span style={{ ...styles.badge, ...styles.proBadge }}>Premium</span>
-            </div>
-            
-            <ul style={styles.featuresList}>
-              {plans.pro.features.map((feature, index) => (
-                <li key={index} style={styles.featureItem}>
-                  <span style={styles.checkIcon}>✓</span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            
-            <button 
-              style={{ ...styles.planButton, ...styles.proButton }}
-              onClick={() => handleSubscribe('pro')}
-              onMouseEnter={(e) => handleButtonHover(e, false)}
-              onMouseLeave={handleButtonLeave}
-            >
-              Upgrade to Pro
-            </button>
-          </div>
-        </div>
+              <ul style={styles.featuresList}>
+                {plans.pro.features.map((feature, index) => (
+                  <li key={index} style={styles.featureItem}>
+                    <span style={styles.checkIcon}>✓</span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
 
-        {/* Features Comparison */}
-        <div style={styles.comparison}>
-          <h2 style={styles.comparisonTitle}>Plan Comparison</h2>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.tableHeader}>Features</th>
-                  <th style={{ ...styles.tableHeader, textAlign: 'center' }}>Basic</th>
-                  <th style={{ ...styles.tableHeader, textAlign: 'center' }}>Pro</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={styles.tableRow}>
-                  <td style={styles.tableCell}>Number of Alerts</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell }}>Up to 5</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell }}>Unlimited</td>
-                </tr>
-                <tr style={styles.tableRow}>
-                  <td style={styles.tableCell}>Notification Types</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell }}>Email Only</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell }}>Email + SMS</td>
-                </tr>
-                <tr style={styles.tableRow}>
-                  <td style={styles.tableCell}>Real-time Updates</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.cross }}>✗</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.check }}>✓</td>
-                </tr>
-                <tr style={styles.tableRow}>
-                  <td style={styles.tableCell}>API Access</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.cross }}>✗</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.check }}>✓</td>
-                </tr>
-                <tr>
-                  <td style={styles.tableCell}>Priority Support</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.cross }}>✗</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.check }}>✓</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <Footer />
-      
-      {/* Payment Form Modal */}
-      {showPaymentForm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30,41,59,.95), rgba(15,23,42,.95))',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,.1)',
-            borderRadius: '20px',
-            padding: '40px',
-            width: '500px',
-            maxWidth: '90vw',
-            color: 'white'
-          }}>
-            <h2 style={{ marginBottom: '20px', fontSize: '24px', fontWeight: '700' }}>Payment Details</h2>
-            <div style={{ marginBottom: '30px', padding: '20px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-              <h3 style={{ margin: '0 0 10px 0', color: '#60a5fa' }}>{currentPlan?.name}</h3>
-              <p style={{ margin: '0', fontSize: '28px', fontWeight: '700' }}>{currentPlan?.price}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/{currentPlan?.period}</span></p>
-            </div>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', color: '#94a3b8' }}>Card Number</label>
-              <input type="text" placeholder="1234 5678 9012 3456" style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                border: '1px solid rgba(255,255,255,.2)',
-                background: 'rgba(0,0,0,.3)',
-                color: 'white',
-                fontSize: '16px'
-              }} />
-            </div>
-            
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#94a3b8' }}>Expiry</label>
-                <input type="text" placeholder="MM/YY" style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,.2)',
-                  background: 'rgba(0,0,0,.3)',
-                  color: 'white',
-                  fontSize: '16px'
-                }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#94a3b8' }}>CVV</label>
-                <input type="text" placeholder="123" style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,.2)',
-                  background: 'rgba(0,0,0,.3)',
-                  color: 'white',
-                  fontSize: '16px'
-                }} />
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
               <button
-                onClick={() => setShowPaymentForm(false)}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,.2)',
-                  background: 'transparent',
-                  color: '#94a3b8',
-                  cursor: 'pointer'
-                }}
+                style={{ ...styles.planButton, ...styles.proButton }}
+                onClick={() => handleSubscribe('pro')}
+                onMouseEnter={(e) => handleButtonHover(e, false)}
+                onMouseLeave={handleButtonLeave}
               >
-                Cancel
-              </button>
-              <button
-                onClick={handlePayment}
-                style={{
-                  flex: 2,
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                  color: 'white',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
-              >
-                Process Payment
+                Upgrade to Pro
               </button>
             </div>
           </div>
-        </div>
-      )}
-      
-      {/* Payment Success Modal */}
-      {showPaymentSuccess && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30,41,59,.95), rgba(15,23,42,.95))',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(34, 197, 94, 0.3)',
-            borderRadius: '20px',
-            padding: '40px',
-            width: '400px',
-            maxWidth: '90vw',
-            color: 'white',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '60px', marginBottom: '20px' }}>✅</div>
-            <h2 style={{ marginBottom: '16px', fontSize: '24px', fontWeight: '700', color: '#22c55e' }}>Payment Successful!</h2>
-            <p style={{ marginBottom: '30px', color: '#94a3b8' }}>Your subscription has been activated successfully.</p>
-            <button
-              onClick={handlePaymentSuccess}
-              style={{
-                padding: '12px 30px',
-                borderRadius: '8px',
-                border: 'none',
-                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                color: 'white',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '16px'
-              }}
-            >
-              OK
-            </button>
+
+          {/* Features Comparison */}
+          <div style={styles.comparison}>
+            <h2 style={styles.comparisonTitle}>Plan Comparison</h2>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.tableHeader}>Features</th>
+                    <th style={{ ...styles.tableHeader, textAlign: 'center' }}>Basic</th>
+                    <th style={{ ...styles.tableHeader, textAlign: 'center' }}>Pro</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={styles.tableRow}>
+                    <td style={styles.tableCell}>Number of Alerts</td>
+                    <td style={{ ...styles.tableCell, ...styles.centerCell }}>Up to 5</td>
+                    <td style={{ ...styles.tableCell, ...styles.centerCell }}>Unlimited</td>
+                  </tr>
+                  <tr style={styles.tableRow}>
+                    <td style={styles.tableCell}>Notification Types</td>
+                    <td style={{ ...styles.tableCell, ...styles.centerCell }}>Email Only</td>
+                    <td style={{ ...styles.tableCell, ...styles.centerCell }}>Email + SMS</td>
+                  </tr>
+                  <tr style={styles.tableRow}>
+                    <td style={styles.tableCell}>Real-time Updates</td>
+                    <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.cross }}>✗</td>
+                    <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.check }}>✓</td>
+                  </tr>
+                  <tr style={styles.tableRow}>
+                    <td style={styles.tableCell}>API Access</td>
+                    <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.cross }}>✗</td>
+                    <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.check }}>✓</td>
+                  </tr>
+                  <tr>
+                    <td style={styles.tableCell}>Priority Support</td>
+                    <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.cross }}>✗</td>
+                    <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.check }}>✓</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      )}
+        <Footer />
       </div>
     </>
   );

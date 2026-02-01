@@ -13,6 +13,7 @@ import PaperTradingDashboard from "./components/PaperTradingDashboard";
 import PaperTrading from "./components/PaperTrading";
 import PortfolioDetail from "./components/PortfolioDetail";
 import TransactionHistory from "./components/TransactionHistory";
+import Payment from "./components/Payment";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleRoute from "./routes/RoleRoute";
@@ -60,6 +61,11 @@ function App() {
           <TransactionHistory />
 
         } />
+        <Route path="/payment" element={
+
+          <Payment />
+
+        } />
 
         {/* 🔐 Admin Dashboard */}
         <Route path="/admin/dashboard" element={
@@ -76,6 +82,7 @@ function App() {
             <Subscription />
           </ProtectedRoute>
         } />
+
 
         <Route path="*" element={<Navigate to="/home" replace />} />
 

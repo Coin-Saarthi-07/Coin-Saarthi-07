@@ -4,6 +4,7 @@
   box-sizing: border-box;
   font-family: "Segoe UI", sans-serif;
 }
+
 .body {
   background-color: #0b0f1a;
   color: #ffffff;
@@ -61,7 +62,7 @@
 }
 
 .hero h1 {
-  
+
   font-size: 42px;
   font-weight: bold;
   line-height: 1.3;
@@ -211,16 +212,17 @@
     padding: 0 20px;
   }
 }
+
 /* Search bar */
 .search-bar {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
 }
 
 /* Crypto table */
 .crypto-table {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
   overflow: hidden;
   max-width: 1300px;
@@ -239,7 +241,7 @@
 }
 
 .crypto-header {
-  background: rgba(2,6,23,.9);
+  background: rgba(2, 6, 23, .9);
   font-weight: 600;
   color: #94a3b8;
   font-size: 13px;
@@ -247,13 +249,13 @@
 }
 
 .crypto-row {
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   transition: all 0.3s ease;
   font-size: 14px;
 }
 
 .crypto-row:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .crypto-row:last-child {
@@ -403,7 +405,7 @@
 }
 
 .search-input:hover,
-.search-input:focus{
+.search-input:focus {
   background: rgba(30, 41, 59, 0.7) !important;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
@@ -418,17 +420,92 @@
   flex-direction: column;
   justify-content: center;
 
-  padding-top: 120px; /* navbar height */
-  padding-bottom: 40px; /* REDUCED */
+  padding-top: 120px;
+  /* navbar height */
+  padding-bottom: 40px;
+  /* REDUCED */
 
-  background: 
-    linear-gradient(
-      rgba(5, 10, 25, 0.65),
-      rgba(5, 10, 25, 0.85)
-    ),
-    url("/assets/crypto-chart-bg.png"); /* your image */
+  background:
+    linear-gradient(rgba(5, 10, 25, 0.65),
+      rgba(5, 10, 25, 0.85)),
+    url("/assets/crypto-chart-bg.png");
+  /* your image */
 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+/* Home.css - Add these styles */
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Ensure smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animation for market cards when they come into view */
+.market-card {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.market-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Animation for crypto rows when they come into view */
+.crypto-row {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.crypto-row.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Responsive adjustments for hero section */
+@media (max-width: 768px) {
+  .hero-section {
+    height: 80vh;
+    min-height: 500px;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-buttons button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+/* Add smooth fade-in for the entire page */
+.home {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
