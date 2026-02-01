@@ -41,131 +41,108 @@ const PriceChart = ({ symbol }) => {
     }
   }, [symbol]);
 
-  const fetchChartData = async () => {
-    try {
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/coins/${symbol.toLowerCase()}/market_chart?vs_currency=usd&days=1&interval=hourly`,
-        {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-          }
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      const formattedData = data.prices.slice(-12).map((price, index) => {
-        const date = new Date(price[0]);
-        return {
-          time: date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
-          price: Math.round(price[1] * 100) / 100,
-          volume: data.total_volumes[index] ? Math.round(data.total_volumes[index][1]) : 0
-        };
-      });
-      
-      setChartData(formattedData);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching chart data:', error);
-      // Fallback to mock data
-      const mockData = generateMockData(symbol);
-      setChartData(mockData);
-      setLoading(false);
-    }
-  };
+  const COIN_ID_MAP = {
+  btc: "bitcoin",
+  eth: "ethereum",
+  sol: "solana",
+  ada: "cardano",
+  doge: "dogecoin",
+};
 
-  // const fetchCoinStats = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       `https://api.coingecko.com/api/v3/simple/price?ids=${symbol.toLowerCase()}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`,
-  //       {
-  //         method: 'GET',
-  //         headers: {
-  //           'Accept': 'application/json',
-  //         }
-  //       }
-  //     );
-      
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-      
-  //     const data = await response.json();
-  //     const coinData = data[symbol.toLowerCase()];
-      
-  //     if (coinData) {
-  //       setCoinStats({
-  //         high24h: coinData.usd * 1.05, // Approximate high
-  //         low24h: coinData.usd * 0.95,  // Approximate low
-  //         change24h: coinData.usd_24h_change || 0,
-  //         volume24h: coinData.usd_24h_vol || 0
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching coin stats:', error);
-  //     // Fallback to mock stats
-  //     setCoinStats({
-  //       high24h: 65000,
-  //       low24h: 62000,
-  //       change24h: 2.5,
-  //       volume24h: 28000000000
-  //     });
-  //   }
-  // };
-const fetchCoinStats = async () => {
+const fetchChartData = async () => {
   try {
-    const token = localStorage.getItem("token");
+    const coinId = COIN_ID_MAP[symbol.toLowerCase()];
 
-    const res = await fetch(
-      `https://localhost:7294/api/CryptoCurrency/${symbol}`,
+    if (!coinId) {
+      throw new Error("Unsupported coin symbol");
+    }
+
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
+        headers: { Accept: "application/json" },
       }
     );
 
-    if (!res.ok) throw new Error("Stats API failed");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-    const coin = await res.json();
+    const data = await response.json();
 
-    setCoinStats({
-      high24h: coin.high24h,
-      low24h: coin.low24h,
-      change24h: coin.change24h,
-      volume24h: coin.volume24h
+    const formattedData = data.prices.slice(-12).map((price, index) => {
+      const date = new Date(price[0]);
+      return {
+        time: date.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          hour12: true,
+        }),
+        price: Math.round(price[1] * 100) / 100,
+        volume: data.total_volumes[index]
+          ? Math.round(data.total_volumes[index][1])
+          : 0,
+      };
     });
+
+    setChartData(formattedData);
+    setLoading(false);
   } catch (error) {
-    console.error("Stats error:", error);
+    console.error("Error fetching chart data:", error);
+    setChartData(generateMockData(symbol));
+    setLoading(false);
   }
 };
+
+
+  const fetchCoinStats = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const coinId = COIN_ID_MAP[symbol.toLowerCase()];
+
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`,
+        {
+          method: "GET",
+          headers: { Accept: "application/json" },
+        }
+      );
+
+
+      if (!res.ok) throw new Error("Stats API failed");
+
+      const coin = await res.json();
+
+      setCoinStats({
+        high24h: coin.high24h,
+        low24h: coin.low24h,
+        change24h: coin.change24h,
+        volume24h: coin.volume24h
+      });
+    } catch (error) {
+      console.error("Stats error:", error);
+    }
+  };
 
   const generateMockData = (symbol) => {
     const basePrice = {
       'btc': 65000, 'eth': 3500, 'sol': 150, 'ada': 0.45, 'doge': 0.12
     }[symbol.toLowerCase()] || 100;
-    
+
     const data = [];
     let price = basePrice;
-    
+
     for (let i = 0; i < 12; i++) {
       const change = (Math.random() - 0.5) * (basePrice * 0.02);
       price += change;
       const hour = new Date(Date.now() - (11 - i) * 60 * 60 * 1000);
-      
+
       data.push({
         time: hour.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
         price: Math.round(price * 100) / 100,
         volume: Math.round(Math.random() * 1000000000)
       });
     }
-    
+
     return data;
   };
 
@@ -207,24 +184,24 @@ const fetchCoinStats = async () => {
                 <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid 
-              strokeDasharray="3 3" 
-              stroke="rgba(255, 255, 255, 0.05)" 
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(255, 255, 255, 0.05)"
               vertical={false}
             />
-            <XAxis 
-              dataKey="time" 
+            <XAxis
+              dataKey="time"
               stroke="rgba(255, 255, 255, 0.3)"
               fontSize={12}
               axisLine={false}
               tickLine={false}
             />
-            <YAxis 
+            <YAxis
               stroke="rgba(255, 255, 255, 0.3)"
               fontSize={12}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`}
+              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
               domain={['dataMin - 1000', 'dataMax + 1000']}
             />
             <Tooltip content={<CustomTooltip />} />
@@ -240,7 +217,7 @@ const fetchCoinStats = async () => {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-      
+
       {/* Chart Stats */}
       <div style={{
         display: 'flex',

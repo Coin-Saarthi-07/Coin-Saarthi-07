@@ -32,16 +32,11 @@ const login = async (credentials) => {
 };
 
 /* LOGOUT */
-// const logout = () => {
-//   localStorage.clear();
-//   sessionStorage.clear();
-//   window.location.href = "/login";
-// };
+
 const logout = () => {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
+  localStorage.clear();
   sessionStorage.clear();
-  window.location.replace("/login");
+  window.location.href = "/login";
 };
 
 /* TOKEN */
@@ -65,32 +60,20 @@ const getUserId = () => {
 };
 
 /* AUTH CHECK */
-// 
-const decodeJwt = (token) => {
-  try {
-    return JSON.parse(
-      decodeURIComponent(
-        atob(token.split(".")[1])
-          .split("")
-          .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      )
-    );
-  } catch {
-    return null;
-  }
-};
 
 const isAuthenticated = () => {
   const token = getToken();
   if (!token) return false;
 
-  const payload = decodeJwt(token);
-  if (!payload?.exp) return false;
 
-  return payload.exp > Math.floor(Date.now() / 1000);
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp > now;
+  } catch {
+    return false;
+  }
 };
-
 
 /* ROLE CHECKS */
 const hasRole = (role) => {
@@ -114,5 +97,7 @@ export default {
   getToken,
   isAuthenticated,
   isAdmin,
-  isSubscriber
+  // isSubscriber
+
 };
+

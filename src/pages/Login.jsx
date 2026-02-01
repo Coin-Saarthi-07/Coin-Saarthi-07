@@ -6,7 +6,7 @@ import authService from '../services/authService';
 import './Register.css';
 
 const Login = () => {
-    const [userName, setUserName] = useState('');
+    const [username, setUserName] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -18,14 +18,18 @@ const Login = () => {
         setLoading(true);
 
         try {
-            await authService.login({ userName, password });
+
+            await authService.login({ userName: username, password });
+
             const user = authService.getCurrentUser();
 
-            if (user?.role === "User") {
+            if (user?.role === "ADMIN") {
+
                 navigate("/admin/dashboard");
             } else {
                 navigate("/dashboard");
             }
+
         } catch (err) {
             setError(err.message || err.response?.data?.message || "Login failed. Please check your credentials.");
         } finally {
@@ -47,7 +51,7 @@ const Login = () => {
                                 <Form.Label>Username</Form.Label>
                                 <Form.Control
                                     type="text"
-                                    value={userName}
+                                    value={username}
                                     onChange={(e) => setUserName(e.target.value)}
                                     placeholder="Enter username"
                                     required

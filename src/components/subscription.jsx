@@ -47,7 +47,6 @@
 //             </svg>
 //             Back to Dashboard
 //           </Link>
-          
 //           <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
 //           <p className="text-gray-300">Upgrade to unlock premium features and maximize your crypto trading potential</p>
 //         </div>
@@ -84,7 +83,6 @@
 //               </div>
 //               <span className="px-4 py-1 bg-blue-500 rounded-full text-sm">Popular</span>
 //             </div>
-            
 //             <ul className="space-y-3 mb-8">
 //               {plans.basic.features.map((feature, index) => (
 //                 <li key={index} className="flex items-center gap-3">
@@ -95,7 +93,6 @@
 //                 </li>
 //               ))}
 //             </ul>
-            
 //             <button className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-all">
 //               Get Started
 //             </button>
@@ -113,7 +110,6 @@
 //               </div>
 //               <span className="px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full text-sm">Premium</span>
 //             </div>
-            
 //             <ul className="space-y-3 mb-8">
 //               {plans.pro.features.map((feature, index) => (
 //                 <li key={index} className="flex items-center gap-3">
@@ -124,7 +120,6 @@
 //                 </li>
 //               ))}
 //             </ul>
-            
 //             <button className="w-full py-3 gradient-bg-premium hover:opacity-90 rounded-lg font-semibold transition-all transform hover:-translate-y-1">
 //               Upgrade to Pro
 //             </button>
@@ -177,249 +172,263 @@
 //     </div>
 //   );
 // }
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import NavBar from './NavBar';
 import Footer from './Footer';
 
 export default function SubscriptionPage() {
-  const [selectedPlan, setSelectedPlan] = useState('pro');
+  const [plans, setPlans] = useState([]);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
   const [currentPlan, setCurrentPlan] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const plans = {
-    basic: {
-      name: 'Basic Plan',
-      price: '$9.99',
-      period: 'month',
-      features: [
-        'Up to 5 crypto alerts',
-        'Email notifications',
-        'Basic price charts',
-        '24-hour support',
-        'BTC, ETH, SOL tracking'
-      ]
-    },
-    pro: {
-      name: 'Pro Plan',
-      price: '$29.99',
-      period: 'month',
-      features: [
-        'Unlimited crypto alerts',
-        'Email + SMS notifications',
-        'Advanced price charts',
-        'Real-time alerts',
-        'All major cryptocurrencies',
-        'Technical indicators',
-        'Priority support',
-        'API access'
-      ]
-    }
-  };
+  // Fetch plans from backend
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch('/api/subscription-plans');
+        if (response.ok) {
+          const data = await response.json();
+          setPlans(data);
+          setSelectedPlan(data[0]?.id || null);
+        } else {
+          // Fallback to static data if API fails
+          const fallbackPlans = [
+            {
+              id: 'basic',
+              name: 'Basic Plan',
+              price: 9.99,
+              period: 'month',
+              popular: true,
+              features: [
+                'Up to 5 crypto alerts',
+                'Email notifications',
+                'Basic price charts',
+                '24-hour support',
+                'BTC, ETH, SOL tracking'
+              ]
+            },
+            {
+              id: 'pro',
+              name: 'Pro Plan',
+              price: 29.99,
+              period: 'month',
+              popular: false,
+              premium: true,
+              features: [
+                'Unlimited crypto alerts',
+                'Email + SMS notifications',
+                'Advanced price charts',
+                'Real-time alerts',
+                'All major cryptocurrencies',
+                'Technical indicators',
+                'Priority support',
+                'API access'
+              ]
+            }
+          ];
+          setPlans(fallbackPlans);
+          setSelectedPlan('basic');
+        }
+      } catch (error) {
+        console.error('Error fetching plans:', error);
+        // Use fallback data
+        const fallbackPlans = [
+          {
+            id: 'basic',
+            name: 'Basic Plan',
+            price: 9.99,
+            period: 'month',
+            popular: true,
+            features: [
+              'Up to 5 crypto alerts',
+              'Email notifications',
+              'Basic price charts',
+              '24-hour support',
+              'BTC, ETH, SOL tracking'
+            ]
+          },
+          {
+            id: 'pro',
+            name: 'Pro Plan',
+            price: 29.99,
+            period: 'month',
+            popular: false,
+            premium: true,
+            features: [
+              'Unlimited crypto alerts',
+              'Email + SMS notifications',
+              'Advanced price charts',
+              'Real-time alerts',
+              'All major cryptocurrencies',
+              'Technical indicators',
+              'Priority support',
+              'API access'
+            ]
+          }
+        ];
+        setPlans(fallbackPlans);
+        setSelectedPlan('basic');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
 
   const styles = {
-    page: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-      color: 'white',
-      padding: '24px',
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-    },
     container: {
-      maxWidth: '1200px',
-      margin: '0 auto'
+      maxWidth: '1400px',
+      margin: '0 auto',
+      padding: '0 20px'
     },
     header: {
-      marginBottom: '40px'
-    },
-    backLink: {
-      color: '#60a5fa',
-      textDecoration: 'none',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      marginBottom: '24px',
-      fontSize: '14px',
-      transition: 'color 0.3s ease'
+      textAlign: 'center',
+      marginBottom: '60px'
     },
     title: {
-      fontSize: '36px',
-      fontWeight: '700',
-      marginBottom: '12px'
+      fontSize: '48px',
+      fontWeight: '800',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      marginBottom: '16px'
     },
     subtitle: {
       color: '#94a3b8',
-      fontSize: '16px'
+      fontSize: '18px',
+      maxWidth: '600px',
+      margin: '0 auto'
     },
-    toggleContainer: {
+    plansContainer: {
       display: 'flex',
-      justifyContent: 'center',
-      marginBottom: '48px'
-    },
-    toggleWrapper: {
-      background: 'rgba(30, 41, 59, 0.7)',
-      backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      padding: '4px',
-      borderRadius: '12px',
-      display: 'flex',
-      gap: '4px'
-    },
-    toggleButton: {
-      padding: '12px 32px',
-      borderRadius: '8px',
-      border: 'none',
-      background: 'transparent',
-      color: '#94a3b8',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      fontSize: '14px'
-    },
-    activeToggle: {
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      color: 'white'
-    },
-    plansGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-      gap: '32px',
-      marginBottom: '48px'
+      flexDirection: 'column',
+      gap: '24px',
+      marginBottom: '60px'
     },
     planCard: {
-      background: 'rgba(30, 41, 59, 0.7)',
-      backdropFilter: 'blur(10px)',
+      background: 'rgba(15, 23, 42, 0.8)',
+      backdropFilter: 'blur(20px)',
       border: '1px solid rgba(255, 255, 255, 0.1)',
-      borderRadius: '16px',
+      borderRadius: '20px',
       padding: '32px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '40px',
       transition: 'all 0.3s ease',
-      position: 'relative'
+      cursor: 'pointer',
+      position: 'relative',
+      overflow: 'hidden'
     },
-    highlightedCard: {
-      transform: 'scale(1.05)',
-      border: '2px solid',
-      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+    selectedCard: {
+      border: '2px solid #667eea',
+      transform: 'scale(1.02)',
+      boxShadow: '0 25px 50px rgba(102, 126, 234, 0.2)'
     },
-    planHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: '24px'
+    planInfo: {
+      flex: '1',
+      minWidth: '300px'
     },
-    planTitle: {
-      fontSize: '24px',
+    planName: {
+      fontSize: '28px',
       fontWeight: '700',
-      marginBottom: '8px'
+      marginBottom: '8px',
+      color: '#ffffff'
     },
-    priceContainer: {
-      display: 'flex',
-      alignItems: 'baseline',
-      marginBottom: '8px'
+    planPrice: {
+      fontSize: '42px',
+      fontWeight: '800',
+      color: '#667eea',
+      marginBottom: '16px'
     },
-    price: {
-      fontSize: '36px',
-      fontWeight: '700'
-    },
-    period: {
-      color: '#94a3b8',
+    planPeriod: {
       fontSize: '16px',
+      color: '#94a3b8',
       marginLeft: '8px'
     },
-    badge: {
-      padding: '4px 16px',
-      borderRadius: '20px',
-      fontSize: '12px',
-      fontWeight: '600',
-      color: 'white'
+    planDescription: {
+      color: '#cbd5e1',
+      fontSize: '16px',
+      lineHeight: '1.6'
     },
-    basicBadge: {
-      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+    featuresGrid: {
+      flex: '2',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '16px'
     },
-    proBadge: {
-      background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)'
-    },
-    featuresList: {
-      listStyle: 'none',
-      padding: '0',
-      marginBottom: '32px'
-    },
-    featureItem: {
-      padding: '8px 0',
+    feature: {
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      color: '#e2e8f0'
+      color: '#e2e8f0',
+      fontSize: '14px'
     },
     checkIcon: {
       color: '#10b981',
-      minWidth: '20px'
+      fontSize: '16px',
+      fontWeight: 'bold'
     },
-    planButton: {
-      width: '100%',
-      padding: '16px',
+    planActions: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '16px',
+      minWidth: '200px'
+    },
+    badge: {
+      padding: '6px 16px',
+      borderRadius: '20px',
+      fontSize: '12px',
+      fontWeight: '600',
+      color: 'white',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px'
+    },
+    popularBadge: {
+      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+    },
+    premiumBadge: {
+      background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)'
+    },
+    selectButton: {
+      padding: '14px 32px',
       borderRadius: '12px',
       border: 'none',
       fontWeight: '600',
       fontSize: '16px',
       cursor: 'pointer',
       transition: 'all 0.3s ease',
-      color: 'white'
+      color: 'white',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      minWidth: '140px'
     },
-    basicButton: {
-      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+    selectedButton: {
+      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
     },
-    proButton: {
-      background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)'
-    },
-    comparison: {
-      background: 'rgba(30, 41, 59, 0.7)',
-      backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      borderRadius: '16px',
-      padding: '32px',
-      marginTop: '48px'
-    },
-    comparisonTitle: {
-      fontSize: '24px',
-      fontWeight: '700',
-      marginBottom: '24px'
-    },
-    table: {
-      width: '100%',
-      borderCollapse: 'collapse'
-    },
-    tableHeader: {
-      borderBottom: '1px solid #334155',
-      padding: '16px 0',
-      textAlign: 'left',
-      color: '#94a3b8',
-      fontWeight: '600'
-    },
-    tableRow: {
-      borderBottom: '1px solid #1e293b'
-    },
-    tableCell: {
-      padding: '16px 0',
-      color: '#e2e8f0'
-    },
-    centerCell: {
-      textAlign: 'center'
-    },
-    check: {
-      color: '#10b981',
-      fontWeight: 'bold'
-    },
-    cross: {
-      color: '#ef4444',
-      fontWeight: 'bold'
+    loading: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '400px',
+      fontSize: '18px',
+      color: '#94a3b8'
     }
   };
 
   const handleSubscribe = (plan) => {
-    setCurrentPlan(plans[plan]);
+    setCurrentPlan(plan);
     setShowPaymentForm(true);
+  };
+
+  const handlePlanSelect = (planId) => {
+    setSelectedPlan(planId);
   };
 
   const handlePayment = () => {
@@ -430,385 +439,265 @@ export default function SubscriptionPage() {
   const handlePaymentSuccess = () => {
     setShowPaymentSuccess(false);
     localStorage.setItem('paymentSuccess', 'true');
-    navigate('/dashboard');
+    navigate('/invoice', { state: { plan: currentPlan } });
   };
 
-  const handleMouseEnter = (e) => {
-    e.target.style.transform = 'translateY(-2px)';
-    e.target.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.2)';
-  };
-
-  const handleMouseLeave = (e) => {
-    e.target.style.transform = 'translateY(0)';
-    e.target.style.boxShadow = 'none';
-  };
-
-  const handleButtonHover = (e, isBasic) => {
-    e.target.style.transform = 'translateY(-2px)';
-    e.target.style.boxShadow = isBasic 
-      ? '0 10px 25px rgba(59, 130, 246, 0.3)'
-      : '0 10px 25px rgba(139, 92, 246, 0.3)';
-  };
-
-  const handleButtonLeave = (e) => {
-    e.target.style.transform = 'translateY(0)';
-    e.target.style.boxShadow = 'none';
-  };
+  if (loading) {
+    return (
+      <>
+        <NavBar />
+        <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0f1e,#141c2e)', paddingTop: 80 }}>
+          <div style={styles.loading}>
+            <div>Loading subscription plans...</div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
       <NavBar />
       <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0f1e,#141c2e)', padding: window.innerWidth <= 768 ? 12 : 24, paddingTop: window.innerWidth <= 768 ? 68 : 80, color: 'white' }}>
-      <div style={styles.container}>
-        {/* Header */}
-        <div style={styles.header}>
-          <h1 style={styles.title}>Choose Your Plan</h1>
-          <p style={styles.subtitle}>Upgrade to unlock premium features and maximize your crypto trading potential</p>
-        </div>
-
-        {/* Toggle Switch */}
-        {/* <div style={styles.toggleContainer}>
-          <div style={styles.toggleWrapper}>
-            <button
-              onClick={() => setSelectedPlan('basic')}
-              style={{
-                ...styles.toggleButton,
-                ...(selectedPlan === 'basic' ? styles.activeToggle : {})
-              }}
-              onMouseEnter={(e) => {
-                if (selectedPlan !== 'basic') {
-                  e.target.style.background = '#374151';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedPlan !== 'basic') {
-                  e.target.style.background = 'transparent';
-                }
-              }}
-            >
-              Basic Plan
-            </button>
-            <button
-              onClick={() => setSelectedPlan('pro')}
-              style={{
-                ...styles.toggleButton,
-                ...(selectedPlan === 'pro' ? styles.activeToggle : {})
-              }}
-              onMouseEnter={(e) => {
-                if (selectedPlan !== 'pro') {
-                  e.target.style.background = '#374151';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedPlan !== 'pro') {
-                  e.target.style.background = 'transparent';
-                }
-              }}
-            >
-              Pro Plan
-            </button>
-          </div>
-        </div> */}
-
-        {/* Plan Cards */}
-        <div style={styles.plansGrid}>
-          {/* Basic Plan */}
-          <div 
-            style={{
-              ...styles.planCard,
-              ...(selectedPlan === 'basic' ? { ...styles.highlightedCard, borderColor: '#3b82f6' } : {}),
-              opacity: selectedPlan === 'basic' ? 1 : 0.8
-            }}
-            onMouseEnter={(e) => {
-              if (selectedPlan !== 'basic') {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.2)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (selectedPlan !== 'basic') {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
-          >
-            <div style={styles.planHeader}>
-              <div>
-                <h3 style={styles.planTitle}>Basic Plan</h3>
-                <div style={styles.priceContainer}>
-                  <span style={styles.price}>$9.99</span>
-                  <span style={styles.period}>/month</span>
-                </div>
-              </div>
-              <span style={{ ...styles.badge, ...styles.basicBadge }}>Popular</span>
-            </div>
-            
-            <ul style={styles.featuresList}>
-              {plans.basic.features.map((feature, index) => (
-                <li key={index} style={styles.featureItem}>
-                  <span style={styles.checkIcon}>✓</span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            
-            <button 
-              style={{ ...styles.planButton, ...styles.basicButton }}
-              onClick={() => handleSubscribe('basic')}
-              onMouseEnter={(e) => handleButtonHover(e, true)}
-              onMouseLeave={handleButtonLeave}
-            >
-              Get Started
-            </button>
+        <div style={styles.container}>
+          {/* Header */}
+          <div style={styles.header}>
+            <h1 style={styles.title}>Choose Your Plan</h1>
+            <p style={styles.subtitle}>Upgrade to unlock premium features and maximize your crypto trading potential</p>
           </div>
 
-          {/* Pro Plan */}
-          <div 
-            style={{
-              ...styles.planCard,
-              ...(selectedPlan === 'pro' ? { ...styles.highlightedCard, borderColor: '#8b5cf6' } : {}),
-              opacity: selectedPlan === 'pro' ? 1 : 0.8
-            }}
-            onMouseEnter={(e) => {
-              if (selectedPlan !== 'pro') {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.2)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (selectedPlan !== 'pro') {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
-          >
-            <div style={styles.planHeader}>
-              <div>
-                <h3 style={styles.planTitle}>Pro Plan</h3>
-                <div style={styles.priceContainer}>
-                  <span style={styles.price}>$29.99</span>
-                  <span style={styles.period}>/month</span>
-                </div>
-              </div>
-              <span style={{ ...styles.badge, ...styles.proBadge }}>Premium</span>
-            </div>
-            
-            <ul style={styles.featuresList}>
-              {plans.pro.features.map((feature, index) => (
-                <li key={index} style={styles.featureItem}>
-                  <span style={styles.checkIcon}>✓</span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            
-            <button 
-              style={{ ...styles.planButton, ...styles.proButton }}
-              onClick={() => handleSubscribe('pro')}
-              onMouseEnter={(e) => handleButtonHover(e, false)}
-              onMouseLeave={handleButtonLeave}
-            >
-              Upgrade to Pro
-            </button>
-          </div>
-        </div>
-
-        {/* Features Comparison */}
-        <div style={styles.comparison}>
-          <h2 style={styles.comparisonTitle}>Plan Comparison</h2>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.tableHeader}>Features</th>
-                  <th style={{ ...styles.tableHeader, textAlign: 'center' }}>Basic</th>
-                  <th style={{ ...styles.tableHeader, textAlign: 'center' }}>Pro</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={styles.tableRow}>
-                  <td style={styles.tableCell}>Number of Alerts</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell }}>Up to 5</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell }}>Unlimited</td>
-                </tr>
-                <tr style={styles.tableRow}>
-                  <td style={styles.tableCell}>Notification Types</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell }}>Email Only</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell }}>Email + SMS</td>
-                </tr>
-                <tr style={styles.tableRow}>
-                  <td style={styles.tableCell}>Real-time Updates</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.cross }}>✗</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.check }}>✓</td>
-                </tr>
-                <tr style={styles.tableRow}>
-                  <td style={styles.tableCell}>API Access</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.cross }}>✗</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.check }}>✓</td>
-                </tr>
-                <tr>
-                  <td style={styles.tableCell}>Priority Support</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.cross }}>✗</td>
-                  <td style={{ ...styles.tableCell, ...styles.centerCell, ...styles.check }}>✓</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <Footer />
-      
-      {/* Payment Form Modal */}
-      {showPaymentForm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30,41,59,.95), rgba(15,23,42,.95))',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,.1)',
-            borderRadius: '20px',
-            padding: '40px',
-            width: '500px',
-            maxWidth: '90vw',
-            color: 'white'
-          }}>
-            <h2 style={{ marginBottom: '20px', fontSize: '24px', fontWeight: '700' }}>Payment Details</h2>
-            <div style={{ marginBottom: '30px', padding: '20px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-              <h3 style={{ margin: '0 0 10px 0', color: '#60a5fa' }}>{currentPlan?.name}</h3>
-              <p style={{ margin: '0', fontSize: '28px', fontWeight: '700' }}>{currentPlan?.price}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/{currentPlan?.period}</span></p>
-            </div>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', color: '#94a3b8' }}>Card Number</label>
-              <input type="text" placeholder="1234 5678 9012 3456" style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                border: '1px solid rgba(255,255,255,.2)',
-                background: 'rgba(0,0,0,.3)',
-                color: 'white',
-                fontSize: '16px'
-              }} />
-            </div>
-            
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#94a3b8' }}>Expiry</label>
-                <input type="text" placeholder="MM/YY" style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,.2)',
-                  background: 'rgba(0,0,0,.3)',
-                  color: 'white',
-                  fontSize: '16px'
-                }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#94a3b8' }}>CVV</label>
-                <input type="text" placeholder="123" style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,.2)',
-                  background: 'rgba(0,0,0,.3)',
-                  color: 'white',
-                  fontSize: '16px'
-                }} />
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
-              <button
-                onClick={() => setShowPaymentForm(false)}
+          {/* Horizontal Plan Cards */}
+          <div style={styles.plansContainer}>
+            {plans.map((plan) => (
+              <div
+                key={plan.id}
                 style={{
-                  flex: 1,
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,.2)',
-                  background: 'transparent',
-                  color: '#94a3b8',
-                  cursor: 'pointer'
+                  ...styles.planCard,
+                  ...(selectedPlan === plan.id ? styles.selectedCard : {})
+                }}
+                onClick={() => handlePlanSelect(plan.id)}
+                onMouseEnter={(e) => {
+                  if (selectedPlan !== plan.id) {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 15px 30px rgba(102, 126, 234, 0.1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedPlan !== plan.id) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }
                 }}
               >
-                Cancel
-              </button>
-              <button
-                onClick={handlePayment}
-                style={{
-                  flex: 2,
+                {/* Plan Info */}
+                <div style={styles.planInfo}>
+                  <h3 style={styles.planName}>{plan.name}</h3>
+                  <div>
+                    <span style={styles.planPrice}>${plan.price}</span>
+                    <span style={styles.planPeriod}>/{plan.period}</span>
+                  </div>
+                  <p style={styles.planDescription}>
+                    {plan.id === 'basic' ? 'Perfect for getting started with crypto tracking' : 'Advanced features for serious crypto traders'}
+                  </p>
+                </div>
+
+                {/* Features Grid */}
+                <div style={styles.featuresGrid}>
+                  {plan.features.map((feature, index) => (
+                    <div key={index} style={styles.feature}>
+                      <span style={styles.checkIcon}>✓</span>
+                      <span>{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Plan Actions */}
+                <div style={styles.planActions}>
+                  {plan.popular && (
+                    <span style={{ ...styles.badge, ...styles.popularBadge }}>Popular</span>
+                  )}
+                  {plan.premium && (
+                    <span style={{ ...styles.badge, ...styles.premiumBadge }}>Premium</span>
+                  )}
+                  <button
+                    style={{
+                      ...styles.selectButton,
+                      ...(selectedPlan === plan.id ? styles.selectedButton : {})
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSubscribe(plan);
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 8px 20px rgba(102, 126, 234, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
+                    }}
+                  >
+                    {selectedPlan === plan.id ? 'Selected' : 'Select Plan'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <Footer />
+
+        {/* Payment Form Modal */}
+        {showPaymentForm && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              background: 'linear-gradient(145deg, rgba(30,41,59,.95), rgba(15,23,42,.95))',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,.1)',
+              borderRadius: '20px',
+              padding: '40px',
+              width: '500px',
+              maxWidth: '90vw',
+              color: 'white'
+            }}>
+              <h2 style={{ marginBottom: '20px', fontSize: '24px', fontWeight: '700' }}>Payment Details</h2>
+              <div style={{ marginBottom: '30px', padding: '20px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                <h3 style={{ margin: '0 0 10px 0', color: '#60a5fa' }}>{currentPlan?.name}</h3>
+                <p style={{ margin: '0', fontSize: '28px', fontWeight: '700' }}>${currentPlan?.price}<span style={{ fontSize: '16px', color: '#94a3b8' }}>/{currentPlan?.period}</span></p>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#94a3b8' }}>Card Number</label>
+                <input type="text" placeholder="1234 5678 9012 3456" style={{
+                  width: '100%',
                   padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,.2)',
+                  background: 'rgba(0,0,0,.3)',
+                  color: 'white',
+                  fontSize: '16px'
+                }} />
+              </div>
+
+              <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#94a3b8' }}>Expiry</label>
+                  <input type="text" placeholder="MM/YY" style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,.2)',
+                    background: 'rgba(0,0,0,.3)',
+                    color: 'white',
+                    fontSize: '16px'
+                  }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#94a3b8' }}>CVV</label>
+                  <input type="text" placeholder="123" style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,.2)',
+                    background: 'rgba(0,0,0,.3)',
+                    color: 'white',
+                    fontSize: '16px'
+                  }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
+                <button
+                  onClick={() => setShowPaymentForm(false)}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,.2)',
+                    background: 'transparent',
+                    color: '#94a3b8',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handlePayment}
+                  style={{
+                    flex: 2,
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                    color: 'white',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Process Payment
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Payment Success Modal */}
+        {showPaymentSuccess && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              background: 'linear-gradient(145deg, rgba(30,41,59,.95), rgba(15,23,42,.95))',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              borderRadius: '20px',
+              padding: '40px',
+              width: '400px',
+              maxWidth: '90vw',
+              color: 'white',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '60px', marginBottom: '20px' }}>✅</div>
+              <h2 style={{ marginBottom: '16px', fontSize: '24px', fontWeight: '700', color: '#22c55e' }}>Payment Successful!</h2>
+              <p style={{ marginBottom: '30px', color: '#94a3b8' }}>Your subscription has been activated successfully.</p>
+              <button
+                onClick={handlePaymentSuccess}
+                style={{
+                  padding: '12px 30px',
                   borderRadius: '8px',
                   border: 'none',
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
                   color: 'white',
                   fontWeight: '600',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontSize: '16px'
                 }}
               >
-                Process Payment
+                OK
               </button>
             </div>
           </div>
-        </div>
-      )}
-      
-      {/* Payment Success Modal */}
-      {showPaymentSuccess && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30,41,59,.95), rgba(15,23,42,.95))',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(34, 197, 94, 0.3)',
-            borderRadius: '20px',
-            padding: '40px',
-            width: '400px',
-            maxWidth: '90vw',
-            color: 'white',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '60px', marginBottom: '20px' }}>✅</div>
-            <h2 style={{ marginBottom: '16px', fontSize: '24px', fontWeight: '700', color: '#22c55e' }}>Payment Successful!</h2>
-            <p style={{ marginBottom: '30px', color: '#94a3b8' }}>Your subscription has been activated successfully.</p>
-            <button
-              onClick={handlePaymentSuccess}
-              style={{
-                padding: '12px 30px',
-                borderRadius: '8px',
-                border: 'none',
-                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                color: 'white',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '16px'
-              }}
-            >
-              OK
-            </button>
-          </div>
-        </div>
-      )}
+        )}
       </div>
     </>
   );

@@ -7,8 +7,8 @@ import api from '../services/api';
 import authService from '../services/authService';
 import "./Home.css";
 import "../components/NavBar.css";
-import { addToWatchlist } from "../services/watchlistService";
-import { getMyWatchlist } from "../services/watchlistService";
+
+import { addToWatchlist, getMyWatchlist } from "../services/watchlistService";
 
 
 const Home = () => {
@@ -42,14 +42,21 @@ const Home = () => {
 
       try {
         const res = await getMyWatchlist(user.userId);
-        const ids = new Set(res.data.map(w => w.cryptoId));
+
+
+        const ids = new Set(
+          res.data.map(w => w.cryptoCurrency.cryptoId)
+        );
+
         setWatchlistItems(ids);
-      } catch { }
+      } catch (err) {
+        console.error("Failed to load watchlist", err);
+      }
+
     };
 
     loadUserWatchlist();
   }, []);
-
 
   const fetchAllData = () => {
     fetchLive();
@@ -153,8 +160,6 @@ const Home = () => {
 
   const visibleCoins = filteredCoins.slice(0, visibleCount);
 
-
-
   const handleAddToWatchlist = async (coin) => {
     const user = authService.getCurrentUser();
     if (!user) {
@@ -168,12 +173,14 @@ const Home = () => {
         cryptoId: coin.cryptoId
       });
 
+
+
       setWatchlistItems(prev => new Set([...prev, coin.cryptoId]));
     } catch (err) {
-      alert("Already added to watchlist");
+      alert(err.response?.data || "Already added to watchlist");
+
     }
   };
-
 
   const getCoinIcon = (symbol) => {
     const icons = {
@@ -336,20 +343,10 @@ const Home = () => {
 
               return (
                 <div className="crypto-row" key={c.cryptoId}>
-                  <span className="star-icon" onClick={() => {
-                    if (watchlistItems.has(c.cryptoId)) {
-                      setWatchlistItems(prev => {
-                        const newSet = new Set(prev);
-                        newSet.delete(c.cryptoId);
-                        return newSet;
-                      });
-                    } else {
-                      setWatchlistItems(prev => new Set([...prev, c.cryptoId]));
-                    }
-                  }}>
-                    {watchlistItems.has(c.cryptoId)}
-                  </span>
 
+                  <span className="star-icon">
+                    {watchlistItems.has(c.cryptoId) ? "⭐" : "☆"}
+                  </span>
                   <span className="muted">{index + 1}</span>
 
                   <div className="coin-info">
@@ -476,3 +473,4 @@ const MarketCard = ({ title, header, data }) => (
 );
 
 export default Home;
+

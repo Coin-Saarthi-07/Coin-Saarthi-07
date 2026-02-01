@@ -1,27 +1,27 @@
 
+
 // import { Navigate } from "react-router-dom";
-// import authService from "../services/authService";
 
-// const ProtectedRoute = ({ children }) => {
-//   return authService.isAuthenticated()
-//     ? children
-//     : <Navigate to="/login" replace />;
-// };
+// const ProtectedRoute = ({ children, roles }) => {
+//   const token = localStorage.getItem("token");
+//   const role = localStorage.getItem("role");
 
-// export default ProtectedRoute;
+//   if (!token) return <Navigate to="/login" />;
+
+//   if (roles && !roles.includes(role)) {
+//     return <Navigate to="/unauthorized" />;
+//   }
+
+//   return children;
+
 import { Navigate } from "react-router-dom";
+import authService from "../services/authService";
 
-const ProtectedRoute = ({ children, roles }) => {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+const ProtectedRoute = ({ children }) => {
+  return authService.isAuthenticated()
+    ? children
+    : <Navigate to="/login" replace />;
 
-  if (!token) return <Navigate to="/login" />;
-
-  if (roles && !roles.includes(role)) {
-    return <Navigate to="/unauthorized" />;
-  }
-
-  return children;
 };
 
 export default ProtectedRoute;

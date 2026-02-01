@@ -7,7 +7,8 @@ import './Register.css'
 
 const Register = () => {
     const [formData, setFormData] = useState({
-        userName: '',
+
+        username: '',
         email: '',
         phoneNo: '',
         password: '',
@@ -47,14 +48,16 @@ const Register = () => {
         const newErrors = {};
 
         // Username validation
-        if (!formData.userName) {
-            newErrors.userName = 'Username is required';
-        } else if (formData.userName.length < 6) {
-            newErrors.userName = 'Must contain minimum 6 characters';
-        } else if (formData.userName.length > 50) {
-            newErrors.userName = 'Maximum 50 characters allowed';
-        } else if (!/^(?=.*[A-Z])[A-Za-z0-9_@]+$/.test(formData.userName)) {
-            newErrors.userName = 'Username must contain at least one capital letter and may include letters, numbers, _ ,@ only.';
+
+        if (!formData.username) {
+            newErrors.username = 'Username is required';
+        } else if (formData.username.length < 6) {
+            newErrors.username = 'Must contain minimum 6 characters';
+        } else if (formData.username.length > 50) {
+            newErrors.username = 'Maximum 50 characters allowed';
+        } else if (!/^(?=.*[A-Z])[A-Za-z0-9_@]+$/.test(formData.username)) {
+            newErrors.username = 'Username must contain at least one capital letter and may include letters, numbers, _ ,@ only.';
+
         }
 
         // Email validation
@@ -113,19 +116,25 @@ const Register = () => {
 
         try {
             await authService.register({
-                ...formData,
-                role: "User"
+
+                userName: formData.username,   // 🔥 IMPORTANT
+                email: formData.email,
+                phoneNo: formData.phoneNo,
+                password: formData.password,
+                dob: formData.dob
             });
+
 
             setSuccess('Registration successful! Redirecting to login...');
             setTimeout(() => navigate('/login'), 1500);
-        } catch (err) {
-            const message =
-                err.response?.data?.message ||
-                err.response?.data?.error ||
-                "Something went wrong";
 
-            setError(message);
+        } catch (err) {
+            const msg =
+                err.response?.data?.message ||
+                err.response?.data ||
+                err.message ||
+                "Registration failed";
+            setError(msg);
         }
         finally {
             setLoading(false);
@@ -146,14 +155,15 @@ const Register = () => {
                                 <Form.Label>Username</Form.Label>
                                 <Form.Control
                                     type="text"
-                                    name="userName"
-                                    value={formData.userName}
+                                    name="username"
+                                    value={formData.username}
                                     onChange={handleChange}
                                     placeholder="Enter username"
-                                    isInvalid={!!errors.userName}
+                                    isInvalid={!!errors.username}
                                 />
                                 <Form.Control.Feedback type="invalid">
-                                    {errors.userName}
+                                    {errors.username}
+                                    
                                 </Form.Control.Feedback>
                             </Form.Group>
 
