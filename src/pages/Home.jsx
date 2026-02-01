@@ -2,14 +2,14 @@ import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
+
 import authService from '../services/authService';
 import "./Home.css";
 import "../components/NavBar.css";
-import { addToWatchlist } from "../services/watchlistService";
-import { getMyWatchlist } from "../services/watchlistService";
 import HomeCarousel from '../components/HomeCarousel';
-import heroBg from '../assets/hero-bg.png';
+import { addToWatchlist, getMyWatchlist } from "../services/watchlistService";
+
 
 const Home = () => {
   const navigate = useNavigate();
@@ -41,20 +41,20 @@ const Home = () => {
 
       try {
         const res = await getMyWatchlist(user.userId);
-        const ids = new Set(res.data.map(w => w.cryptoId));
+
+
+        const ids = new Set(
+          res.data.map(w => w.cryptoCurrency.cryptoId)
+        );
+
         setWatchlistItems(ids);
-      } catch { }
+      } catch (err) {
+        console.error("Failed to load watchlist", err);
+      }
+
     };
 
     loadUserWatchlist();
-  }, []);
-
-  // Trigger hero animation after component mounts
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsHeroVisible(true);
-    }, 100);
-    return () => clearTimeout(timer);
   }, []);
 
   const fetchAllData = () => {
@@ -74,26 +74,37 @@ const Home = () => {
 
   const fetchLive = async () => {
     try {
-      const res = await axios.get('https://localhost:7294/api/crypto/live');
-      setLiveCoins(res.data);
+      const res = await api.get("/crypto/crypto-currency/live");
+
+      const data = Array.isArray(res.data) ? res.data : [];
+      const mapped = data.map(c => ({
+        cryptoId: c.cryptoId,
+        currencySymbol: c.symbol,
+        currencyPrice: c.price,
+        lastUpdated: new Date().toISOString()
+      }));
+
+      setLiveCoins(mapped);
     } catch (err) {
       console.error("Live prices error", err);
     }
   };
 
+
   const fetchGainers = async () => {
     try {
-      const res = await axios.get('https://localhost:7294/api/crypto/top-gainers');
-      setTopGainers(res.data);
+      const res = await api.get("/crypto/crypto-currency/top-gainers");
+      setTopGainers(Array.isArray(res.data) ? res.data : []); // ✅ FIX
     } catch (err) {
       console.error("Top gainers error", err);
     }
   };
 
+
   const fetchLosers = async () => {
     try {
-      const res = await axios.get('https://localhost:7294/api/crypto/top-losers');
-      setTopLosers(res.data);
+      const res = await api.get("/crypto/crypto-currency/top-losers");
+      setTopLosers(Array.isArray(res.data) ? res.data : []); // ✅ FIX
     } catch (err) {
       console.error("Top losers error", err);
     }
@@ -101,12 +112,25 @@ const Home = () => {
 
   const fetchCryptoList = async () => {
     try {
-      const res = await axios.get('https://localhost:7294/api/crypto');
-      setCryptoList(res.data);
+      const res = await api.get("/crypto/crypto-currency");
+
+      const flatList = Array.isArray(res.data)
+        ? res.data.map(c => ({
+          cryptoId: c.cryptoId,
+          currencyName: c.currencyName,
+          currencySymbol: c.currencySymbol,
+          currencyPrice: c.currencyPrice
+        }))
+        : [];
+
+      setCryptoList(flatList);
     } catch (err) {
       console.error("Crypto list error", err);
+      setCryptoList([]);
     }
   };
+
+
 
   const mergeWithLive = (list) =>
     list.map(item => {
@@ -125,10 +149,13 @@ const Home = () => {
   const losers = mergeWithLive(topLosers).slice(0, 3);
   const volume = hotCoins;
 
-  const filteredCoins = cryptoList.filter(c =>
-    c.currencyName.toLowerCase().includes(search.toLowerCase()) ||
-    c.currencySymbol.toLowerCase().includes(search.toLowerCase())
-  );
+
+  const filteredCoins = cryptoList.filter(c => {
+    const name = String(c.currencyName || "").toLowerCase();
+    const symbol = String(c.currencySymbol || "").toLowerCase();
+    return name.includes(search.toLowerCase()) || symbol.includes(search.toLowerCase());
+  });
+
 
   const visibleCoins = filteredCoins.slice(0, visibleCount);
 
@@ -145,9 +172,12 @@ const Home = () => {
         cryptoId: coin.cryptoId
       });
 
+
+
       setWatchlistItems(prev => new Set([...prev, coin.cryptoId]));
     } catch (err) {
-      alert("Already added to watchlist");
+      alert(err.response?.data || "Already added to watchlist");
+
     }
   };
 
@@ -161,34 +191,35 @@ const Home = () => {
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    if (typeof price !== "number" || isNaN(price)) return "—";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(price);
   };
 
-  const formatVolume = (volume) => {
-    if (volume >= 1e12) return `$${(volume / 1e12).toFixed(2)}T`;
-    if (volume >= 1e9) return `$${(volume / 1e9).toFixed(2)}B`;
-    if (volume >= 1e6) return `$${(volume / 1e6).toFixed(2)}M`;
-    return `$${volume?.toFixed(2) || 0}`;
+
+  const formatVolume = (value) => {
+    if (typeof value !== "number" || isNaN(value)) return "—";
+    if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
+    if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+    if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+    return `$${value.toFixed(2)}`;
   };
 
   return (
     <>
       <NavBar />
 
-      <div className="home" style={{ paddingTop: '80px', backgroundColor: '#0f172a', minHeight: '100vh' }}>
+      <div className="home" style={{ paddingTop: '80px', backgroundColor: '#0b111eff', minHeight: '100vh' }}>
 
         {/* New Hero Carousel Section */}
         <HomeCarousel />
-
-        {/* Existing Market Content */}
-        <section className="market-section container">
+        {/* Market Cards */}
+        <section className="market-section container-fluid">
           <div className="row">
-
             <MarketCard
               title="Hot"
               header={["Name", "Price", "Updated"]}
@@ -250,7 +281,7 @@ const Home = () => {
 
         {/* Crypto List */}
         {/* Crypto List Section */}
-        <section className="container mt-5">
+        <section className="container-fluid mt-5">
           <h3 className="mb-3">All Cryptocurrencies</h3>
 
           {/* Search */}
@@ -282,7 +313,7 @@ const Home = () => {
             {visibleCoins.map((c, index) => {
               const prev = previousPrices[c.cryptoId];
               const movement =
-                prev === undefined
+                typeof c.currencyPrice !== "number" || typeof prev !== "number"
                   ? "—"
                   : c.currencyPrice > prev
                     ? "up"
@@ -290,22 +321,15 @@ const Home = () => {
                       ? "down"
                       : "same";
 
+              console.log("CRYPTO LIST:", cryptoList);
+              console.log("VISIBLE COINS:", visibleCoins);
+
               return (
                 <div className="crypto-row" key={c.cryptoId}>
-                  <span className="star-icon" onClick={() => {
-                    if (watchlistItems.has(c.cryptoId)) {
-                      setWatchlistItems(prev => {
-                        const newSet = new Set(prev);
-                        newSet.delete(c.cryptoId);
-                        return newSet;
-                      });
-                    } else {
-                      setWatchlistItems(prev => new Set([...prev, c.cryptoId]));
-                    }
-                  }}>
-                    {watchlistItems.has(c.cryptoId)}
-                  </span>
 
+                  <span className="star-icon">
+                    {watchlistItems.has(c.cryptoId) ? "⭐" : "☆"}
+                  </span>
                   <span className="muted">{index + 1}</span>
 
                   <div className="coin-info">
@@ -415,18 +439,24 @@ const MarketCard = ({ title, header, data }) => (
         {header.map(h => <span key={h}>{h}</span>)}
       </div>
 
-      {data.map(row => (
-        <div className="market-row" key={row.key}>
-          {row.cols.map((c, i) => (
-            <span
-              key={i}
-              className={i === row.cols.length - 1 ? (row.positive ? "positive" : "negative") : ""}
-            >
-              {c}
-            </span>
-          ))}
+      {data.length > 0 ? (
+        data.map(row => (
+          <div className="market-row" key={row.key}>
+            {row.cols.map((c, i) => (
+              <span
+                key={i}
+                className={i === row.cols.length - 1 ? (row.positive ? "positive" : "negative") : ""}
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        ))
+      ) : (
+        <div className="market-row" style={{ display: 'flex', justifyContent: 'center', padding: '20px', color: '#64748b' }}>
+          <span>No Data Available</span>
         </div>
-      ))}
+      )}
     </div>
   </div>
 );

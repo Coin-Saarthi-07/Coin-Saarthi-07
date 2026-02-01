@@ -27,14 +27,20 @@ ChartJS.register(
   ArcElement
 );
 
+import Spinner from './Spinner';
+
 const PortfolioDetail = () => {
   const [portfolio, setPortfolio] = useState([]);
   const [showTradeModal, setShowTradeModal] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch portfolio data
     const fetchPortfolio = async () => {
+      // Simulate loading delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
       // Mock data
       const mockData = [
         {
@@ -66,6 +72,7 @@ const PortfolioDetail = () => {
         }
       ];
       setPortfolio(mockData);
+      setLoading(false);
     };
     fetchPortfolio();
   }, []);
@@ -378,6 +385,10 @@ const PortfolioDetail = () => {
       fontSize: '14px',
     },
   };
+
+  if (loading) {
+    return <Spinner />;
+  }
 
   return (
     <div style={styles.portfolioDetail}>

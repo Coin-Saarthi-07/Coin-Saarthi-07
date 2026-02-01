@@ -18,14 +18,18 @@ const Login = () => {
         setLoading(true);
 
         try {
-            await authService.login({ username, password });
+
+            await authService.login({ userName: username, password });
+
             const user = authService.getCurrentUser();
 
-            if (user?.role === "User") {
+            if (user?.role === "ADMIN") {
+
                 navigate("/admin/dashboard");
             } else {
                 navigate("/dashboard");
             }
+
         } catch (err) {
             setError(err.message || err.response?.data?.message || "Login failed. Please check your credentials.");
         } finally {

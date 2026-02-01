@@ -12,7 +12,7 @@
 
 .home {
   min-height: 100vh;
-  background: linear-gradient(180deg, #0b0f1a 0%, #0e1529 100%);
+  background: linear-gradient(180deg, #0b0f1a 0%, #0b0f1a 100%);
 }
 
 /* Navbar */
@@ -174,7 +174,7 @@
 
 .more {
   font-size: 13px;
-  color: #facc15;
+  color: #2563eb;
   cursor: pointer;
 }
 
@@ -271,11 +271,11 @@
 }
 
 .star-icon:hover {
-  color: #facc15;
+  color: #1561fa;
 }
 
 .star-icon.starred {
-  color: #facc15;
+  color: #1561fa;
 }
 
 /* Coin info */
@@ -434,78 +434,4 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-}
-
-/* Home.css - Add these styles */
-
-.hero-section {
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-}
-
-/* Ensure smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Animation for market cards when they come into view */
-.market-card {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.market-card.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Animation for crypto rows when they come into view */
-.crypto-row {
-  opacity: 0;
-  transform: translateX(-20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.crypto-row.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Responsive adjustments for hero section */
-@media (max-width: 768px) {
-  .hero-section {
-    height: 80vh;
-    min-height: 500px;
-  }
-
-  .hero-buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .hero-buttons button {
-    width: 100%;
-    max-width: 300px;
-  }
-}
-
-/* Add smooth fade-in for the entire page */
-.home {
-  animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }

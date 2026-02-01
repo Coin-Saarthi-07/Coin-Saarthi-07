@@ -82,7 +82,16 @@ const Payment = () => {
                     const result = await axios.post('/api/payment/verify', data);
 
                     if (result.data.success) {
-                        navigate('/dashboard', { state: { paymentSuccess: true } });
+                        navigate('/invoice', {
+                            state: {
+                                plan: plan,
+                                paymentDetails: {
+                                    razorpayPaymentId: response.razorpay_payment_id,
+                                    razorpayOrderId: response.razorpay_order_id,
+                                    razorpaySignature: response.razorpay_signature
+                                }
+                            }
+                        });
                     } else {
                         setError('Payment verification failed.');
                     }
