@@ -6,24 +6,19 @@ import {
   FaChartLine, FaCoins, FaDownload, FaTimes,
   FaSearch, FaArrowUp, FaArrowDown
 } from 'react-icons/fa';
-import axios from 'axios';
-// import './PaperTrading.css'; // Removed external CSS
+import api from '../services/api';
+import authService from '../services/authService';
 
 const PaperTrading = () => {
   const [user, setUser] = useState({
-    userId: 1,
-    name: 'John Doe',
+    userId: authService.getUserId() || null,
+    name: authService.getCurrentUser()?.userName || 'User',
     virtualBalance: 100000
   });
 
   const [portfolio, setPortfolio] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [cryptos, setCryptos] = useState([
-    { id: 1, name: 'Bitcoin', symbol: 'BTC', price: 5678234, change: 2.34 },
-    { id: 2, name: 'Ethereum', symbol: 'ETH', price: 345678, change: 1.56 },
-    { id: 3, name: 'Binance Coin', symbol: 'BNB', price: 45678, change: -0.89 },
-    { id: 4, name: 'Solana', symbol: 'SOL', price: 12345, change: 5.67 }
-  ]);
+  const [cryptos, setCryptos] = useState([]);
 
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showSellModal, setShowSellModal] = useState(false);
@@ -32,37 +27,116 @@ const PaperTrading = () => {
   const [sellQuantity, setSellQuantity] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch portfolio data
+
+
+  // Fetch initial data
   useEffect(() => {
-    fetchPortfolio();
-    fetchTransactions();
+    const currentUser = authService.getCurrentUser();
+    if (currentUser) {
+      setUser(prev => ({
+        ...prev,
+        userId: currentUser.userId,
+        name: currentUser.userName
+      }));
+      fetchInitialData(currentUser.userId);
+    }
   }, []);
 
-  const fetchPortfolio = async () => {
+  const fetchInitialData = async (userId) => {
+    setLoading(true);
+    await Promise.all([
+      fetchCryptoList(),
+      fetchPortfolio(userId),
+      fetchTransactions(userId),
+      fetchAccountInfo(userId)
+    ]);
+    setLoading(false);
+  };
+
+  const fetchCryptoList = async () => {
     try {
-      // Mock data - replace with actual API call
-      const mockPortfolio = [
-        { id: 1, cryptoId: 1, name: 'Bitcoin', symbol: 'BTC', quantity: 0.025, avgPrice: 5245000, currentPrice: 5678234 },
-        { id: 2, cryptoId: 2, name: 'Ethereum', symbol: 'ETH', quantity: 1.5, avgPrice: 320000, currentPrice: 345678 },
-        { id: 3, cryptoId: 4, name: 'Solana', symbol: 'SOL', quantity: 15, avgPrice: 11200, currentPrice: 12345 }
-      ];
-      setPortfolio(mockPortfolio);
-    } catch (error) {
-      console.error('Error fetching portfolio:', error);
+      const res = await api.get("/crypto/crypto-currency");
+
+      const flatList = Array.isArray(res.data)
+        ? res.data.map(c => ({
+          id: c.cryptoId,
+          name: c.currencyName,
+          symbol: c.currencySymbol,
+          price: c.currencyPrice,
+          change: c.dayChange || 0 // Added safety for change check
+        }))
+        : [];
+
+      setCryptos(flatList);
+    } catch (err) {
+      console.error("Crypto list error", err);
+      setCryptos([]);
     }
   };
 
-  const fetchTransactions = async () => {
+  const fetchPortfolio = async (userId) => {
     try {
-      // Mock data - replace with actual API call
-      const mockTransactions = [
-        { id: 1, date: '2024-03-15 10:30:00', type: 'BUY', asset: 'Bitcoin', quantity: 0.01, price: 5450000, total: 54500, status: 'COMPLETED' },
-        { id: 2, date: '2024-03-14 14:20:00', type: 'SELL', asset: 'Ethereum', quantity: 0.5, price: 340000, total: 170000, status: 'COMPLETED' },
-        { id: 3, date: '2024-03-13 09:15:00', type: 'BUY', asset: 'Solana', quantity: 10, price: 12000, total: 120000, status: 'COMPLETED' }
-      ];
-      setTransactions(mockTransactions);
+      const response = await api.get(`/paper/portfolio/${userId}`);
+      // Map portfolio data to ensure correct property names for UI
+      const mappedPortfolio = (response.data || []).map(item => ({
+        id: item.cryptoId, // Ensure ID is mapped if needed for keys
+        cryptoId: item.cryptoId,
+        name: item.currencyName || item.name || 'Unknown',
+        symbol: item.currencySymbol || item.symbol || '???',
+        quantity: item.quantity,
+        avgPrice: item.averagePrice,
+        currentPrice: item.currentPrice,
+        ...item
+      }));
+      setPortfolio(mappedPortfolio);
     } catch (error) {
-      console.error('Error fetching transactions:', error);
+      console.warn('Error fetching portfolio:', error);
+      setPortfolio([]);
+    }
+  };
+
+  const fetchTransactions = async (userId) => {
+    try {
+      const response = await api.get(`/paper/transactions/${userId}`);
+      setTransactions(response.data || []);
+    } catch (error) {
+      console.warn('Error fetching transactions:', error);
+      setTransactions([]);
+    }
+  };
+
+  const initializeAccount = async (userId) => {
+    try {
+      await api.post(`/paper/account/paper-trading/${userId}`);
+      // Retry fetching account info after initialization
+      const response = await api.get(`/paper/account/${userId}`);
+      if (response.data) {
+        setUser(prev => ({
+          ...prev,
+          virtualBalance: response.data.virtualBalance
+        }));
+      }
+    } catch (error) {
+      console.error('Error initializing account:', error);
+    }
+  };
+
+  const fetchAccountInfo = async (userId) => {
+    try {
+      const response = await api.get(`/paper/account/${userId}`);
+      if (response.data) {
+        setUser(prev => ({
+          ...prev,
+          virtualBalance: response.data.virtualBalance
+        }));
+      }
+    } catch (error) {
+      console.warn('Error fetching account info:', error);
+      // If account not found (404) or other error, try to initialize
+      if (error.response && (error.response.status === 404 || error.response.status === 400 || error.response.status === 500)) {
+        console.log("Attempting to initialize paper trading account...");
+        initializeAccount(userId);
+      }
     }
   };
 
@@ -82,84 +156,63 @@ const PaperTrading = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('/paper/trade/buy', {
-        userId: user.userId,
-        cryptoId: selectedCrypto.id,
-        quantity: parseFloat(buyQuantity)
-      });
+      // Using null as body for query param POST
+      const response = await api.post(
+        `/paper/trade/buy?userId=${user.userId}&cryptoId=${selectedCrypto.id}&quantity=${parseFloat(buyQuantity)}`
+      );
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         alert('Buy order executed successfully!');
         setShowBuyModal(false);
         setBuyQuantity('');
         setSelectedCrypto(null);
-        // Refresh data
-        fetchPortfolio();
-        fetchTransactions();
-        // Update balance
-        const totalCost = selectedCrypto.price * parseFloat(buyQuantity);
-        setUser(prev => ({
-          ...prev,
-          virtualBalance: prev.virtualBalance - totalCost
-        }));
+        fetchInitialData(user.userId);
       }
     } catch (error) {
       console.error('Error executing buy order:', error);
-      alert('Failed to execute buy order');
+      alert('Failed to execute buy order: ' + (error.response?.data?.message || error.message || 'Internal Server Error'));
     } finally {
       setLoading(false);
     }
   };
 
   const executeSellOrder = async (crypto) => {
-    if (!sellQuantity || parseFloat(sellQuantity) <= 0) {
+    const quantityToSell = parseFloat(sellQuantity);
+    if (!quantityToSell || quantityToSell <= 0) {
       alert('Please enter valid quantity');
-      return;
-    }
-
-    const portfolioItem = portfolio.find(p => p.cryptoId === crypto.id);
-    if (!portfolioItem || parseFloat(sellQuantity) > portfolioItem.quantity) {
-      alert('Insufficient quantity in portfolio');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await axios.post('/paper/trade/sell', {
-        userId: user.userId,
-        cryptoId: crypto.id,
-        quantity: parseFloat(sellQuantity)
-      });
+      const response = await api.post(
+        '/paper/trade/sell',
+        {
+          userId: user.userId,
+          cryptoId: crypto.id,
+          quantity: quantityToSell
+        }
+      );
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         alert('Sell order executed successfully!');
         setShowSellModal(false);
         setSellQuantity('');
-        // Refresh data
-        fetchPortfolio();
-        fetchTransactions();
-        // Update balance
-        const totalAmount = crypto.price * parseFloat(sellQuantity);
-        setUser(prev => ({
-          ...prev,
-          virtualBalance: prev.virtualBalance + totalAmount
-        }));
+        fetchInitialData(user.userId);
       }
     } catch (error) {
       console.error('Error executing sell order:', error);
-      alert('Failed to execute sell order');
+      alert('Failed to execute sell order: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
   };
 
   const resetAccount = async () => {
-    if (window.confirm('Are you sure you want to reset your paper trading account? All holdings will be cleared and balance reset to ₹100,000.')) {
+    if (window.confirm('Are you sure you want to reset your paper trading account? All holdings will be cleared and balance reset.')) {
       try {
-        // Call reset API
-        await axios.post(`/paper/account/reset/${user.userId}`);
-        setUser(prev => ({ ...prev, virtualBalance: 100000 }));
-        setPortfolio([]);
+        await api.post(`/paper/account/reset/${user.userId}`);
+        fetchInitialData(user.userId);
         alert('Account reset successfully!');
       } catch (error) {
         console.error('Error resetting account:', error);
@@ -871,3 +924,4 @@ const PaperTrading = () => {
 };
 
 export default PaperTrading;
+

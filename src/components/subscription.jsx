@@ -174,6 +174,7 @@
 // }
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
+import authService from '../services/authService';
 import NavBar from './NavBar';
 import Footer from './Footer';
 
@@ -190,8 +191,19 @@ export default function SubscriptionPage() {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        // Replace with your actual API endpoint
-        const response = await fetch('/api/subscription-plans');
+        const userId = authService.getUserId();
+        if (!userId) {
+          console.error('No userId found');
+          setLoading(false);
+          return;
+        }
+
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/subscriptions/user/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (response.ok) {
           const data = await response.json();
           setPlans(data);
@@ -280,6 +292,16 @@ export default function SubscriptionPage() {
     fetchPlans();
   }, []);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const styles = {
     container: {
       maxWidth: '1200px',
@@ -306,8 +328,8 @@ export default function SubscriptionPage() {
       lineHeight: '1.6'
     },
     plansContainer: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+      display: 'flex',
+      flexDirection: 'column',
       gap: '32px',
       marginBottom: '60px'
     },
@@ -317,33 +339,43 @@ export default function SubscriptionPage() {
       borderRadius: '24px',
       padding: '40px',
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: isMobile ? 'column' : 'row',
+      alignItems: isMobile ? 'stretch' : 'center',
+      justifyContent: 'space-between',
+      gap: isMobile ? '24px' : '48px',
       transition: 'all 0.3s ease',
       cursor: 'pointer',
       position: 'relative',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+      boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+      textAlign: isMobile ? 'center' : 'left'
     },
     selectedCard: {
       border: '1px solid #667eea',
       boxShadow: '0 20px 60px rgba(102, 126, 234, 0.15)',
-      transform: 'translateY(-8px)'
+      transform: 'translateY(-4px)'
     },
     planHeader: {
-      marginBottom: '32px',
-      textAlign: 'center',
-      position: 'relative'
+      marginBottom: isMobile ? '24px' : '0',
+      textAlign: isMobile ? 'center' : 'left',
+      position: 'relative',
+      minWidth: isMobile ? 'auto' : '200px',
+      borderRight: isMobile ? 'none' : '1px solid rgba(255,255,255,0.1)',
+      paddingRight: isMobile ? '0' : '32px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center'
     },
     planName: {
       fontSize: '24px',
       fontWeight: '700',
-      marginBottom: '16px',
+      marginBottom: '8px',
       color: '#ffffff',
       textTransform: 'uppercase',
       letterSpacing: '0.1em'
     },
     planPrice: {
       display: 'flex',
-      justifyContent: 'center',
+      justifyContent: isMobile ? 'center' : 'flex-start',
       alignItems: 'baseline',
       gap: '4px',
       color: '#white'
@@ -361,14 +393,16 @@ export default function SubscriptionPage() {
     },
     featuresList: {
       flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
+      display: 'grid',
+      gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(200px, 1fr))',
       gap: '16px',
-      marginBottom: '40px'
+      marginBottom: isMobile ? '24px' : '0',
+      paddingRight: isMobile ? '0' : '24px'
     },
     feature: {
       display: 'flex',
       alignItems: 'center',
+      justifyContent: isMobile ? 'center' : 'flex-start',
       gap: '12px',
       color: '#cbd5e1',
       fontSize: '15px'
@@ -387,7 +421,7 @@ export default function SubscriptionPage() {
       flexShrink: 0
     },
     selectButton: {
-      width: '100%',
+      width: isMobile ? '100%' : '200px',
       padding: '16px',
       borderRadius: '12px',
       border: 'none',
@@ -397,7 +431,8 @@ export default function SubscriptionPage() {
       transition: 'all 0.3s ease',
       color: 'white',
       background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-      border: '1px solid rgba(255,255,255,0.1)'
+      border: '1px solid rgba(255,255,255,0.1)',
+      alignSelf: isMobile ? 'stretch' : 'center'
     },
     selectedButton: {
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -406,9 +441,10 @@ export default function SubscriptionPage() {
     },
     badge: {
       position: 'absolute',
-      top: '-56px',
-      left: '50%',
-      transform: 'translateX(-50%)',
+      top: isMobile ? '-16px' : '20px',
+      right: isMobile ? 'auto' : '20px',
+      left: isMobile ? '50%' : 'auto',
+      transform: isMobile ? 'translateX(-50%)' : 'none',
       padding: '6px 16px',
       borderRadius: '20px',
       fontSize: '12px',
@@ -417,7 +453,8 @@ export default function SubscriptionPage() {
       letterSpacing: '0.05em',
       color: 'white',
       background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
+      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+      zIndex: 2
     },
     loading: {
       display: 'flex',

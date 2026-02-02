@@ -42,6 +42,7 @@ const NavBar = () => {
                         {user && (
                             <>
                                 <Nav.Link href="/dashboard">Watchlist</Nav.Link>
+                                {(user.role?.toUpperCase() === 'SUBSCRIBER' || user.role?.toUpperCase() === 'USER') && <Nav.Link href="/paper-trading/trade">Trading</Nav.Link>}
                                 <Nav.Link href="/subscription">Upgrade Plan</Nav.Link>
                             </>
                         )}
