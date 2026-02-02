@@ -390,7 +390,6 @@ export default function SubscriptionPage() {
       width: '100%',
       padding: '16px',
       borderRadius: '12px',
-      border: 'none',
       fontWeight: '700',
       fontSize: '16px',
       cursor: 'pointer',
