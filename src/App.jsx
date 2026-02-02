@@ -47,20 +47,23 @@ function App() {
         } />
         {/* Paper Trading Routes */}
         <Route path="/paper-trading/dashboard" element={
-
-          <PaperTradingDashboard />
+          <ProtectedRoute>
+            <PaperTradingDashboard />
+          </ProtectedRoute>
 
         } />
 
         <Route path="/paper-trading/trade" element={
-
-          <PaperTrading />
+          <ProtectedRoute>
+            <PaperTrading />
+          </ProtectedRoute>
 
         } />
 
         <Route path="/paper-trading/portfolio" element={
-
-          <PortfolioDetail />
+          <ProtectedRoute>
+            <PortfolioDetail />
+          </ProtectedRoute>
 
         } />
 
