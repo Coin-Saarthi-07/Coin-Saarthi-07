@@ -4,7 +4,7 @@ import authService from '../services/authService';
 
 
 
-import logo from '../assets/coinsaarthi_logo.png';
+import logo from '../assets/coinsaarthi_logo_circular.png';
 
 const NavBar = () => {
     const navigate = useNavigate();
@@ -22,11 +22,18 @@ const NavBar = () => {
                     <img
                         src={logo}
                         alt="COINSaarthi Logo"
-                        height="120"
-                        className="d-inline-block align-top me-2"
-                        style={{ width: 'auto', objectFit: 'contain', maxHeight: '140px' }}
+                        height="60"
+                        className="d-inline-block align-top me-3"
+                        style={{
+                            width: '60px',
+                            height: '60px',
+                            objectFit: 'contain',
+                            borderRadius: '50%',
+                            background: 'transparent'
+                        }}
                     />
-                    <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>COINSaarthi</span>
+
+                    <span style={{ fontSize: '1.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>COINSaarthi</span>
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
@@ -50,7 +57,7 @@ const NavBar = () => {
                         ) : (
                             <>
 
-                 <Nav.Link href="/login">Login</Nav.Link>
+                                <Nav.Link href="/login">Login</Nav.Link>
                                 <Nav.Link href="/register">Register</Nav.Link>
                             </>
                         )}

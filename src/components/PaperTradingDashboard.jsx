@@ -38,15 +38,15 @@ const PaperTradingDashboard = () => {
     dashboard: {
       display: 'flex',
       minHeight: '100vh',
-      background: '#0f172a', // bg-dark
+      background: 'linear-gradient(180deg, #0b0f1a 0%, #0e1529 100%)',
       position: 'relative',
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Segoe UI', sans-serif",
       color: '#fff',
     },
     sidebar: {
       width: '280px',
-      background: '#1e293b', // bg-card
-      borderRight: '1px solid #334155',
+      background: '#0b0f1a',
+      borderRight: '1px solid rgba(255, 255, 255, 0.08)',
       display: 'flex',
       flexDirection: 'column',
       position: 'fixed',

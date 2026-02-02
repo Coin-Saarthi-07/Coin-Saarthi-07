@@ -7,7 +7,7 @@ import api from '../services/api';
 import authService from '../services/authService';
 import "./Home.css";
 import "../components/NavBar.css";
-
+import HomeCarousel from '../components/HomeCarousel';
 import { addToWatchlist, getMyWatchlist } from "../services/watchlistService";
 
 
@@ -22,9 +22,7 @@ const Home = () => {
   const [visibleCount, setVisibleCount] = useState(15);
   const [previousPrices, setPreviousPrices] = useState({});
   const [watchlistItems, setWatchlistItems] = useState(new Set());
-  const [alertItems, setAlertItems] = useState(new Set());
-
-
+  const [isHeroVisible, setIsHeroVisible] = useState(false);
 
   useEffect(() => {
     fetchAllData();
@@ -35,6 +33,7 @@ const Home = () => {
 
     return () => clearInterval(interval);
   }, []);
+
   useEffect(() => {
     const loadUserWatchlist = async () => {
       const user = authService.getCurrentUser();
@@ -64,6 +63,7 @@ const Home = () => {
     fetchLosers();
     fetchCryptoList();
   };
+
   useEffect(() => {
     const map = {};
     cryptoList.forEach(c => {
@@ -71,7 +71,6 @@ const Home = () => {
     });
     setPreviousPrices(map);
   }, [cryptoList]);
-
 
   const fetchLive = async () => {
     try {
@@ -210,33 +209,17 @@ const Home = () => {
     return `$${value.toFixed(2)}`;
   };
 
-
   return (
     <>
       <NavBar />
 
-      <div className="home" style={{ paddingTop: '200px' }}>
-        {/* Hero */}
-        <div style={{
-          textAlign: 'center',
-          width: '100%',
-          padding: '40px 0',
-          color: '#ffffff'   // 🔥 force white
-        }}>
-          <h1 style={{ fontSize: 38, fontWeight: 800 }}>
-            Real-Time Crypto Monitoring <br /> & Smart Alerts
-          </h1>
-          <p style={{ color: '#ffffff', opacity: 0.9 }}>
-            Real-time crypto monitoring platform built with enterprise-grade tools.
-          </p>
-        </div>
+      <div className="home" style={{ paddingTop: '80px', backgroundColor: '#0b111eff', minHeight: '100vh' }}>
 
-
-
+        {/* New Hero Carousel Section */}
+        <HomeCarousel />
         {/* Market Cards */}
         <section className="market-section container-fluid">
           <div className="row">
-
             <MarketCard
               title="Hot"
               header={["Name", "Price", "Updated"]}
@@ -456,21 +439,26 @@ const MarketCard = ({ title, header, data }) => (
         {header.map(h => <span key={h}>{h}</span>)}
       </div>
 
-      {data.map(row => (
-        <div className="market-row" key={row.key}>
-          {row.cols.map((c, i) => (
-            <span
-              key={i}
-              className={i === row.cols.length - 1 ? (row.positive ? "positive" : "negative") : ""}
-            >
-              {c}
-            </span>
-          ))}
+      {data.length > 0 ? (
+        data.map(row => (
+          <div className="market-row" key={row.key}>
+            {row.cols.map((c, i) => (
+              <span
+                key={i}
+                className={i === row.cols.length - 1 ? (row.positive ? "positive" : "negative") : ""}
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        ))
+      ) : (
+        <div className="market-row" style={{ display: 'flex', justifyContent: 'center', padding: '20px', color: '#64748b' }}>
+          <span>No Data Available</span>
         </div>
-      ))}
+      )}
     </div>
   </div>
 );
 
 export default Home;
-

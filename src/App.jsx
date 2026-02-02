@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -11,7 +13,11 @@ import Subscription from "./components/subscription";
 
 import InvoicePage from "./pages/InvoicePage";
 import AdminRoute from "./routes/AdminRoute";
-
+import PaperTradingDashboard from "./components/PaperTradingDashboard";
+import PaperTrading from "./components/PaperTrading";
+import PortfolioDetail from "./components/PortfolioDetail";
+import TransactionHistory from "./components/TransactionHistory";
+import Payment from "./components/Payment";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleRoute from "./routes/RoleRoute";
@@ -20,6 +26,7 @@ import ChatBot from "./components/ChatBot";
 function App() {
   return (
     <Router>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
 
         <Route path="/" element={<Home />} />
@@ -38,9 +45,38 @@ function App() {
             <UserDashboard />
           </ProtectedRoute>
         } />
+        {/* Paper Trading Routes */}
+        <Route path="/paper-trading/dashboard" element={
+
+          <PaperTradingDashboard />
+
+        } />
+
+        <Route path="/paper-trading/trade" element={
+
+          <PaperTrading />
+
+        } />
+
+        <Route path="/paper-trading/portfolio" element={
+
+          <PortfolioDetail />
+
+        } />
+
+        <Route path="/paper-trading/transactions" element={
+
+          <TransactionHistory />
+
+        } />
+        <Route path="/payment" element={
+
+          <Payment />
+
+        } />
+
         {/* 🔐 Admin Dashboard */}
         {/* <Route path="/admin/dashboard" element={
->>>>>>> 1bf93c58d7cfc0df9de5ce791442f6b74cd6f0f6
           <ProtectedRoute>
             <RoleRoute role="Admin">
               <AdminDashboard />
