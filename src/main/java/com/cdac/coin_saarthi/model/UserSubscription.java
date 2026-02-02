@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.cdac.coin_saarthi.enums.SubscriptionStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -31,6 +32,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserSubscription {
 
     @Id
@@ -46,7 +48,7 @@ public class UserSubscription {
 
     // Many subscriptions can use same plan
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "subplan_id", nullable = false)
     private SubscriptionPlan subscriptionPlan;
 

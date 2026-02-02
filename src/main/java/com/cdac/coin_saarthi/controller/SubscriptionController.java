@@ -19,7 +19,7 @@ import com.cdac.coin_saarthi.service.SubscriptionService;
 
 @RestController
 @RequestMapping("/api/subscriptions")
-@PreAuthorize("hasAnyAuthority('ADMIN')")
+@PreAuthorize("hasAnyAuthority('ADMIN','SUBSCRIBER','USER')")
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
@@ -33,6 +33,12 @@ public class SubscriptionController {
             @RequestBody SubscriptionPlanDTO dto) {
         return ResponseEntity.ok(subscriptionService.createPlan(dto));
     }
+    
+    @GetMapping("/allplan")
+    public ResponseEntity<List<SubscriptionPlanDTO>> getAllPlans() {
+        return ResponseEntity.ok(subscriptionService.getAllPlans());
+    }
+
     // Subscribe user
     @PostMapping("/subscribe")
     public UserSubscription subscribeUser(

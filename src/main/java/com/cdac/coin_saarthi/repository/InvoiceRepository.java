@@ -7,5 +7,7 @@ import com.cdac.coin_saarthi.model.Payment;
 
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 	boolean existsByPayment(Payment payment);
+	Invoice findByPayment_PaymentId(Long userId);
+	Invoice findByUserSubscription_SubscriptionPlan_PlanId(Long planId);
 
 }

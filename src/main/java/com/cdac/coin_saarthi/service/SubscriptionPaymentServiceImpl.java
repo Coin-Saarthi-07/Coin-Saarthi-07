@@ -38,8 +38,12 @@ import com.razorpay.Utils;
 @Transactional
 public class SubscriptionPaymentServiceImpl implements SubscriptionPaymentService {
 
+	@Value("${razorpay.key.id}")
+	private String razorpayKeyId;
+
 	@Value("${razorpay.key.secret}")
 	private String razorpayKeySecret;
+
 	private final RazorpayClient razorpayClient;
 	private final UserRepository userRepository;
 	private final SubscriptionPlanRepository planRepository;
@@ -60,24 +64,23 @@ public class SubscriptionPaymentServiceImpl implements SubscriptionPaymentServic
 		this.userSubscriptionRepository = userSubscriptionRepository;
 		this.invoiceService = invoiceService;
 		this.invoiceRepository = invoiceRepository;
-		this.securityUtil=securityUtil;
+		this.securityUtil = securityUtil;
 	}
 
 	// 1.CREATE RAZORPAY ORDER + SAVE PAYMENT (PENDING)
 	@Override
-	public CreateOrderResponseDTO createOrder(Long userId, Long planId, PaymentMethod paymentMethod)
-			throws RazorpayException {
+	public CreateOrderResponseDTO createOrder(Long userId, Long planId) throws RazorpayException {
 
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
 		SubscriptionPlan plan = planRepository.findById(planId)
 				.orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
-		
+
 		User currentUser = securityUtil.getCurrentUser();
-		if((!currentUser.getUserId().equals(user.getUserId()))) {
+		if ((!currentUser.getUserId().equals(user.getUserId()))) {
 			throw new AccessDeniedCustomException("User can't set alert for another user");
 		}
-		
+
 		BigDecimal amountInPaise = plan.getPlanPrice().multiply(BigDecimal.valueOf(100));
 
 		JSONObject orderRequest = new JSONObject();
@@ -107,7 +110,7 @@ public class SubscriptionPaymentServiceImpl implements SubscriptionPaymentServic
 		response.setRazorpayOrderId(order.get("id"));
 		response.setAmount(amountInPaise);
 		response.setCurrency("INR");
-
+		response.setKey(razorpayKeyId);
 		return response;
 	}
 
@@ -115,42 +118,47 @@ public class SubscriptionPaymentServiceImpl implements SubscriptionPaymentServic
 	@Override
 	public void verifyAndActivateSubscription(VerifyPaymentDTO dto) {
 
+		if (dto.getRazorpayOrderId() == null || dto.getRazorpayPaymentId() == null
+				|| dto.getRazorpaySignature() == null) {
+			throw new IllegalStateException("Invalid Razorpay callback data");
+		}
 		Payment payment = paymentRepository.findByRazorpayOrderId(dto.getRazorpayOrderId())
 				.orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
 
-		if (payment.getStatus().equals(PaymentStatus.SUCCESS)) {
-			throw new ResourceNotFoundException("Payment already verified");
+		if (payment.getStatus() == PaymentStatus.SUCCESS) {
+			throw new AccessDeniedCustomException("Payment already verified");
 		}
 
 		String payload = dto.getRazorpayOrderId() + "|" + dto.getRazorpayPaymentId();
-
+		boolean isValid;
 		try {
-			// 🔽 ADD THIS BLOCK HERE
-			if (dto.getRazorpaySignature() == null || dto.getRazorpaySignature().isBlank()) {
-				// Swagger / local testing → skip verification
-				System.out.println("⚠️ Signature verification skipped (Swagger testing)");
-			} else {
-				boolean isValid = Utils.verifySignature(payload, dto.getRazorpaySignature(), razorpayKeySecret);
+			// 🔹 Signature verification (skip only for Swagger/local testing)
+			//if (dto.getRazorpaySignature() != null && !dto.getRazorpaySignature().isBlank()) {
 
-				if (!isValid) {
-					payment.setStatus(PaymentStatus.FAILED);
-					paymentRepository.save(payment);
-					throw new IllegalStateException("Payment verification failed");
-				}
-			}
+				isValid = Utils.verifySignature(payload, dto.getRazorpaySignature(), razorpayKeySecret);
+
+//			} else {
+//				System.out.println("⚠️ Signature skipped (Swagger/local testing)");
+//			}
 
 		} catch (Exception e) {
-			payment.setStatus(PaymentStatus.FAILED);
-			paymentRepository.save(payment);
+//			e.printStackTrace();
+//			payment.setStatus(PaymentStatus.FAILED);
+//			paymentRepository.save(payment);
 			throw new IllegalStateException("Payment verification error");
 		}
+		
+		if (!isValid) {
+			payment.setStatus(PaymentStatus.FAILED);
+			paymentRepository.save(payment);
+			throw new ResourceNotFoundException("Invalid Razorpay signature");
+		}
 
-		// ✅ Update payment after verification
+		// ✅ Update payment
 		payment.setStatus(PaymentStatus.SUCCESS);
 		payment.setRazorpayPaymentId(dto.getRazorpayPaymentId());
 		payment.setRazorpaySignature(dto.getRazorpaySignature());
 		payment.setPaymentTime(LocalDateTime.now());
-
 		paymentRepository.save(payment);
 
 		// ✅ Activate subscription
@@ -163,30 +171,102 @@ public class SubscriptionPaymentServiceImpl implements SubscriptionPaymentServic
 
 		userSubscriptionRepository.save(subscription);
 
-		// ✅ Create Invoice AFTER subscription activation
-		Invoice invoice = new Invoice();
-		if (invoiceRepository.existsByPayment(payment)) {
-			throw new ResourceNotFoundException("Invoice already generated");
+		// ✅ Invoice
+		if (!invoiceRepository.existsByPayment(payment)) {
+			Invoice invoice = new Invoice();
+			invoice.setUser(payment.getUser());
+			invoice.setPayment(payment);
+			invoice.setUserSubscription(subscription);
+			invoice.setAmount(payment.getAmount());
+			invoice.setInvoicePaymentStatus(InvoicePaymentStatus.SUCCESS);
+			invoice.setCreatedAt(LocalDateTime.now());
+
+			invoiceService.createInvoice(invoice);
 		}
 
-		invoice.setUser(payment.getUser());
-		invoice.setPayment(payment);
-		invoice.setUserSubscription(subscription);
-		invoice.setAmount(payment.getAmount());
-		invoice.setInvoicePaymentStatus(InvoicePaymentStatus.SUCCESS);
-		invoice.setCreatedAt(LocalDateTime.now());
-
-		invoiceService.createInvoice(invoice);
-
-		// Promote user role
-		User user = userRepository.findById(payment.getUser().getUserId())
-		        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
+		// ✅ Promote role
+		User user = payment.getUser();
 		if (user.getRole() != UserRole.SUBSCRIBER) {
 			user.setRole(UserRole.SUBSCRIBER);
 			userRepository.save(user);
 		}
-
 	}
+
+//	@Override
+//	public void verifyAndActivateSubscription(VerifyPaymentDTO dto) {
+//
+//		Payment payment = paymentRepository.findByRazorpayOrderId(dto.getRazorpayOrderId())
+//				.orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+//
+//		if (payment.getStatus().equals(PaymentStatus.SUCCESS)) {
+//			throw new ResourceNotFoundException("Payment already verified");
+//		}
+//
+//		String payload = dto.getRazorpayOrderId() + "|" + dto.getRazorpayPaymentId();
+//
+//		try {
+//			// 🔽 ADD THIS BLOCK HERE
+//			if (dto.getRazorpaySignature() == null || dto.getRazorpaySignature().isBlank()) {
+//				// Swagger / local testing → skip verification
+//				System.out.println("⚠️ Signature verification skipped (Swagger testing)");
+//			} else {
+//				boolean isValid = Utils.verifySignature(payload, dto.getRazorpaySignature(), razorpayKeySecret);
+//
+//				if (!isValid) {
+//					payment.setStatus(PaymentStatus.FAILED);
+//					paymentRepository.save(payment);
+//					throw new IllegalStateException("Payment verification failed");
+//				}
+//			}
+//
+//		} catch (Exception e) {
+//			payment.setStatus(PaymentStatus.FAILED);
+//			paymentRepository.save(payment);
+//			throw new IllegalStateException("Payment verification error");
+//		}
+//
+//		// ✅ Update payment after verification
+//		payment.setStatus(PaymentStatus.SUCCESS);
+//		payment.setRazorpayPaymentId(dto.getRazorpayPaymentId());
+//		payment.setRazorpaySignature(dto.getRazorpaySignature());
+//		payment.setPaymentTime(LocalDateTime.now());
+//
+//		paymentRepository.save(payment);
+//
+//		// ✅ Activate subscription
+//		UserSubscription subscription = new UserSubscription();
+//		subscription.setUser(payment.getUser());
+//		subscription.setSubscriptionPlan(payment.getSubscriptionPlan());
+//		subscription.setStartDate(LocalDate.now());
+//		subscription.setEndDate(LocalDate.now().plusDays(payment.getSubscriptionPlan().getDuration()));
+//		subscription.setStatus(SubscriptionStatus.ACTIVE);
+//
+//		userSubscriptionRepository.save(subscription);
+//
+//		// ✅ Create Invoice AFTER subscription activation
+//		Invoice invoice = new Invoice();
+//		if (invoiceRepository.existsByPayment(payment)) {
+//			throw new ResourceNotFoundException("Invoice already generated");
+//		}
+//
+//		invoice.setUser(payment.getUser());
+//		invoice.setPayment(payment);
+//		invoice.setUserSubscription(subscription);
+//		invoice.setAmount(payment.getAmount());
+//		invoice.setInvoicePaymentStatus(InvoicePaymentStatus.SUCCESS);
+//		invoice.setCreatedAt(LocalDateTime.now());
+//
+//		invoiceService.createInvoice(invoice);
+//
+//		// Promote user role
+//		User user = userRepository.findById(payment.getUser().getUserId())
+//		        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+//
+//		if (user.getRole() != UserRole.SUBSCRIBER) {
+//			user.setRole(UserRole.SUBSCRIBER);
+//			userRepository.save(user);
+//		}
+//
+//	}
 
 }

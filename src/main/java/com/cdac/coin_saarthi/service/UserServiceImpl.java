@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.cdac.coin_saarthi.dto.UpdateDTO;
+import com.cdac.coin_saarthi.enums.UserStatus;
 import com.cdac.coin_saarthi.exception.ResourceNotFoundException;
 import com.cdac.coin_saarthi.model.User;
 import com.cdac.coin_saarthi.repository.UserRepository;
@@ -32,8 +33,10 @@ public class UserServiceImpl implements UserService{
 
         // Delete user
         public void deleteUser(Long id) {
-            User user = getUserById(id);
-            userRepository.delete(user);
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
+            user.setStatus(UserStatus.BLOCKED);
+            userRepository.save(user);
         }
 
         // Update user

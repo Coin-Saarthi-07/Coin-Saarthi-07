@@ -39,13 +39,13 @@ public class UserSubscriptionController {
 	}
 	
 	//Get User Subscription by UserId
-	@GetMapping("{userId}")
+	@GetMapping("/user/{userId}")
 	public ResponseEntity<List<UserSubscription>> getByUserId(@PathVariable Long userId){
 			return ResponseEntity.ok(userSubscriptionService.getByUserId(userId));
 	}
 	
 	//Get User Subscription by UserId
-	@GetMapping("{subId}")
+	@GetMapping("/{subId}")
 	public ResponseEntity<UserSubscription> getById(@PathVariable Long subId){
 			return ResponseEntity.ok(userSubscriptionService.getById(subId));
 	}

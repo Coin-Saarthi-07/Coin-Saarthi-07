@@ -11,4 +11,7 @@ public class CreateOrderResponseDTO {
 	private String razorpayOrderId;
 	private String currency;
 	private BigDecimal amount;
+	private String key;
+	private String razorpayPaymentId;
+    private String razorpaySignature;
 }

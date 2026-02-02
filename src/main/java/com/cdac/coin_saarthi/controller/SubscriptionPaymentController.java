@@ -1,5 +1,8 @@
 package com.cdac.coin_saarthi.controller;
 
+import java.util.Map;
+
+import org.apache.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,30 +21,39 @@ import com.razorpay.RazorpayException;
 @PreAuthorize("hasAnyAuthority('ADMIN','SUBSCRIBER','USER')")
 public class SubscriptionPaymentController {
 
-    private final SubscriptionPaymentService paymentService;
+	private final SubscriptionPaymentService paymentService;
 
-    public SubscriptionPaymentController(SubscriptionPaymentService paymentService) {
-        this.paymentService = paymentService;
-    }
+	public SubscriptionPaymentController(SubscriptionPaymentService paymentService) {
+		this.paymentService = paymentService;
+	}
 
-    // STEP 1: Create order
-    @PostMapping("/order")
-    public ResponseEntity<?> createOrder(
-            @RequestParam Long userId,
-            @RequestParam Long planId,
-            @RequestParam PaymentMethod paymentMethod) throws RazorpayException {
+	// STEP 1: Create order
+	@PostMapping("/order")
+	public ResponseEntity<?> createOrder(@RequestParam Long userId, @RequestParam Long planId) throws RazorpayException {
 
-        return ResponseEntity.ok(
-                paymentService.createOrder(userId, planId,paymentMethod)
-        );
-    }
+		return ResponseEntity.ok(paymentService.createOrder(userId, planId));
+	}
 
-    // STEP 2: Verify payment
-    @PostMapping("/verify")
-    public ResponseEntity<?> verifyPayment(
-            @RequestBody VerifyPaymentDTO dto) {
+	// STEP 2: Verify payment
+	@PostMapping("/verify")
+	public ResponseEntity<?> verifyPayment(@RequestBody VerifyPaymentDTO dto) {
+		try {
+			paymentService.verifyAndActivateSubscription(dto);
+			return ResponseEntity.ok("Payment verified & subscription activated");
 
-        paymentService.verifyAndActivateSubscription(dto);
-        return ResponseEntity.ok("Payment verified & subscription activated");
-    }
+		} catch (IllegalStateException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).body("Payment verification failed");
+		}
+	}
+
+//    @PostMapping("/verify")
+//    public ResponseEntity<?> verifyPayment(
+//            @RequestBody VerifyPaymentDTO dto) {
+//
+//        paymentService.verifyAndActivateSubscription(dto);
+//        return ResponseEntity.ok("Payment verified & subscription activated");
+//    }
 }

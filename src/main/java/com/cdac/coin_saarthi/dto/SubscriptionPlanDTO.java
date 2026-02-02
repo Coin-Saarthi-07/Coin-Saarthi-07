@@ -12,6 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SubscriptionPlanDTO {
+	private Long planId;
     private String planName;
     private String features;
     private BigDecimal planPrice;
