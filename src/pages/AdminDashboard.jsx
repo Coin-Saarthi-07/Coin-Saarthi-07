@@ -1,10 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import SubscriptionForm from '../components/SubscriptionForm'; // Adjust path as needed
 import AddUser from '../components/AddUser'; // Adjust path as needed
+import { fetchUsers, updateUser, deleteUser } from "../services/adminUserService";
+import { createSubscription } from "../services/adminSubscriptionService";
+
+
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -126,6 +130,12 @@ export default function AdminDashboard() {
       marginTop: '30px',
       overflowX: 'auto'
     },
+    blockedStatus: {
+      background: 'rgba(239, 68, 68, 0.2)',
+      color: '#ef4444',
+      border: '1px solid rgba(239, 68, 68, 0.4)'
+    },
+
     table: {
       width: '100%',
       borderCollapse: 'collapse'
@@ -184,21 +194,94 @@ export default function AdminDashboard() {
     }
   };
 
+
+  const [usersData, setUsersData] = useState([]);
+  // const totalAlerts = usersData.reduce(
+  //   (sum, user) => sum + (user.alerts || 0),
+  //   0
+  // );
+
+  const totalUsers = usersData.length;
+
+  const activeUsers = usersData.filter(
+    u => u.status === "Active"
+  ).length;
+
+  const blockedUsers = usersData.filter(
+    u => u.status === "Blocked"
+  ).length;
+
+  // const premiumUsers = usersData.filter(
+  //   u => u.plan === "Premium"
+  // ).length;
+
   const statsData = [
-    { title: "Total Users", value: "1,542", change: "+12%", icon: "👥" },
-    { title: "Active Alerts", value: "4,892", change: "+8%", icon: "🔔" },
-    { title: "Alerts Triggered", value: "2,345", change: "+24%", icon: "⚡" },
-    { title: "API Requests", value: "1.2M", change: "+15%", icon: "🔄" }
+    {
+      title: "Total Users",
+      value: totalUsers,
+      icon: "👥"
+    },
+    {
+      title: "Active Users",
+      value: activeUsers,
+      icon: "✅"
+    },
+    {
+      title: "Blocked Users",
+      value: blockedUsers,
+      icon: "⛔"
+    },
+    // {
+    //   title: "Premium Users",
+    //   value: premiumUsers,
+    //   icon: "💎"
+    // }
   ];
 
 
-  const [usersData, setUsersData] = useState([
-    { id: 1, name: "John Doe", email: "john@example.com", plan: "Premium", alerts: 12, status: "Active" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", plan: "Basic", alerts: 5, status: "Active" },
-    { id: 3, name: "Bob Johnson", email: "bob@example.com", plan: "Premium", alerts: 18, status: "Inactive" },
-    { id: 4, name: "Alice Brown", email: "alice@example.com", plan: "Premium", alerts: 25, status: "Active" },
-    { id: 5, name: "Charlie Wilson", email: "charlie@example.com", plan: "Basic", alerts: 3, status: "Active" }
-  ]);
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+  try {
+    const res = await fetchUsers();
+
+    const mappedUsers = res.data.map(u => {
+      // ✅ find ACTIVE subscription for THIS user
+      const activeSubscription = u.subscriptions?.find(
+        sub => sub.status === "ACTIVE"
+      );
+
+      return {
+        id: u.userId,
+        name: u.userName,
+        email: u.email,
+        phoneNo: u.phoneNo,
+        dob: u.dob,
+
+        // ✅ plan now comes from backend correctly
+        plan: activeSubscription
+          ? activeSubscription.plan?.planName
+          : "No Active Plan",
+
+        alerts: u.alerts ? u.alerts.length : 0,
+        status:
+          u.status === "ACTIVE"
+            ? "Active"
+            : u.status === "BLOCKED"
+              ? "Blocked"
+              : "Inactive",
+        role: u.role
+      };
+    });
+
+    setUsersData(mappedUsers);
+  } catch (error) {
+    toast.error("Failed to load users", { theme: "dark" });
+  }
+};
+
 
 
   const handleEditUser = () => {
@@ -215,7 +298,19 @@ export default function AdminDashboard() {
       });
       return;
     }
-    setEditFormData({ name: selectedUser.name, email: selectedUser.email, plan: selectedUser.plan, status: selectedUser.status });
+    if (selectedUser.status === "Blocked") {
+      toast.warning("Blocked users cannot be edited", { theme: "dark" });
+      return;
+    }
+
+    setEditFormData({
+      name: selectedUser.name,
+      email: selectedUser.email,
+      phoneNo: selectedUser.phoneNo,  // ✅ pre-fill
+      dob: selectedUser.dob            // ✅ pre-fill (yyyy-MM-dd)
+    });
+
+
     setShowEditModal(true);
   };
 
@@ -236,22 +331,50 @@ export default function AdminDashboard() {
     setShowDeleteModal(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
+    try {
+      await updateUser(selectedUser.id, {
+        userName: editFormData.name,
+        email: editFormData.email,
+        phoneNo: editFormData.phoneNo, // ✅ REQUIRED
+        dob: editFormData.dob           // ✅ REQUIRED (yyyy-MM-dd)
+      });
 
-    setUsersData(prev => prev.map(user =>
-      user.id === selectedUser.id
-        ? { ...user, ...editFormData }
-        : user
-    ));
-    setShowEditModal(false);
-    setSelectedUser(null);
+      toast.success("User updated successfully", { theme: "dark" });
+      setShowEditModal(false);
+      loadUsers();
+    } catch (error) {
+      toast.error("Update failed", { theme: "dark" });
+      console.error(error);
+    }
   };
 
-  const handleConfirmDelete = () => {
-    setUsersData(prev => prev.filter(user => user.id !== selectedUser.id));
-    setShowDeleteModal(false);
-    setSelectedUser(null);
+
+
+  const handleConfirmDelete = async () => {
+    if (!selectedUser?.id) {
+      toast.error("No user selected", { theme: "dark" });
+      return;
+    }
+
+    try {
+      await deleteUser(selectedUser.id); // backend BLOCKS user
+
+      toast.success("User blocked successfully", { theme: "dark" });
+      setShowDeleteModal(false);
+      setSelectedUser(null);
+
+      // reload users to reflect BLOCKED status
+      loadUsers();
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to block user", { theme: "dark" });
+    }
   };
+
+
+
 
   const adminActions = [
 
@@ -261,18 +384,6 @@ export default function AdminDashboard() {
       icon: '📋',
       color: '#10b981'
     },
-    // { 
-    //   label: 'Add User', 
-    //   action: () => setShowAddUserForm(true),
-    //   icon: '👤',
-    //   color: '#3b82f6'
-    // },
-    // { 
-    //   label: 'Refresh', 
-    //   action: () => alert('Refreshing...'),
-    //   icon: '🔄',
-    //   color: '#f59e0b'
-    // },
 
     {
       label: 'Edit User',
@@ -389,8 +500,14 @@ export default function AdminDashboard() {
                 border: '1px solid rgba(34, 197, 94, 0.3)',
                 width: 'fit-content'
               }}>
-                <span>↗</span>
-                <span>{stat.change}</span>
+                <p style={{
+                  fontSize: '32px',
+                  fontWeight: '800',
+                  margin: '4px 0 0 0'
+                }}>
+                  {stat.value}
+                </p>
+
               </div>
             </div>
           ))}
@@ -441,7 +558,8 @@ export default function AdminDashboard() {
                   <th style={styles.tableHeader}>Name</th>
                   <th style={styles.tableHeader}>Email</th>
                   <th style={styles.tableHeader}>Plan</th>
-                  <th style={styles.tableHeader}>Alerts</th>
+                  <th style={styles.tableHeader}>Phone Number</th>
+                  <th style={styles.tableHeader}>DOB</th>
                   <th style={styles.tableHeader}>Status</th>
 
                 </tr>
@@ -491,15 +609,24 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td style={styles.tableCell}>
-                      <span style={{ fontWeight: '600' }}>{user.alerts}</span>
+                      <span style={{ fontWeight: '600' }}>{user.phoneNo}</span>
                     </td>
+                    <td style={styles.tableCell}>
+                      {user.dob ? new Date(user.dob).toLocaleDateString() : "-"}
+                    </td>
+
                     <td style={styles.tableCell}>
                       <span style={{
                         ...styles.statusBadge,
-                        ...(user.status === 'Active' ? styles.activeStatus : styles.inactiveStatus)
+                        ...(user.status === 'Active'
+                          ? styles.activeStatus
+                          : user.status === 'Blocked'
+                            ? styles.blockedStatus
+                            : styles.inactiveStatus)
                       }}>
                         {user.status}
                       </span>
+
                     </td>
 
                   </tr>
@@ -515,15 +642,28 @@ export default function AdminDashboard() {
         {showSubscriptionForm && (
           <SubscriptionForm
             onClose={() => setShowSubscriptionForm(false)}
-            onSubmit={(plan) => {
-              console.log('New plan created:', plan);
-              setShowSubscriptionForm(false);
-              toast.success('Subscription plan created successfully!', {
-                theme: "dark"
-              });
+            onSubmit={async (plan) => {
+              try {
+                await createSubscription(plan);
+
+                toast.success("Subscription plan created successfully!", {
+                  theme: "dark"
+                });
+
+                setShowSubscriptionForm(false);
+              } catch (error) {
+                console.error("Subscription error:", error.response?.data);
+
+                toast.error(
+                  error.response?.data?.message || "Failed to create subscription",
+                  { theme: "dark" }
+                );
+              }
             }}
           />
+
         )}
+
 
         {/* Edit User Modal */}
         {showEditModal && (
@@ -576,44 +716,30 @@ export default function AdminDashboard() {
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '6px', color: '#94a3b8', fontSize: '14px' }}>Plan</label>
-                <select
-                  value={editFormData.plan}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, plan: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '14px'
-                  }}
-                >
-                  <option value="Basic">Basic</option>
-                  <option value="Premium">Premium</option>
-                </select>
+                <label style={{ color: '#94a3b8' }}>Phone Number</label>
+                <input
+                  type="text"
+                  value={editFormData.phoneNo || ""}
+                  onChange={(e) =>
+                    setEditFormData(prev => ({ ...prev, phoneNo: e.target.value }))
+                  }
+                />
+
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', marginBottom: '6px', color: '#94a3b8', fontSize: '14px' }}>Status</label>
-                <select
-                  value={editFormData.status}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, status: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '14px'
-                  }}
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ color: '#94a3b8' }}>Date of Birth</label>
+                <input
+                  type="date"
+                  value={editFormData.dob || ""}
+                  onChange={(e) =>
+                    setEditFormData(prev => ({ ...prev, dob: e.target.value }))
+                  }
+                />
+
               </div>
+
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                 <button
@@ -664,9 +790,9 @@ export default function AdminDashboard() {
               textAlign: 'center'
             }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
-              <h3 style={{ margin: '0 0 12px 0', color: 'white', fontSize: '20px', fontWeight: '700' }}>Delete User</h3>
+              <h3 style={{ margin: '0 0 12px 0', color: 'white', fontSize: '20px', fontWeight: '700' }}>Block User</h3>
               <p style={{ margin: '0 0 24px 0', color: '#94a3b8', fontSize: '14px', lineHeight: '1.5' }}>
-                Are you sure you want to delete <strong style={{ color: 'white' }}>{selectedUser?.name}</strong>? This action cannot be undone.
+                Are you sure you want to block <strong style={{ color: 'white' }}>{selectedUser?.name}</strong>? This action cannot be undone.
               </p>
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
@@ -697,7 +823,7 @@ export default function AdminDashboard() {
                     fontWeight: '600'
                   }}
                 >
-                  Delete User
+                  Block User
                 </button>
               </div>
             </div>
