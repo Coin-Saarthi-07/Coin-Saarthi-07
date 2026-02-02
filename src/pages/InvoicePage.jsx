@@ -2,85 +2,66 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
-import invoiceService from '../services/invoiceService';
-import { toast } from 'react-toastify';
+import axios from 'axios';
+import authService from '../services/authService';
 
 export default function InvoicePage() {
     const location = useLocation();
     const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+    const user = authService.getCurrentUser();
+
     const [invoiceData, setInvoiceData] = useState(null);
-    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        if (location.state && location.state.plan) {
-            setInvoiceData({
-                plan: location.state.plan,
-                paymentDetails: location.state.paymentDetails || {}, // Get payment details
-                date: new Date().toLocaleDateString(),
-                invoiceNumber: `INV-${Math.floor(Math.random() * 1000000)}`,
-                transactionId: `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-            });
-        } else {
-            // Fallback for testing or direct access
-            setInvoiceData({
-                plan: { name: 'Pro Plan', price: '$29.99', period: 'month' },
-                paymentDetails: {
-                    razorpayPaymentId: "mock_pay_id",
-                    razorpayOrderId: "mock_order_id",
-                    razorpaySignature: "mock_sig"
-                },
-                date: new Date().toLocaleDateString(),
-                invoiceNumber: `INV-${Math.floor(Math.random() * 1000000)}`,
-                transactionId: `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-            });
+        if (!location.state?.plan && !location.state?.paymentId) {
+            navigate("/subscription");
+            return;
         }
-    }, [location]);
 
-    const handleSaveInvoice = async () => {
-        if (!invoiceData) return;
-
-        setIsSaving(true);
-        try {
-            const amount = parseFloat(invoiceData.plan.price.toString().replace(/[^0-9.]/g, ''));
-            const now = new Date();
-            const nextMonth = new Date(now);
-            nextMonth.setMonth(now.getMonth() + 1);
-
-            const payload = {
-                invoiceId: 0,
-                payment: {
-                    paymentId: 0,
-                    razorpayOrderId: invoiceData.paymentDetails.razorpayOrderId || "N/A",
-                    razorpayPaymentId: invoiceData.paymentDetails.razorpayPaymentId || "N/A",
-                    razorpaySignature: invoiceData.paymentDetails.razorpaySignature || "N/A",
-                    paymentMethod: "UPI",
-                    amount: amount,
-                    status: "SUCCESS", // Assuming success
-                    currencyCode: "USD",
-                    transactionId: invoiceData.transactionId,
-                    paymentTime: now.toISOString()
-                },
+        // If plan data is passed directly, use it for display
+        if (location.state?.plan) {
+            const plan = location.state.plan;
+            setInvoiceData({
+                invoiceId: 1703123456789,
+                createdAt: new Date().toISOString(),
+                amount: plan.price,
                 userSubscription: {
-                    userSubscriptionId: 0,
-                    startDate: now.toISOString().split('T')[0],
-                    endDate: nextMonth.toISOString().split('T')[0],
-                    status: "ACTIVE",
-                    invoices: []
+                    subscriptionPlan: {
+                        planName: plan.name,
+                        duration: plan.period.replace(' days', ''),
+                        features: plan.features
+                    }
                 },
-                amount: amount,
-                invoicePaymentStatus: "SUCCESS",
-                createdAt: now.toISOString()
-            };
-
-            await invoiceService.createInvoice(payload);
-            toast.success('Invoice saved successfully!');
-        } catch (error) {
-            console.error('Failed to save invoice:', error);
-            toast.error('Failed to save invoice.');
-        } finally {
-            setIsSaving(false);
+                paymentId: 1703123457789
+            });
+            return;
         }
-    };
+
+        // Fetch invoice data if paymentId is provided
+        const fetchInvoice = async () => {
+            try {
+                const res = await axios.get(
+                    `http://localhost:8080/crypto/admin/invoices/payment/${location.state.paymentId}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+
+                setInvoiceData(res.data);
+
+            } catch (err) {
+                console.error(err);
+                navigate("/subscription");
+            }
+        };
+
+        fetchInvoice();
+    }, []);
+
+
 
     if (!invoiceData) return null;
 
@@ -170,9 +151,9 @@ export default function InvoicePage() {
         },
         totalLabel: {
             marginRight: '32px',
-            fontSize: '18px',
-            fontWeight: '600',
-            color: '#0f172a'
+            fontSize: '24px',
+            fontWeight: '800',
+            color: '#3b82f6'
         },
         totalAmount: {
             fontSize: '24px',
@@ -202,11 +183,6 @@ export default function InvoicePage() {
             background: 'transparent',
             color: 'white',
             border: '1px solid rgba(255,255,255,0.2)'
-        },
-        successBtn: {
-            background: '#10b981',
-            color: 'white',
-            border: 'none'
         }
     };
 
@@ -227,18 +203,24 @@ export default function InvoicePage() {
                             </div>
                             <div style={styles.invoiceDetails}>
                                 <div style={styles.label}>Invoice Number</div>
-                                <div style={styles.value}>#{invoiceData.invoiceNumber}</div>
+                                <div style={styles.value}>#{String(invoiceData.invoiceId).slice(-5)}</div>
                                 <div style={styles.label}>Date</div>
-                                <div style={styles.value}>{invoiceData.date}</div>
+                                <div style={styles.value}>
+                                    {new Date(invoiceData.createdAt).toLocaleDateString()}
+                                </div>
+
                                 <div style={styles.label}>Transaction ID</div>
-                                <div style={styles.value}>{invoiceData.transactionId}</div>
+                                <div style={styles.value}>
+                                    {invoiceData.payment?.razorpayPaymentId || invoiceData.paymentId}
+                                </div>
+
                             </div>
                         </div>
 
                         {/* Bill To */}
                         <div style={styles.billTo}>
                             <div style={styles.label}>Bill To</div>
-                            <div style={{ ...styles.value, fontSize: '18px' }}>Valued Customer</div>
+                            <div style={{ ...styles.value, fontSize: '18px' }}>{user?.userName || 'Valued Customer'}</div>
                         </div>
 
                         {/* Items Table */}
@@ -252,9 +234,23 @@ export default function InvoicePage() {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td style={{ ...styles.td, fontWeight: '600' }}>{invoiceData.plan.name} Subscription</td>
-                                    <td style={styles.td}>1 {invoiceData.plan.period}</td>
-                                    <td style={{ ...styles.td, textAlign: 'right', fontWeight: '600' }}>{invoiceData.plan.price}</td>
+                                    <td style={{ ...styles.td, fontWeight: '600' }}>
+                                        {invoiceData.userSubscription?.subscriptionPlan?.planName} Subscription
+                                        {invoiceData.userSubscription?.subscriptionPlan?.features && (
+                                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                                                {invoiceData.userSubscription.subscriptionPlan.features.join(', ')}
+                                            </div>
+                                        )}
+                                    </td>
+
+                                    <td style={styles.td}>
+                                        {invoiceData.userSubscription?.subscriptionPlan?.duration} days
+                                    </td>
+
+                                    <td style={{ ...styles.td, textAlign: 'right', fontWeight: '600' }}>
+                                        ₹{invoiceData.amount}
+                                    </td>
+
                                 </tr>
                             </tbody>
                         </table>
@@ -262,7 +258,8 @@ export default function InvoicePage() {
                         {/* Total */}
                         <div style={styles.totalRow}>
                             <span style={styles.totalLabel}>Total</span>
-                            <span style={styles.totalAmount}>{invoiceData.plan.price}</span>
+                            <span style={styles.totalAmount}>₹{invoiceData.amount}</span>
+
                         </div>
 
                         <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #e2e8f0', color: '#64748b', fontSize: '13px', textAlign: 'center' }}>
@@ -273,16 +270,9 @@ export default function InvoicePage() {
                     <div style={styles.actions}>
                         <button
                             style={{ ...styles.button, ...styles.secondaryBtn }}
-                            onClick={() => navigate('/dashboard')}
+                            onClick={() => navigate('/subscription')}
                         >
                             Back to Dashboard
-                        </button>
-                        <button
-                            style={{ ...styles.button, ...styles.successBtn }}
-                            onClick={handleSaveInvoice}
-                            disabled={isSaving}
-                        >
-                            {isSaving ? 'Saving...' : 'Save Invoice'}
                         </button>
                         <button
                             style={{ ...styles.button, ...styles.primaryBtn }}

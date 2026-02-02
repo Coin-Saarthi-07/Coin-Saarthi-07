@@ -5,6 +5,7 @@ import NavBar from '../components/NavBar';
 import authService from '../services/authService';
 import './Register.css';
 
+
 const Login = () => {
     const [username, setUserName] = useState('');
     const [password, setPassword] = useState('');
@@ -13,29 +14,40 @@ const Login = () => {
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-        try {
+    try {
+        await authService.login({ userName: username, password });
 
-            await authService.login({ userName: username, password });
+        const user = authService.getCurrentUser();
 
-            const user = authService.getCurrentUser();
-
-            if (user?.role === "ADMIN") {
-
-                navigate("/admin/dashboard");
-            } else {
-                navigate("/dashboard");
-            }
-
-        } catch (err) {
-            setError(err.message || err.response?.data?.message || "Login failed. Please check your credentials.");
-        } finally {
+        // 🚫 BLOCKED USER HANDLING (frontend-only)
+        if (user?.status === "BLOCKED") {
+            authService.logout(); // ⛔ remove token immediately
+            setError("Your account has been blocked. Please contact the administrator.");
             setLoading(false);
+            return;
         }
-    };
+
+        if (user?.role === "ADMIN") {
+            navigate("/admin/dashboard");
+        } else {
+            navigate("/dashboard");
+        }
+
+    } catch (err) {
+        setError(
+            err.response?.data?.message ||
+            err.message ||
+            "Login failed. Please check your credentials."
+        );
+    } finally {
+        setLoading(false);
+    }
+};
+
 
 
     return (

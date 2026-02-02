@@ -20,6 +20,7 @@ const login = async (credentials) => {
     localStorage.setItem(TOKEN_KEY, res.data.token);
 
     const userData = {
+      token: res.data.token,  
       userId: res.data.userId,
       userName: res.data.userName,
       role: res.data.role // USER / ADMIN / SUBSCRIBER
