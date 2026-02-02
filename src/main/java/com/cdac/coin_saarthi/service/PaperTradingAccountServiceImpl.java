@@ -60,14 +60,23 @@ public class PaperTradingAccountServiceImpl implements PaperTradingAccountServic
 	}
 
 	@Override
-	public PaperTradingAccount getAccountByUserId(Long userId) {
-		return accountRepository.findByUser_UserId(userId)
+	public AccountResponseDTO getAccountByUserId(Long userId) {
+		PaperTradingAccount account = accountRepository.findByUser_UserId(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("Paper trading account not found"));
+		
+		AccountResponseDTO dto = new AccountResponseDTO();
+		dto.setAccountId(account.getAccountId());
+		dto.setVirtualBalance(account.getVirtualBalance());
+		dto.setCreatedAt(account.getCreatedAt());
+		dto.setLastUpdated(account.getLastUpdated());
+		
+		return dto;
 	}
 
 	@Override
 	public void resetAccount(Long userId) {
-		PaperTradingAccount account = getAccountByUserId(userId);
+		PaperTradingAccount account = accountRepository.findByUser_UserId(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("Paper trading account not found"));
 		account.setVirtualBalance(new BigDecimal("100000"));
 		account.setLastUpdated(LocalDateTime.now());
 		PaperTradingAccount acc = accountRepository.save(account);

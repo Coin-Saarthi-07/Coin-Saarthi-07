@@ -7,7 +7,7 @@ public interface PaperTradingAccountService {
 
 	AccountResponseDTO createAccount(Long userId);
 
-    PaperTradingAccount getAccountByUserId(Long userId);
+    AccountResponseDTO getAccountByUserId(Long userId);
 
     void resetAccount(Long userId);
 }

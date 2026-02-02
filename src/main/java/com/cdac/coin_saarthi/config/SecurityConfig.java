@@ -29,31 +29,31 @@ public class SecurityConfig {
 			throws Exception {
 
 		http
-				// ✅ ENABLE CORS (ONLY ONCE)
+				// ENABLE CORS (ONLY ONCE)
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-				// ✅ DISABLE CSRF (JWT)
+				// DISABLE CSRF (JWT)
 				.csrf(csrf -> csrf.disable())
 
 				.authorizeHttpRequests(auth -> auth
 
-						// ✅ Preflight
+						// Preflight
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-						// ✅ Swagger + Auth
+						// Swagger + Auth
 						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/auth/**").permitAll()
 
-						// ✅ PUBLIC CRYPTO APIs (MATCH FRONTEND EXACTLY)
-						.requestMatchers("/crypto/crypto-currency/**").permitAll()
+						// PUBLIC CRYPTO APIs (MATCH FRONTEND EXACTLY)
+						.requestMatchers("/crypto/crypto-currency/**", "/api/ai/**").permitAll()
 
-						// ✅ Paper trading needs login
+						// Paper trading needs login
 						.requestMatchers("/api/paper/**").authenticated()
 
-						// ✅ Everything else secured
+						//  Everything else secured
 						.anyRequest().authenticated())
 
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
+    
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
