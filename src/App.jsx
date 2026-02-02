@@ -15,6 +15,7 @@ import AdminRoute from "./routes/AdminRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleRoute from "./routes/RoleRoute";
+import ChatBot from "./components/ChatBot";
 
 function App() {
   return (
@@ -69,6 +70,7 @@ function App() {
         <Route path="*" element={<Navigate to="/home" replace />} />
 
       </Routes>
+      <ChatBot />
     </Router>
   );
 }

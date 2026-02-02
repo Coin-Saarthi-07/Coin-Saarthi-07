@@ -432,3 +432,25 @@
   background-position: center;
   background-repeat: no-repeat;
 }
+.crypto-table {
+  width: 100%;
+}
+
+.crypto-row {
+  display: grid;
+  grid-template-columns: 
+    40px 40px 220px 120px 
+    80px 80px 80px 
+    140px 140px 120px;
+  align-items: center;
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  height: auto;
+  opacity: 1;
+  visibility: visible;
+}
+
+.crypto-row * {
+  visibility: visible;
+}
+
