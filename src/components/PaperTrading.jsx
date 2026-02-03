@@ -15,6 +15,7 @@ const PaperTrading = () => {
     name: authService.getCurrentUser()?.userName || 'User',
     virtualBalance: 100000
   });
+  const [selectedPortfolioItem, setSelectedPortfolioItem] = useState(null);
 
   const [portfolio, setPortfolio] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -44,12 +45,16 @@ const PaperTrading = () => {
 
   const fetchInitialData = async (userId) => {
     setLoading(true);
-    await Promise.all([
-      fetchCryptoList(),
-      fetchPortfolio(userId),
-      fetchTransactions(userId),
-      fetchAccountInfo(userId)
-    ]);
+    try {
+      const cryptoData = await fetchCryptoList();
+      await Promise.all([
+        fetchPortfolio(userId, cryptoData),
+        fetchTransactions(userId),
+        fetchAccountInfo(userId)
+      ]);
+    } catch (error) {
+      console.error("Error fetching initial data:", error);
+    }
     setLoading(false);
   };
 
@@ -68,31 +73,39 @@ const PaperTrading = () => {
         : [];
 
       setCryptos(flatList);
+      return flatList;
     } catch (err) {
       console.error("Crypto list error", err);
       setCryptos([]);
+      return [];
     }
   };
 
-  const fetchPortfolio = async (userId) => {
+  const fetchPortfolio = async (userId, currentCryptos = []) => {
     try {
       // First get the account to find accountId
       const accountResponse = await api.get(`/paper/account/${userId}`);
       const accountId = accountResponse.data.accountId;
-      
+
       // Then fetch portfolio using accountId
       const response = await api.get(`/api/portfolio/holdings/${accountId}`);
+      // const response = await api.get(`/paper/portfolio/${userId}`);
       // Map portfolio data to ensure correct property names for UI
-      const mappedPortfolio = (response.data || []).map(item => ({
-        id: item.cryptoId || Math.random(), // Ensure ID is mapped if needed for keys
-        cryptoId: item.cryptoId,
-        name: item.cryptoName || item.name || 'Unknown',
-        symbol: item.cryptoName || item.symbol || '???',
-        quantity: item.quantity,
-        avgPrice: item.avgBuyPrice,
-        currentPrice: item.currentPrice,
-        ...item
-      }));
+      const mappedPortfolio = (response.data || []).map(item => {
+        // Find the crypto info from our full list to get the ID
+        const matchedCrypto = currentCryptos.find(c => c.symbol === item.cryptoName);
+
+        return {
+          id: item.cryptoId || (matchedCrypto ? matchedCrypto.id : Math.random()),
+          cryptoId: item.cryptoId || (matchedCrypto ? matchedCrypto.id : null),
+          name: item.cryptoName || item.name || 'Unknown',
+          symbol: item.cryptoName || item.symbol || '???',
+          quantity: item.quantity,
+          avgPrice: item.avgBuyPrice,
+          currentPrice: item.currentPrice,
+          ...item
+        };
+      });
       setPortfolio(mappedPortfolio);
     } catch (error) {
       console.warn('Error fetching portfolio:', error);
@@ -182,37 +195,27 @@ const PaperTrading = () => {
     }
   };
 
-  const executeSellOrder = async (crypto) => {
-    const quantityToSell = parseFloat(sellQuantity);
-    if (!quantityToSell || quantityToSell <= 0) {
-      alert('Please enter valid quantity');
-      return;
-    }
+  const executeSellOrder = async () => {
+    const qty = parseFloat(sellQuantity);
+    if (!qty || qty <= 0) return;
 
     setLoading(true);
     try {
-      const response = await api.post(
-        '/paper/trade/sell',
-        {
-          userId: user.userId,
-          cryptoId: crypto.id,
-          quantity: quantityToSell
-        }
-      );
+      await api.post(`/paper/trade/sell?userId=${user.userId}&cryptoId=${selectedPortfolioItem.cryptoId}&quantity=${parseFloat(sellQuantity)}`);
 
-      if (response.status === 200 || response.status === 201) {
-        alert('Sell order executed successfully!');
-        setShowSellModal(false);
-        setSellQuantity('');
-        fetchInitialData(user.userId);
-      }
+      alert("Sell order executed successfully!");
+      setShowSellModal(false);
+      setSellQuantity("");
+      setSelectedPortfolioItem(null);
+      fetchInitialData(user.userId);
     } catch (error) {
-      console.error('Error executing sell order:', error);
-      alert('Failed to execute sell order: ' + (error.response?.data?.message || error.message));
+      console.error("Sell error:", error);
+      alert(error.response?.data?.message || "Sell failed");
     } finally {
-      setLoading(false);
+      setLoading(false); // Ensure loading is turned off
     }
   };
+
 
   const resetAccount = async () => {
     if (window.confirm('Are you sure you want to reset your paper trading account? All holdings will be cleared and balance reset.')) {
@@ -540,12 +543,12 @@ const PaperTrading = () => {
           <button style={{ ...styles.btn, ...styles.btnPrimary }} onClick={handleBuy}>
             <FaShoppingCart /> Buy
           </button>
-          <button style={{ ...styles.btn, ...styles.btnDanger }} onClick={handleSell}>
+          {/* <button style={{ ...styles.btn, ...styles.btnDanger }} onClick={handleSell}>
             <FaMoneyBillWave /> Sell
-          </button>
-          <button style={{ ...styles.btn, ...styles.btnSecondary }} onClick={resetAccount}>
+          </button> */}
+          {/* <button style={{ ...styles.btn, ...styles.btnSecondary }} onClick={resetAccount}>
             <FaRedo /> Reset Account
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -649,9 +652,17 @@ const PaperTrading = () => {
                           <button
                             style={{ ...styles.btn, ...styles.btnDanger, padding: '6px 12px', fontSize: '12px' }}
                             onClick={() => {
-                              setSelectedCrypto({ id: item.cryptoId, name: item.name, price: item.currentPrice });
+                              setSelectedPortfolioItem(item);
+                              setSelectedCrypto({
+                                id: item.cryptoId,
+                                name: item.name,
+                                symbol: item.symbol,
+                                price: item.currentPrice
+                              });
                               setShowSellModal(true);
                             }}
+
+
                           >
                             Sell
                           </button>
@@ -862,7 +873,8 @@ const PaperTrading = () => {
       )}
 
       {/* Sell Modal */}
-      {showSellModal && selectedCrypto && (
+      {showSellModal && selectedPortfolioItem && (
+
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
             <div style={styles.modalHeader}>
