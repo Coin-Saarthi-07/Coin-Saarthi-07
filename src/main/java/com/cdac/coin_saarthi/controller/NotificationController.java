@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cdac.coin_saarthi.dto.CreateNotificationDTO;
 import com.cdac.coin_saarthi.dto.UpdateNotificationDTO;
+import com.cdac.coin_saarthi.dto.NotificationResponseDTO;
 import com.cdac.coin_saarthi.model.Notification;
 import com.cdac.coin_saarthi.service.NotificationService;
 
@@ -42,6 +43,13 @@ public class NotificationController {
     @GetMapping("/{id}")
     public Notification get(@PathVariable Long id) {
         return notificationService.getById(id);
+    }
+
+    // GET: /api/notification/user/{userId}
+    // get notifications by user id
+    @GetMapping("/user/{userId}")
+    public List<NotificationResponseDTO> getByUser(@PathVariable Long userId) {
+        return notificationService.getByUser(userId);
     }
 
     // POST: /api/notification

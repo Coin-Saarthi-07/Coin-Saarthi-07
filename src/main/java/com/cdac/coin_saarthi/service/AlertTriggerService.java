@@ -137,6 +137,7 @@ public class AlertTriggerService {
 		notification.setSentAt(LocalDateTime.now());
 
 		notificationRepository.save(notification);
+		System.out.println("Saved " + medium + " notification for user " + user.getUserId());
 	}
 
 
