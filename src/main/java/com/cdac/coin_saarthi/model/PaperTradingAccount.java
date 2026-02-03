@@ -30,6 +30,7 @@ public class PaperTradingAccount {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @lombok.ToString.Exclude
     private User user;
 
     @Column(nullable = false)
@@ -40,14 +41,17 @@ public class PaperTradingAccount {
     
     @JsonIgnore
     @OneToMany(mappedBy = "account")
+    @lombok.ToString.Exclude
     private List<PaperTradeOrder> orders;
 
     @JsonIgnore
     @OneToMany(mappedBy = "account")
+    @lombok.ToString.Exclude
     private List<PaperTransactionLog> transactions;
     
     @OneToMany(mappedBy = "paperTradingAccount")
     @JsonIgnore
+    @lombok.ToString.Exclude
     private List<Portfolio> portfolios;
 
 

@@ -36,9 +36,11 @@ public class PaperTradeController {
 
 	// sell crypto
 	@PostMapping("/sell")
-	public ResponseEntity<String> sellCrypto(@RequestBody SellRequestDTO dto) {
-
-		service.sellCrypto(dto.getUserId(), dto.getCryptoId(), dto.getQuantity());
+	public ResponseEntity<String> sellCrypto(@RequestParam Long userId, @RequestParam Long cryptoId,
+			@RequestParam BigDecimal quantity){
+//	public ResponseEntity<String> sellCrypto(@RequestBody SellRequestDTO dto) {
+//
+	service.sellCrypto(userId, cryptoId, quantity);
 
 		return ResponseEntity.ok("Crypto sold successfully");
 	}

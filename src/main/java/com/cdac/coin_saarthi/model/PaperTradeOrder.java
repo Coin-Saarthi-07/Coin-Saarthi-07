@@ -27,6 +27,7 @@ public class PaperTradeOrder {
 
     @ManyToOne
     @JoinColumn(name = "account_id")
+    @lombok.ToString.Exclude
     private PaperTradingAccount account;
 
     @ManyToOne

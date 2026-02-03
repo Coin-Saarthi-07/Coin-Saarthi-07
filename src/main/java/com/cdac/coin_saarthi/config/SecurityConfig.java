@@ -47,7 +47,8 @@ public class SecurityConfig {
 						.requestMatchers("/crypto/crypto-currency/**", "/api/ai/**").permitAll()
 
 						// Paper trading needs login
-						.requestMatchers("/api/paper/**").authenticated()
+						//.requestMatchers("/api/paper/**").authenticated()
+						.requestMatchers("/paper/**").authenticated()
 
 						//  Everything else secured
 						.anyRequest().authenticated())
