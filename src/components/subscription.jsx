@@ -61,13 +61,29 @@ export default function SubscriptionPage() {
     }
   }, [toast.show]);
 
-  // Check for subscribed plans from localStorage
+  // Add effect to clear subscription data if user changes
+  useEffect(() => {
+    if (!userId) {
+      // Clear subscription data if no user is logged in
+      authService.clearSubscriptionData();
+      setSubscribedPlans(new Set());
+    }
+  }, [userId]);
+
+  // Check for subscribed plans from localStorage and validate against current user
   useEffect(() => {
     const savedSubscribedPlans = localStorage.getItem('subscribedPlans');
-    if (savedSubscribedPlans) {
+    const savedUserId = localStorage.getItem('subscribedUserId');
+    
+    if (savedSubscribedPlans && savedUserId === userId?.toString()) {
+      // Only load subscribed plans if they belong to the current user
       setSubscribedPlans(new Set(JSON.parse(savedSubscribedPlans)));
+    } else {
+      // Clear subscription data if it belongs to a different user or no user
+      authService.clearSubscriptionData();
+      setSubscribedPlans(new Set());
     }
-  }, []);
+  }, [userId]);
   const styles = {
     container: {
       maxWidth: '1400px',
@@ -293,41 +309,104 @@ export default function SubscriptionPage() {
         description: plan.name,
         order_id: res.data.razorpayOrderId,
 
+        // handler: async function (response) {
+        //   await axios.post(
+        //     "http://localhost:8080/api/payments/subscription/verify",
+        //     {
+        //       razorpayOrderId: response.razorpay_order_id,
+        //       razorpayPaymentId: response.razorpay_payment_id,
+        //       razorpaySignature: response.razorpay_signature
+        //     },
+        //     {
+        //       headers: {
+        //         Authorization: `Bearer ${token}`
+        //       }
+        //     }
+        //   );
+
+        //   // CRITICAL: Update Auth Context to reflect new role immediately
+        //   const storedUser = authService.getCurrentUser();
+        //   if (storedUser) {
+        //     const updatedUser = { ...storedUser, role: res.data.role || "SUBSCRIBER" };
+        //     updateUser(updatedUser); // Update Context & LocalStorage via Context
+        //   }
+
+        //   setSubscribedPlans(prev => {
+        //     const newSet = new Set([...prev, plan.planId]);
+        //     localStorage.setItem('subscribedPlans', JSON.stringify([...newSet]));
+        //     localStorage.setItem('subscribedUserId', userId.toString());
+        //     return newSet;
+        //   });
+        //   setToast({ show: true, message: "Payment verified & subscription activated 🎉", type: 'success' });
+        //   // setTimeout(() => {
+        //   //   //('/invoice', { state: { plan } });
+        //   //   navigate("/invoice", {
+        //   //     state: { paymentId }
+        //   //   });
+        //   // }, 2000);
+        // }
         handler: async function (response) {
-          await axios.post(
-            "http://localhost:8080/api/payments/subscription/verify",
-            {
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          );
-
-          // CRITICAL: Update Auth Context to reflect new role immediately
-          const storedUser = authService.getCurrentUser();
-          if (storedUser) {
-            const updatedUser = { ...storedUser, role: res.data.role || "SUBSCRIBER" };
-            updateUser(updatedUser); // Update Context & LocalStorage via Context
-          }
-
-          setSubscribedPlans(prev => {
-            const newSet = new Set([...prev, plan.planId]);
-            localStorage.setItem('subscribedPlans', JSON.stringify([...newSet]));
-            return newSet;
-          });
-          setToast({ show: true, message: "Payment verified & subscription activated 🎉", type: 'success' });
-          // setTimeout(() => {
-          //   //('/invoice', { state: { plan } });
-          //   navigate("/invoice", {
-          //     state: { paymentId }
-          //   });
-          // }, 2000);
+  try {
+    // 1️⃣ VERIFY PAYMENT
+    const verifyRes = await axios.post(
+      "http://localhost:8080/api/payments/subscription/verify",
+      {
+        razorpayOrderId: response.razorpay_order_id,
+        razorpayPaymentId: response.razorpay_payment_id,
+        razorpaySignature: response.razorpay_signature
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
+      }
+    );
+
+    // 2️⃣ 🔥 UPDATE JWT (MOST IMPORTANT)
+    if (verifyRes.data?.token) {
+      localStorage.setItem("token", verifyRes.data.token);
+    }
+
+    // 3️⃣ UPDATE AUTH CONTEXT (UI sync)
+    const storedUser = authService.getCurrentUser();
+    if (storedUser) {
+      const updatedUser = {
+        ...storedUser,
+        role: "SUBSCRIBER"
+      };
+      updateUser(updatedUser);
+    }
+
+    // 4️⃣ LOCAL UI STATE (plans)
+    setSubscribedPlans(prev => {
+      const newSet = new Set([...prev, plan.planId]);
+      localStorage.setItem("subscribedPlans", JSON.stringify([...newSet]));
+      localStorage.setItem("subscribedUserId", userId.toString());
+      return newSet;
+    });
+
+    // 5️⃣ SUCCESS UX
+    setToast({
+      show: true,
+      message: "Payment verified & subscription activated 🎉",
+      type: "success"
+    });
+
+    // 6️⃣ OPTIONAL: redirect
+    navigate("/invoice", {
+      state: { paymentId: verifyRes.data.paymentId }
+    });
+
+  } catch (err) {
+    console.error(err);
+    setToast({
+      show: true,
+      message: "Payment verification failed",
+      type: "error"
+    });
+  }
+}
+
         ,
 
         theme: {

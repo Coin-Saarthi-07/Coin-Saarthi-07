@@ -80,7 +80,7 @@ const NavBar = () => {
                                 {(user.role?.toUpperCase() === 'SUBSCRIBER' || user.role?.toUpperCase() === 'ADMIN') && (
                                     <>
                                         <Nav.Link href="/paper-trading/trade">Trading</Nav.Link>
-                                        <Nav.Link href="/paper-trading/portfolio">Portfolio</Nav.Link>
+                                        {/* <Nav.Link href="/paper-trading/portfolio">Portfolio</Nav.Link> */}
                                     </>
                                 )}
                             </>

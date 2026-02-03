@@ -32,11 +32,33 @@ const login = async (credentials) => {
   return res.data;
 };
 
+/* CLEAR SUBSCRIPTION DATA */
+const clearSubscriptionData = () => {
+  // Clear subscription-related data from localStorage
+  localStorage.removeItem('subscribedPlans');
+  localStorage.removeItem('subscribedUserId');
+  localStorage.removeItem('paymentSuccess');
+  
+  // Clear any other subscription/payment related data
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.includes('razorpay') || key.includes('subscription') || key.includes('payment'))) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+};
+
 /* LOGOUT */
 
 const logout = () => {
+  // Clear all user session data
   sessionStorage.clear();
-  localStorage.clear(); // Clear local storage too just in case old data exists
+  
+  // Clear subscription data
+  clearSubscriptionData();
+  
   // window.location.href = "/login"; // Handled by Context/Component
 };
 
@@ -98,6 +120,7 @@ export default {
   getToken,
   isAuthenticated,
   isAdmin,
+  clearSubscriptionData,
   // isSubscriber
 
 };

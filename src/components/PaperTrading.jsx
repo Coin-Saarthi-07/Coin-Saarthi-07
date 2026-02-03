@@ -174,11 +174,10 @@ const PaperTrading = () => {
 
     setLoading(true);
     try {
-      const response = await api.post('/paper/trade/buy', {
-        userId: user.userId,
-        cryptoId: selectedCrypto.id,
-        quantity: parseFloat(buyQuantity)
-      });
+      // Using null as body for query param POST
+      const response = await api.post(
+        `/paper/trade/buy?userId=${user.userId}&cryptoId=${selectedCrypto.id}&quantity=${parseFloat(buyQuantity)}`
+      );
 
       if (response.status === 200 || response.status === 201) {
         alert('Buy order executed successfully!');
@@ -252,7 +251,7 @@ const PaperTrading = () => {
     paperTrading: {
       padding: '24px',
       color: '#fff',
-      fontFamily: "'Inter', system-ui, sans-serif",
+      fontFamily: "'Segoe UI', sans-serif",
     },
     header: {
       display: 'flex',
@@ -268,16 +267,12 @@ const PaperTrading = () => {
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      background: 'linear-gradient(to right, #60a5fa, #a855f7)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      fontWeight: '800',
+      color: '#fff',
     },
     textMuted: {
       color: '#9ca3af',
       fontSize: '14px',
       margin: 0,
-      fontWeight: '500',
     },
     headerRight: {
       display: 'flex',
@@ -286,7 +281,7 @@ const PaperTrading = () => {
     },
     btn: {
       padding: '10px 20px',
-      borderRadius: '10px',
+      borderRadius: '8px',
       border: 'none',
       cursor: 'pointer',
       fontSize: '14px',
@@ -295,15 +290,14 @@ const PaperTrading = () => {
       alignItems: 'center',
       gap: '8px',
       transition: 'all 0.2s',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     },
     btnPrimary: {
-      background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-      color: 'white',
-      border: 'none',
+      background: 'rgba(255, 255, 255, 0.05)',
+      color: '#3b82f6',
+      border: '1px solid rgba(59, 130, 246, 0.2)',
     },
     btnDanger: {
-      background: 'rgba(239, 68, 68, 0.1)',
+      background: 'rgba(255, 255, 255, 0.05)',
       color: '#ef4444',
       border: '1px solid rgba(239, 68, 68, 0.2)',
     },
@@ -319,15 +313,14 @@ const PaperTrading = () => {
       marginBottom: '32px',
     },
     statCard: {
-      background: 'linear-gradient(145deg, #0f172a, #020617)',
+      background: 'linear-gradient(180deg, #1a1f26, #141922)',
       borderRadius: '16px',
       padding: '24px',
       display: 'flex',
       alignItems: 'center',
       gap: '20px',
-      border: '1px solid rgba(255, 255, 255, 0.05)',
-      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
-      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+      border: 'none',
+      boxShadow: '0 15px 40px rgba(0, 0, 0, 0.5)',
     },
     statIcon: {
       width: '56px',
@@ -341,12 +334,10 @@ const PaperTrading = () => {
       color: '#3b82f6',
     },
     statContentH3: {
-      fontSize: '13px',
+      fontSize: '14px',
       color: '#94a3b8',
       margin: '0 0 8px 0',
-      fontWeight: '600',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px',
+      fontWeight: '500',
     },
     statContentH1: {
       fontSize: '24px',
@@ -361,10 +352,10 @@ const PaperTrading = () => {
       marginBottom: '24px',
     },
     card: {
-      background: 'linear-gradient(145deg, #0f172a, #020617)',
+      background: 'linear-gradient(180deg, #1a1f26, #141922)',
       borderRadius: '16px',
-      border: '1px solid rgba(255, 255, 255, 0.05)',
-      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
+      border: 'none', // Removed border to match Home theme or keep subtle
+      boxShadow: '0 15px 40px rgba(0, 0, 0, 0.5)',
       overflow: 'hidden',
     },
     cardHeader: {
@@ -372,8 +363,8 @@ const PaperTrading = () => {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '20px 24px',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-      background: 'linear-gradient(to right, rgba(15, 23, 42, 0.5), transparent)',
+      borderBottom: '1px solid #334155',
+      background: 'rgba(30, 41, 59, 0.5)',
     },
     cardHeaderH3: {
       fontSize: '18px',
@@ -382,7 +373,6 @@ const PaperTrading = () => {
       alignItems: 'center',
       gap: '10px',
       color: '#fff',
-      fontWeight: '600',
     },
     cardBody: {
       padding: '24px',
@@ -398,20 +388,17 @@ const PaperTrading = () => {
     },
     th: {
       textAlign: 'left',
-      padding: '16px',
+      padding: '12px 16px',
       color: '#94a3b8',
-      fontWeight: '700',
-      fontSize: '12px',
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+      fontWeight: '600',
+      fontSize: '13px',
+      borderBottom: '1px solid #334155',
     },
     td: {
       padding: '16px',
       borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
       fontSize: '14px',
       color: '#e2e8f0',
-      fontWeight: '500',
     },
     assetInfo: {
       display: 'flex',
@@ -429,7 +416,6 @@ const PaperTrading = () => {
       fontWeight: '700',
       color: 'white',
       fontSize: '14px',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
     },
     // Market Watch
     marketList: {
@@ -441,12 +427,11 @@ const PaperTrading = () => {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '16px',
+      padding: '12px',
       borderRadius: '12px',
       background: 'rgba(255, 255, 255, 0.02)',
       cursor: 'pointer',
       border: '1px solid transparent',
-      transition: 'all 0.2s ease',
     },
     // Modal
     modalOverlay: {
@@ -455,8 +440,8 @@ const PaperTrading = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(0, 0, 0, 0.8)',
-      backdropFilter: 'blur(8px)',
+      background: 'rgba(0, 0, 0, 0.75)',
+      backdropFilter: 'blur(4px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -464,12 +449,12 @@ const PaperTrading = () => {
       padding: '20px',
     },
     modal: {
-      background: 'linear-gradient(145deg, #1e293b, #0f172a)',
+      background: 'linear-gradient(180deg, #1a1f26, #141922)',
       borderRadius: '16px',
       width: '480px',
       maxWidth: '100%',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+      border: 'none',
+      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
       overflow: 'hidden',
     },
     modalHeader: {
@@ -491,33 +476,30 @@ const PaperTrading = () => {
       gap: '12px',
     },
     formGroup: {
-      marginBottom: '20px',
+      marginBottom: '16px',
     },
     formControl: {
       width: '100%',
-      padding: '12px 16px',
-      borderRadius: '10px',
-      background: '#020617',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
+      padding: '10px 14px',
+      borderRadius: '8px',
+      background: 'rgba(30, 41, 59, 0.7)',
+      border: '1px solid rgba(255, 255, 255, 0.12)',
       color: '#fff',
       fontSize: '14px',
       outline: 'none',
-      marginBottom: '0',
     },
     priceDisplay: {
-      padding: '12px 16px',
+      padding: '10px 14px',
       background: 'rgba(255, 255, 255, 0.05)',
-      borderRadius: '10px',
+      borderRadius: '8px',
       color: '#fff',
       fontWeight: '600',
-      border: '1px solid rgba(255, 255, 255, 0.05)',
     },
     label: {
       display: 'block',
       color: '#94a3b8',
       marginBottom: '8px',
       fontSize: '13px',
-      fontWeight: '500',
     },
     textSuccess: { color: '#10b981' },
     textDanger: { color: '#ef4444' },
@@ -526,8 +508,8 @@ const PaperTrading = () => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '64px 0',
-      color: '#64748b',
+      padding: '48px 0',
+      color: '#94a3b8',
     },
   };
 
@@ -797,7 +779,7 @@ const PaperTrading = () => {
             </div>
             <div style={styles.modalBody}>
               <div style={styles.formGroup}>
-                <label style={{ ...styles.label, color: 'white' }}>Select Cryptocurrency</label>
+                <label style={styles.label}>Select Cryptocurrency</label>
                 <select
                   style={styles.formControl}
                   value={selectedCrypto?.id || ''}
