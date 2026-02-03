@@ -76,15 +76,20 @@ const PaperTrading = () => {
 
   const fetchPortfolio = async (userId) => {
     try {
-      const response = await api.get(`/paper/portfolio/${userId}`);
+      // First get the account to find accountId
+      const accountResponse = await api.get(`/paper/account/${userId}`);
+      const accountId = accountResponse.data.accountId;
+      
+      // Then fetch portfolio using accountId
+      const response = await api.get(`/api/portfolio/holdings/${accountId}`);
       // Map portfolio data to ensure correct property names for UI
       const mappedPortfolio = (response.data || []).map(item => ({
-        id: item.cryptoId, // Ensure ID is mapped if needed for keys
+        id: item.cryptoId || Math.random(), // Ensure ID is mapped if needed for keys
         cryptoId: item.cryptoId,
-        name: item.currencyName || item.name || 'Unknown',
-        symbol: item.currencySymbol || item.symbol || '???',
+        name: item.cryptoName || item.name || 'Unknown',
+        symbol: item.cryptoName || item.symbol || '???',
         quantity: item.quantity,
-        avgPrice: item.averagePrice,
+        avgPrice: item.avgBuyPrice,
         currentPrice: item.currentPrice,
         ...item
       }));
@@ -97,7 +102,7 @@ const PaperTrading = () => {
 
   const fetchTransactions = async (userId) => {
     try {
-      const response = await api.get(`/paper/transactions/${userId}`);
+      const response = await api.get(`/api/paper/transactions/user/${userId}`);
       setTransactions(response.data || []);
     } catch (error) {
       console.warn('Error fetching transactions:', error);

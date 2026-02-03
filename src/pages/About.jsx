@@ -78,34 +78,46 @@ const About = () => {
               <div className="h-100" style={{ maxWidth: '100%' }}>
                 <div className="py-4">
                   <h2 className="mb-4 fw-bold" style={{ color: '#fff' }}>About Us</h2>
+                  <p className="mb-4" style={{ color: '#94a3b8', lineHeight: '1.6' }}>
+                    CryptoAlert is a smart cryptocurrency monitoring and trading analysis platform designed to help users track market movements, analyze trends, and make confident decisions in a fast-changing crypto environment.
+                  </p>
 
                   <div className="mb-4">
                     <h4 className="mb-3" style={{ color: '#c7d2fe' }}>Our Mission</h4>
-                    <p style={{ color: '#94a3b8', lineHeight: '1.6' }}>
-                      We provide real-time cryptocurrency monitoring and smart alert systems to help traders and investors
-                      make informed decisions in the volatile crypto market. Our platform combines cutting-edge technology
-                      with user-friendly interfaces to deliver enterprise-grade monitoring solutions.
-                    </p>
+                    <ul style={{ color: '#94a3b8', lineHeight: '1.6', listStyleType: 'none', paddingLeft: 0 }}>
+                      <li className="mb-2">✓ To provide real-time cryptocurrency monitoring with accurate and reliable market data</li>
+                      <li className="mb-2">✓ To empower traders and investors with smart alerts for timely decision-making</li>
+                      <li className="mb-2">✓ To combine advanced technology with a simple, user-friendly interface</li>
+                      <li className="mb-2">✓ To support both learning-focused beginners and data-driven traders</li>
+                    </ul>
                   </div>
 
                   <div className="mb-4">
                     <h4 className="mb-3" style={{ color: '#c7d2fe' }}>Key Features</h4>
-                    <ul style={{ color: '#94a3b8', lineHeight: '1.8' }}>
+                    <ul style={{ color: '#94a3b8', lineHeight: '1.6' }}>
                       <li>Real-time price monitoring for 100+ cryptocurrencies</li>
-                      <li>Customizable price alerts via email and SMS</li>
+                      <li>Customizable price alerts delivered via Email and SMS</li>
                       <li>Advanced charting and technical analysis tools</li>
-                      <li>Portfolio tracking and performance analytics</li>
-                      <li>Market trend analysis and insights</li>
+                      <li>Portfolio tracking with performance and profit/loss analytics</li>
+                      <li>Market trend analysis and actionable insights</li>
                     </ul>
                   </div>
 
                   <div className="mb-4">
                     <h4 className="mb-3" style={{ color: '#c7d2fe' }}>Our Technology</h4>
-                    <p style={{ color: '#94a3b8', lineHeight: '1.6' }}>
-                      Built with React.js frontend and ASP.NET Core backend, our platform integrates with leading
-                      cryptocurrency APIs to provide accurate, real-time data. We use enterprise-grade security
-                      measures to protect user data and ensure reliable service availability.
-                    </p>
+                    <ul style={{ color: '#94a3b8', lineHeight: '1.6' }}>
+                      <li><strong>React.js</strong> for a fast, responsive, and modern frontend experience</li>
+                      <li><strong>ASP.NET Core</strong> backend for secure and scalable service handling</li>
+                      <li>Integration with trusted cryptocurrency APIs for real-time and historical data</li>
+                      <li>Enterprise-grade security to protect user data and transactions</li>
+                      <li>High availability and reliability to ensure uninterrupted monitoring</li>
+                    </ul>
+                  </div>
+
+                  <div className="text-center mt-5 mb-3">
+                    <h5 style={{ color: '#93c5fd', fontStyle: 'italic' }}>
+                      "CryptoAlert — Monitor smarter. Analyze deeper. Trade confidently."
+                    </h5>
                   </div>
 
                   <div className="text-center mt-4">

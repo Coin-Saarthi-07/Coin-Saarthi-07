@@ -4,8 +4,10 @@ import NavBar from "../components/NavBar";
 import AlertPanel from "../components/AlertPanel";
 import PriceChart from "../components/PriceChart";
 import { getMyWatchlist, deleteWatch } from "../services/watchlistService";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Spinner from "../components/Spinner";
+import { toast } from 'react-toastify';
+import { getUserNotifications } from '../services/notificationService';
 
 
 import { useAuth } from "../context/AuthContext";
@@ -20,6 +22,7 @@ const UserDashboard = () => {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [itemToRemove, setItemToRemove] = useState(null);
   const [alertsByCrypto, setAlertsByCrypto] = useState({});
+  const lastNoteIdRef = useRef(null);
 
 
   const { user } = useAuth();
@@ -65,7 +68,7 @@ const UserDashboard = () => {
       cryptoId: w.cryptoId,
       name: w.currencyName,
       symbol: w.symbol,
-      price: `$${w.currentPrice}`,
+      price: `$${w.currencyPrice}`,
       change: "+0.0%",
       isPositive: true,
       isWatching: true,
@@ -81,6 +84,50 @@ const UserDashboard = () => {
     };
     fetchData();
   }, []);
+
+  // Poll for notifications to show toasts
+  useEffect(() => {
+    const checkNotifications = async () => {
+      if (user && user.userId) {
+        console.log("Checking notifications for user:", user.userId);
+        try {
+          const res = await getUserNotifications(user.userId);
+          const newNotifications = res.data;
+          console.log("Notifications received in Dashboard:", newNotifications);
+
+          if (newNotifications.length > 0) {
+            const latestNote = newNotifications[0];
+            // If we have a new notification ID and its status is Sent/Pending
+            if (latestNote.notificationId !== lastNoteIdRef.current) {
+              // If it's the first time polling, just set the ref, don't toast old ones
+              if (lastNoteIdRef.current === null) {
+                lastNoteIdRef.current = latestNote.notificationId;
+              } else {
+                // It's a truly new notification triggered while on dashboard
+                toast.info(latestNote.message, {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  theme: "dark",
+                });
+                lastNoteIdRef.current = latestNote.notificationId;
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error checking notifications for toast:", error);
+        }
+      }
+    };
+
+    const interval = setInterval(checkNotifications, 30000);
+    checkNotifications(); // Immediate check on mount
+
+    return () => clearInterval(interval);
+  }, [user?.userId]);
 
   const handleConfirmRemove = async () => {
     await deleteWatch(itemToRemove.id);

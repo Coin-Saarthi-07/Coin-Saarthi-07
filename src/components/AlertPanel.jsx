@@ -144,7 +144,7 @@ export default function AlertPanel({ coin, onSaved, onClose }) {
     try {
       const payload = {
         userId: authService.getUserId(),       // ✅ JWT user
-        cryptoId: coin.id,                     // ✅ DB cryptoId
+        cryptoId: coin.cryptoId,               // ✅ DB cryptoId
         duration: Number(duration),
         targetPrice: Number(targetPrice),
         alert_condition: alertType === "buy" ? "Buy" : "Sell",

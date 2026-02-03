@@ -5,10 +5,6 @@ import Footer from '../components/Footer';
 import axios from 'axios';
 import authService from '../services/authService';
 
-// import invoiceService from '../services/invoiceService';
-// import { toast } from 'react-toastify';
-
-
 export default function InvoicePage() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -16,34 +12,11 @@ export default function InvoicePage() {
     const user = authService.getCurrentUser();
 
     const [invoiceData, setInvoiceData] = useState(null);
-    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (!location.state?.plan && !location.state?.paymentId) {
             navigate("/subscription");
             return;
-
-            // if (location.state && location.state.plan) {
-            //     setInvoiceData({
-            //         plan: location.state.plan,
-            //         paymentDetails: location.state.paymentDetails || {}, // Get payment details
-            //         date: new Date().toLocaleDateString(),
-            //         invoiceNumber: `INV-${Math.floor(Math.random() * 1000000)}`,
-            //         transactionId: `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-            //     });
-            // } else {
-            //     // Fallback for testing or direct access
-            //     setInvoiceData({
-            //         plan: { name: 'Pro Plan', price: '$29.99', period: 'month' },
-            //         paymentDetails: {
-            //             razorpayPaymentId: "mock_pay_id",
-            //             razorpayOrderId: "mock_order_id",
-            //             razorpaySignature: "mock_sig"
-            //         },
-            //         date: new Date().toLocaleDateString(),
-            //         invoiceNumber: `INV-${Math.floor(Math.random() * 1000000)}`,
-            //         transactionId: `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-            //     });
         }
 
         // If plan data is passed directly, use it for display
@@ -89,52 +62,6 @@ export default function InvoicePage() {
     }, []);
 
 
-
-    const handleSaveInvoice = async () => {
-        if (!invoiceData) return;
-
-        setIsSaving(true);
-        try {
-            const amount = parseFloat(invoiceData.plan.price.toString().replace(/[^0-9.]/g, ''));
-            const now = new Date();
-            const nextMonth = new Date(now);
-            nextMonth.setMonth(now.getMonth() + 1);
-
-            const payload = {
-                invoiceId: 0,
-                payment: {
-                    paymentId: 0,
-                    razorpayOrderId: invoiceData.paymentDetails.razorpayOrderId || "N/A",
-                    razorpayPaymentId: invoiceData.paymentDetails.razorpayPaymentId || "N/A",
-                    razorpaySignature: invoiceData.paymentDetails.razorpaySignature || "N/A",
-                    paymentMethod: "UPI",
-                    amount: amount,
-                    status: "SUCCESS", // Assuming success
-                    currencyCode: "USD",
-                    transactionId: invoiceData.transactionId,
-                    paymentTime: now.toISOString()
-                },
-                userSubscription: {
-                    userSubscriptionId: 0,
-                    startDate: now.toISOString().split('T')[0],
-                    endDate: nextMonth.toISOString().split('T')[0],
-                    status: "ACTIVE",
-                    invoices: []
-                },
-                amount: amount,
-                invoicePaymentStatus: "SUCCESS",
-                createdAt: now.toISOString()
-            };
-
-            await invoiceService.createInvoice(payload);
-            toast.success('Invoice saved successfully!');
-        } catch (error) {
-            console.error('Failed to save invoice:', error);
-            toast.error('Failed to save invoice.');
-        } finally {
-            setIsSaving(false);
-        }
-    };
 
     if (!invoiceData) return null;
 
@@ -256,11 +183,6 @@ export default function InvoicePage() {
             background: 'transparent',
             color: 'white',
             border: '1px solid rgba(255,255,255,0.2)'
-        },
-        successBtn: {
-            background: '#10b981',
-            color: 'white',
-            border: 'none'
         }
     };
 
@@ -352,7 +274,6 @@ export default function InvoicePage() {
                         >
                             Back to Dashboard
                         </button>
-
                         <button
                             style={{ ...styles.button, ...styles.primaryBtn }}
                             onClick={() => window.print()}

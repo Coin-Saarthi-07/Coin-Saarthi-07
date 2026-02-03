@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import authService from '../services/authService';
 import { useAuth } from '../context/AuthContext';
+
 import NavBar from './NavBar';
 
 import { fetchAllPlans, subscribeUserToPlan } from "../services/subscriptionService";
@@ -49,6 +50,7 @@ export default function SubscriptionPage() {
 
     loadPlans();
   }, []);
+
   // Hide toast after 3 seconds
   useEffect(() => {
     if (toast.show) {
@@ -68,9 +70,9 @@ export default function SubscriptionPage() {
   }, []);
   const styles = {
     container: {
-      maxWidth: '1200px',
+      maxWidth: '1400px',
       margin: '0 auto',
-      padding: '0 24px'
+      padding: '0 20px'
     },
     header: {
       textAlign: 'center',
@@ -88,20 +90,20 @@ export default function SubscriptionPage() {
       color: '#94a3b8',
       fontSize: '18px',
       maxWidth: '600px',
-      margin: '0 auto',
-      lineHeight: '1.6'
+      margin: '0 auto'
     },
     plansContainer: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '32px',
+      gap: '24px',
       marginBottom: '60px'
     },
     planCard: {
-      background: 'linear-gradient(145deg, #0f172a, #020617)',
-      border: '1px solid rgba(255, 255, 255, 0.05)',
-      borderRadius: '24px',
-      padding: '40px',
+      background: 'rgba(15, 23, 42, 0.8)',
+      backdropFilter: 'blur(20px)',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      borderRadius: '20px',
+      padding: '32px',
       display: 'flex',
       //flexDirection: isMobile ? 'column' : 'row',
       //alignItems: isMobile ? 'stretch' : 'center',
@@ -112,11 +114,18 @@ export default function SubscriptionPage() {
       position: 'relative',
       boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
       //textAlign: isMobile ? 'center' : 'left'
+      // alignItems: 'center',
+      // gap: '40px',
+      // transition: 'all 0.3s ease',
+      // cursor: 'pointer',
+      // position: 'relative',
+      // overflow: 'hidden'
+
     },
     selectedCard: {
-      border: '1px solid #667eea',
-      boxShadow: '0 20px 60px rgba(102, 126, 234, 0.15)',
-      transform: 'translateY(-4px)'
+      border: '2px solid #667eea',
+      transform: 'scale(1.02)',
+      boxShadow: '0 25px 50px rgba(102, 126, 234, 0.2)'
     },
     planHeader: {
       //marginBottom: isMobile ? '24px' : '0',
@@ -128,14 +137,15 @@ export default function SubscriptionPage() {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center'
+      // planInfo: {
+      //   flex: '1',
+      //   minWidth: '300px'
     },
     planName: {
-      fontSize: '24px',
+      fontSize: '28px',
       fontWeight: '700',
       marginBottom: '8px',
-      color: '#ffffff',
-      textTransform: 'uppercase',
-      letterSpacing: '0.1em'
+      color: '#ffffff'
     },
     planPrice: {
       display: 'flex',
@@ -147,49 +157,62 @@ export default function SubscriptionPage() {
     priceAmount: {
       fontSize: '48px',
       fontWeight: '800',
-      background: 'linear-gradient(135deg, #fff 0%, #94a3b8 100%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
+      color: '#667eea',
+      marginBottom: '16px'
     },
     planPeriod: {
       fontSize: '16px',
-      color: '#64748b',
+      color: '#94a3b8',
+      marginLeft: '8px'
     },
-    featuresList: {
-      flex: 1,
+    planDescription: {
+      color: '#cbd5e1',
+      fontSize: '16px',
+      lineHeight: '1.6'
+    },
+    featuresGrid: {
+      flex: '2',
       display: 'grid',
       //gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(200px, 1fr))',
       gap: '16px',
       // marginBottom: isMobile ? '24px' : '0',
       // paddingRight: isMobile ? '0' : '24px'
+
+      // gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      // gap: '16px'
     },
     feature: {
       display: 'flex',
       alignItems: 'center',
-      //justifyContent: isMobile ? 'center' : 'flex-start',
       gap: '12px',
-      color: '#cbd5e1',
-      fontSize: '15px'
+      color: '#e2e8f0',
+      fontSize: '14px'
     },
     checkIcon: {
       color: '#10b981',
-      background: 'rgba(16, 185, 129, 0.1)',
-      width: '24px',
-      height: '24px',
-      borderRadius: '50%',
+      fontSize: '16px',
+      fontWeight: 'bold'
+    },
+    planActions: {
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '12px',
-      fontWeight: 'bold',
-      flexShrink: 0
+      gap: '16px',
+      minWidth: '200px'
+    },
+    // badge removed from here to fix duplicate key error
+    popularBadge: {
+      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+    },
+    premiumBadge: {
+      background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)'
     },
     selectButton: {
       //width: isMobile ? '100%' : '200px',
       padding: '16px',
       borderRadius: '12px',
       border: 'none',
-      fontWeight: '700',
+      fontWeight: '600',
       fontSize: '16px',
       cursor: 'pointer',
       transition: 'all 0.3s ease',
@@ -341,6 +364,7 @@ export default function SubscriptionPage() {
 
 
 
+
   return (
     <>
       <NavBar />
@@ -472,86 +496,92 @@ export default function SubscriptionPage() {
 
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              ))
+              }
+            </div >
+
+          </div >
 
 
           {/* Toast Notification */}
-          {toast.show && (
-            <div style={{
-              position: 'fixed',
-              top: '20px',
-              right: '20px',
-              background: toast.type === 'success' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-              color: 'white',
-              padding: '16px 24px',
-              borderRadius: '12px',
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-              zIndex: 1001,
-              fontSize: '16px',
-              fontWeight: '600',
-              animation: 'slideIn 0.3s ease-out'
-            }}>
-              {toast.message}
-            </div>
-          )}
+          {
+            toast.show && (
+              <div style={{
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                background: toast.type === 'success' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                color: 'white',
+                padding: '16px 24px',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+                zIndex: 1001,
+                fontSize: '16px',
+                fontWeight: '600',
+                animation: 'slideIn 0.3s ease-out'
+              }}>
+                {toast.message}
+              </div>
+            )
+          }
 
           {/* Payment Success Modal */}
-          {showPaymentSuccess && (
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0, 0, 0, 0.8)',
-              backdropFilter: 'blur(5px)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000
-            }}>
+          {
+            showPaymentSuccess && (
               <div style={{
-                background: 'linear-gradient(145deg, #1e293b, #0f172a)',
-                border: '1px solid rgba(34, 197, 94, 0.2)',
-                borderRadius: '24px',
-                padding: '48px',
-                width: '420px',
-                maxWidth: '90vw',
-                color: 'white',
-                textAlign: 'center',
-                boxShadow: '0 25px 60px rgba(0,0,0,0.6)'
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0, 0, 0, 0.8)',
+                backdropFilter: 'blur(5px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000
               }}>
-                <div style={{ width: '80px', height: '80px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px auto' }}>
-                  <span style={{ fontSize: '40px' }}>✅</span>
+                <div style={{
+                  background: 'linear-gradient(145deg, #1e293b, #0f172a)',
+                  border: '1px solid rgba(34, 197, 94, 0.2)',
+                  borderRadius: '24px',
+                  padding: '48px',
+                  width: '420px',
+                  maxWidth: '90vw',
+                  color: 'white',
+                  textAlign: 'center',
+                  boxShadow: '0 25px 60px rgba(0,0,0,0.6)'
+                }}>
+                  <div style={{ width: '80px', height: '80px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px auto' }}>
+                    <span style={{ fontSize: '40px' }}>✅</span>
+                  </div>
+                  <h2 style={{ marginBottom: '16px', fontSize: '28px', fontWeight: '800', color: 'white' }}>Success!</h2>
+                  <p style={{ marginBottom: '32px', color: '#94a3b8', fontSize: '16px', lineHeight: '1.6' }}>
+                    Your <span style={{ color: '#22c55e', fontWeight: 600 }}>{currentPlan?.name}</span> subscription has been activated successfully.
+                  </p>
+                  <button
+                    onClick={handlePaymentSuccess}
+                    style={{
+                      width: '100%',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                      color: 'white',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      boxShadow: '0 8px 20px rgba(34, 197, 94, 0.3)'
+                    }}
+                  >
+                    Continue to Invoice
+                  </button>
                 </div>
-                <h2 style={{ marginBottom: '16px', fontSize: '28px', fontWeight: '800', color: 'white' }}>Success!</h2>
-                <p style={{ marginBottom: '32px', color: '#94a3b8', fontSize: '16px', lineHeight: '1.6' }}>
-                  Your <span style={{ color: '#22c55e', fontWeight: 600 }}>{currentPlan?.name}</span> subscription has been activated successfully.
-                </p>
-                <button
-                  onClick={handlePaymentSuccess}
-                  style={{
-                    width: '100%',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                    color: 'white',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    boxShadow: '0 8px 20px rgba(34, 197, 94, 0.3)'
-                  }}
-                >
-                  Continue to Invoice
-                </button>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
+            )
+          }
+        </div >
+      </div >
     </>
   );
 }
