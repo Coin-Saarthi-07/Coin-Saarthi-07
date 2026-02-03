@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL = "http://localhost:8080/crypto/admin";
 
 const getAuthHeader = () => {
-  const stored = localStorage.getItem("user");
+  const stored = sessionStorage.getItem("user");
 
   if (!stored) {
     console.error("❌ No user in localStorage");

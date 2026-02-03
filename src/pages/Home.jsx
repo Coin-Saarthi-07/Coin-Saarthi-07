@@ -1,5 +1,3 @@
-import NavBar from '../components/NavBar';
-import Footer from '../components/Footer';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -7,8 +5,9 @@ import api from '../services/api';
 import authService from '../services/authService';
 import "./Home.css";
 import "../components/NavBar.css";
-
+import HomeCarousel from '../components/HomeCarousel';
 import { addToWatchlist, getMyWatchlist } from "../services/watchlistService";
+import { color } from 'chart.js/helpers';
 
 
 const Home = () => {
@@ -22,9 +21,7 @@ const Home = () => {
   const [visibleCount, setVisibleCount] = useState(15);
   const [previousPrices, setPreviousPrices] = useState({});
   const [watchlistItems, setWatchlistItems] = useState(new Set());
-  const [alertItems, setAlertItems] = useState(new Set());
-
-
+  const [isHeroVisible, setIsHeroVisible] = useState(false);
 
   useEffect(() => {
     fetchAllData();
@@ -35,6 +32,7 @@ const Home = () => {
 
     return () => clearInterval(interval);
   }, []);
+
   useEffect(() => {
     const loadUserWatchlist = async () => {
       const user = authService.getCurrentUser();
@@ -64,6 +62,7 @@ const Home = () => {
     fetchLosers();
     fetchCryptoList();
   };
+
   useEffect(() => {
     const map = {};
     cryptoList.forEach(c => {
@@ -71,7 +70,6 @@ const Home = () => {
     });
     setPreviousPrices(map);
   }, [cryptoList]);
-
 
   const fetchLive = async () => {
     try {
@@ -210,237 +208,215 @@ const Home = () => {
     return `$${value.toFixed(2)}`;
   };
 
-
   return (
-    <>
-      <NavBar />
+    <div className="home" style={{ backgroundColor: '#0b111eff', minHeight: '100vh' }}>
 
-      <div className="home" style={{ paddingTop: '200px' }}>
-        {/* Hero */}
-        <div style={{
-          textAlign: 'center',
-          width: '100%',
-          padding: '40px 0',
-          color: '#ffffff'   // 🔥 force white
-        }}>
-          <h1 style={{ fontSize: 38, fontWeight: 800 }}>
-            Real-Time Crypto Monitoring <br /> & Smart Alerts
-          </h1>
-          <p style={{ color: '#ffffff', opacity: 0.9 }}>
-            Real-time crypto monitoring platform built with enterprise-grade tools.
-          </p>
-        </div>
-
-
-
-        {/* Market Cards */}
-        <section className="market-section container-fluid">
-          <div className="row">
-
-            <MarketCard
-              title="Hot"
-              header={["Name", "Price", "Updated"]}
-              data={hotCoins.map(c => ({
-                key: c.cryptoId,
-                cols: [
-                  `⭐ ${c.currencySymbol}`,
-                  `$${c.currencyPrice}`,
-                  new Date(c.lastUpdated).toLocaleTimeString()
-                ],
-                positive: true
-              }))}
-            />
-
-            <MarketCard
-              title="Top Gainer"
-              header={["Name", "Price", "Change"]}
-              data={gainers.map(c => ({
-                key: c.cryptoId,
-                cols: [
-                  c.symbol,
-                  `$${c.price}`,
-                  `+${c.priceChange?.toFixed(2)}`
-                ],
-                positive: true
-              }))}
-            />
-
-            <MarketCard
-              title="Top Loser"
-              header={["Name", "Price", "Change"]}
-              data={losers.map(c => ({
-                key: c.cryptoId,
-                cols: [
-                  c.symbol,
-                  `$${c.price}`,
-                  c.priceChange?.toFixed(2)
-                ],
-                positive: false
-              }))}
-            />
-
-            <MarketCard
-              title="Top Volume"
-              header={["Name", "Price", "Updated"]}
-              data={volume.map(c => ({
-                key: c.cryptoId,
-                cols: [
-                  c.currencySymbol,
-                  `$${c.currencyPrice}`,
-                  new Date(c.lastUpdated).toLocaleTimeString()
-                ],
-                positive: true
-              }))}
-            />
-
-          </div>
-        </section>
-
-        {/* Crypto List */}
-        {/* Crypto List Section */}
-        <section className="container-fluid mt-5">
-          <h3 className="mb-3">All Cryptocurrencies</h3>
-
-          {/* Search */}
-          <input
-            type="text"
-            className="form-control mb-3 search-input"
-            placeholder="Search by name or symbol..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setVisibleCount(15);
-            }}
+      {/* New Hero Carousel Section */}
+      <HomeCarousel />
+      {/* Market Cards */}
+      <section className="market-section container-fluid">
+        <div className="row">
+          <MarketCard
+            title="Hot"
+            header={["Name", "Price", "Updated"]}
+            data={hotCoins.map(c => ({
+              key: c.cryptoId,
+              cols: [
+                `⭐ ${c.currencySymbol}`,
+                `$${c.currencyPrice}`,
+                new Date(c.lastUpdated).toLocaleTimeString()
+              ],
+              positive: true
+            }))}
           />
 
-          <div className="crypto-table">
-            <div className="crypto-header">
-              <span></span>
-              <span>Id</span>
-              <span>Coin</span>
-              <span>Price</span>
-              <span>1h</span>
-              <span>24h</span>
-              <span>7d</span>
-              <span>24h Volume</span>
-              <span>Market Cap</span>
-              <span>Watchlist</span>
-            </div>
+          <MarketCard
+            title="Top Gainer"
+            header={["Name", "Price", "Change"]}
+            data={gainers.map(c => ({
+              key: c.cryptoId,
+              cols: [
+                c.symbol,
+                `$${c.price}`,
+                `+${c.priceChange?.toFixed(2)}`
+              ],
+              positive: true
+            }))}
+          />
 
-            {visibleCoins.map((c, index) => {
-              const prev = previousPrices[c.cryptoId];
-              const movement =
-                typeof c.currencyPrice !== "number" || typeof prev !== "number"
-                  ? "—"
-                  : c.currencyPrice > prev
-                    ? "up"
-                    : c.currencyPrice < prev
-                      ? "down"
-                      : "same";
+          <MarketCard
+            title="Top Loser"
+            header={["Name", "Price", "Change"]}
+            data={losers.map(c => ({
+              key: c.cryptoId,
+              cols: [
+                c.symbol,
+                `$${c.price}`,
+                c.priceChange?.toFixed(2)
+              ],
+              positive: false
+            }))}
+          />
 
-              console.log("CRYPTO LIST:", cryptoList);
-              console.log("VISIBLE COINS:", visibleCoins);
+          <MarketCard
+            title="Top Volume"
+            header={["Name", "Price", "Updated"]}
+            data={volume.map(c => ({
+              key: c.cryptoId,
+              cols: [
+                c.currencySymbol,
+                `$${c.currencyPrice}`,
+                new Date(c.lastUpdated).toLocaleTimeString()
+              ],
+              positive: true
+            }))}
+          />
 
-              return (
-                <div className="crypto-row" key={c.cryptoId}>
+        </div>
+      </section>
 
-                  <span className="star-icon">
-                    {watchlistItems.has(c.cryptoId) ? "⭐" : "☆"}
-                  </span>
-                  <span className="muted">{index + 1}</span>
+      {/* Crypto List */}
+      {/* Crypto List Section */}
+      <section className="crypto-section mt-5">
+        {/* <h3 className="mb-3" style={{ color: "white" }}>All Cryptocurrencies</h3> */}
 
-                  <div className="coin-info">
-                    <div className={`coin-icon ${c.currencySymbol?.toLowerCase()}`} style={{
-                      background: c.currencySymbol === 'BTC' ? '#f7931a' :
-                        c.currencySymbol === 'ETH' ? '#627eea' :
-                          c.currencySymbol === 'BNB' ? '#f3ba2f' :
-                            c.currencySymbol === 'XRP' ? '#23292f' :
-                              c.currencySymbol === 'ADA' ? '#0033ad' :
-                                c.currencySymbol === 'SOL' ? '#14f195' :
-                                  c.currencySymbol === 'USDT' ? '#26a17b' :
-                                    c.currencySymbol === 'USDC' ? '#2775ca' : '#6366f1'
-                    }}>
-                      {getCoinIcon(c.currencySymbol)}
-                    </div>
-                    <div className="coin-details">
-                      <div className="coin-name">{c.currencyName}</div>
-                      <div className="coin-symbol">{c.currencySymbol}</div>
-                    </div>
-                  </div>
+        {/* Search */}
+        <input
+          type="text"
+          className="form-control mb-3 search-input"
+          placeholder="Search by name or symbol..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setVisibleCount(15);
+          }}
+        />
 
-                  <div className="price-value">{formatPrice(c.currencyPrice)}</div>
-
-                  <span className={`percentage-change ${movement === "up" ? "positive" : movement === "down" ? "negative" : "muted"
-                    }`}>
-                    {movement === "up" && "▲ 0.1%"}
-                    {movement === "down" && "▼ 0.2%"}
-                    {movement === "same" && "—"}
-                  </span>
-
-                  <span className={`percentage-change ${Math.random() > 0.5 ? "negative" : "positive"
-                    }`}>
-                    {Math.random() > 0.5 ? "▼ 2.6%" : "▲ 0.1%"}
-                  </span>
-
-                  <span className={`percentage-change ${Math.random() > 0.5 ? "positive" : "negative"
-                    }`}>
-                    {Math.random() > 0.5 ? "▲ 0.0%" : "▼ 1.2%"}
-                  </span>
-
-                  <div style={{ color: '#ffffff', opacity: 0.9 }}>{formatVolume(c.currencyPrice * 1000000)}</div>
-                  <div style={{ color: '#ffffff', opacity: 0.9 }}> {formatVolume(c.currencyPrice * 10000000)}</div>
-
-                  <div>
-                    <button
-                      className="watchlist-btn"
-                      disabled={watchlistItems.has(c.cryptoId)}
-                      onClick={() => handleAddToWatchlist(c)}
-                    >
-                      {watchlistItems.has(c.cryptoId) ? "✓ Added" : "Watchlist"}
-                    </button>
-
-                  </div>
-                </div>
-              );
-            })}
+        <div className="crypto-table">
+          <div className="crypto-header">
+            <span></span>
+            <span>Id</span>
+            <span>Coin</span>
+            <span>Price</span>
+            <span>1h</span>
+            <span>24h</span>
+            <span>7d</span>
+            <span>24h Volume</span>
+            <span>Market Cap</span>
+            <span>Watchlist</span>
           </div>
 
-          {/* Load More */}
-          {visibleCount < filteredCoins.length && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
-              <button
-                style={{
-                  padding: '8px 20px',
-                  borderRadius: 999,
-                  border: '1px solid rgba(255,255,255,.15)',
-                  background: 'transparent',
-                  color: '#94a3b8',
-                  fontSize: 14,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                onClick={() => setVisibleCount(v => v + 15)}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'rgba(59,130,246,.2)';
-                  e.target.style.borderColor = '#3b82f6';
-                  e.target.style.color = '#3b82f6';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'rgba(255,255,255,.15)';
-                  e.target.style.color = '#94a3b8';
-                }}
-              >
-                Load More
-              </button>
-            </div>
-          )}
-        </section>
+          {visibleCoins.map((c, index) => {
+            const prev = previousPrices[c.cryptoId];
+            const movement =
+              typeof c.currencyPrice !== "number" || typeof prev !== "number"
+                ? "—"
+                : c.currencyPrice > prev
+                  ? "up"
+                  : c.currencyPrice < prev
+                    ? "down"
+                    : "same";
 
-      </div>
+            console.log("CRYPTO LIST:", cryptoList);
+            console.log("VISIBLE COINS:", visibleCoins);
 
-      <Footer />
-    </>
+            return (
+              <div className="crypto-row" key={c.cryptoId}>
+
+                <span className="star-icon">
+                  {watchlistItems.has(c.cryptoId) ? "⭐" : "☆"}
+                </span>
+                <span className="muted">{index + 1}</span>
+
+                <div className="coin-info">
+                  <div className={`coin-icon ${c.currencySymbol?.toLowerCase()}`} style={{
+                    background: c.currencySymbol === 'BTC' ? '#f7931a' :
+                      c.currencySymbol === 'ETH' ? '#627eea' :
+                        c.currencySymbol === 'BNB' ? '#f3ba2f' :
+                          c.currencySymbol === 'XRP' ? '#23292f' :
+                            c.currencySymbol === 'ADA' ? '#0033ad' :
+                              c.currencySymbol === 'SOL' ? '#14f195' :
+                                c.currencySymbol === 'USDT' ? '#26a17b' :
+                                  c.currencySymbol === 'USDC' ? '#2775ca' : '#6366f1'
+                  }}>
+                    {getCoinIcon(c.currencySymbol)}
+                  </div>
+                  <div className="coin-details">
+                    <div className="coin-name">{c.currencyName}</div>
+                    <div className="coin-symbol">{c.currencySymbol}</div>
+                  </div>
+                </div>
+
+                <div className="price-value">{formatPrice(c.currencyPrice)}</div>
+
+                <span className={`percentage-change ${movement === "up" ? "positive" : movement === "down" ? "negative" : "muted"
+                  }`}>
+                  {movement === "up" && "▲ 0.1%"}
+                  {movement === "down" && "▼ 0.2%"}
+                  {movement === "same" && "—"}
+                </span>
+
+                <span className={`percentage-change ${Math.random() > 0.5 ? "negative" : "positive"
+                  }`}>
+                  {Math.random() > 0.5 ? "▼ 2.6%" : "▲ 0.1%"}
+                </span>
+
+                <span className={`percentage-change ${Math.random() > 0.5 ? "positive" : "negative"
+                  }`}>
+                  {Math.random() > 0.5 ? "▲ 0.0%" : "▼ 1.2%"}
+                </span>
+
+                <div style={{ color: '#ffffff', opacity: 0.9 }}>{formatVolume(c.currencyPrice * 1000000)}</div>
+                <div style={{ color: '#ffffff', opacity: 0.9 }}> {formatVolume(c.currencyPrice * 10000000)}</div>
+
+                <div>
+                  <button
+                    className="watchlist-btn"
+                    disabled={watchlistItems.has(c.cryptoId)}
+                    onClick={() => handleAddToWatchlist(c)}
+                  >
+                    {watchlistItems.has(c.cryptoId) ? "✓ Added" : "Watchlist"}
+                  </button>
+
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Load More */}
+        {visibleCount < filteredCoins.length && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
+            <button
+              style={{
+                padding: '8px 20px',
+                borderRadius: 999,
+                border: '1px solid rgba(255,255,255,.15)',
+                background: 'transparent',
+                color: '#94a3b8',
+                fontSize: 14,
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onClick={() => setVisibleCount(v => v + 15)}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(59,130,246,.2)';
+                e.target.style.borderColor = '#3b82f6';
+                e.target.style.color = '#3b82f6';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'transparent';
+                e.target.style.borderColor = 'rgba(255,255,255,.15)';
+                e.target.style.color = '#94a3b8';
+              }}
+            >
+              Load More
+            </button>
+          </div>
+        )}
+      </section>
+
+    </div>
   );
 };
 
@@ -456,21 +432,26 @@ const MarketCard = ({ title, header, data }) => (
         {header.map(h => <span key={h}>{h}</span>)}
       </div>
 
-      {data.map(row => (
-        <div className="market-row" key={row.key}>
-          {row.cols.map((c, i) => (
-            <span
-              key={i}
-              className={i === row.cols.length - 1 ? (row.positive ? "positive" : "negative") : ""}
-            >
-              {c}
-            </span>
-          ))}
+      {data.length > 0 ? (
+        data.map(row => (
+          <div className="market-row" key={row.key}>
+            {row.cols.map((c, i) => (
+              <span
+                key={i}
+                className={i === row.cols.length - 1 ? (row.positive ? "positive" : "negative") : ""}
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        ))
+      ) : (
+        <div className="market-row" style={{ display: 'flex', justifyContent: 'center', padding: '20px', color: '#64748b' }}>
+          <span>No Data Available</span>
         </div>
-      ))}
+      )}
     </div>
   </div>
 );
 
 export default Home;
-

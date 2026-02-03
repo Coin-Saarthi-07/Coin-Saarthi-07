@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Form, Button, Alert, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
-import authService from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 import './Register.css';
 
 
@@ -13,40 +13,38 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const { login, logout } = useAuth();
+
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+        e.preventDefault();
+        setError("");
+        setLoading(true);
 
-    try {
-        await authService.login({ userName: username, password });
+        try {
+            const user = await login({ userName: username, password });
 
-        const user = authService.getCurrentUser();
+            if (user?.status === "BLOCKED") {
+                await logout();
+                setError("Your account has been blocked. Please contact the administrator.");
+                return;
+            }
 
-        // 🚫 BLOCKED USER HANDLING (frontend-only)
-        if (user?.status === "BLOCKED") {
-            authService.logout(); // ⛔ remove token immediately
-            setError("Your account has been blocked. Please contact the administrator.");
+            if (user?.role === "ADMIN") {
+                navigate("/admin/dashboard", { replace: true });
+            } else {
+                navigate("/dashboard", { replace: true });
+            }
+
+        } catch (err) {
+            setError(
+                err.response?.data?.message ||
+                err.message ||
+                "Login failed. Please check your credentials."
+            );
+        } finally {
             setLoading(false);
-            return;
         }
-
-        if (user?.role === "ADMIN") {
-            navigate("/admin/dashboard");
-        } else {
-            navigate("/dashboard");
-        }
-
-    } catch (err) {
-        setError(
-            err.response?.data?.message ||
-            err.message ||
-            "Login failed. Please check your credentials."
-        );
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
 
 

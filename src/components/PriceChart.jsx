@@ -42,61 +42,61 @@ const PriceChart = ({ symbol }) => {
   }, [symbol]);
 
   const COIN_ID_MAP = {
-  btc: "bitcoin",
-  eth: "ethereum",
-  sol: "solana",
-  ada: "cardano",
-  doge: "dogecoin",
-};
+    btc: "bitcoin",
+    eth: "ethereum",
+    sol: "solana",
+    ada: "cardano",
+    doge: "dogecoin",
+  };
 
-const fetchChartData = async () => {
-  try {
-    const coinId = COIN_ID_MAP[symbol.toLowerCase()];
+  const fetchChartData = async () => {
+    try {
+      const coinId = COIN_ID_MAP[symbol.toLowerCase()];
 
-    if (!coinId) {
-      throw new Error("Unsupported coin symbol");
-    }
-
-    const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`,
-      {
-        headers: { Accept: "application/json" },
+      if (!coinId) {
+        throw new Error("Unsupported coin symbol");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`,
+        {
+          headers: { Accept: "application/json" },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      const formattedData = data.prices.slice(-12).map((price, index) => {
+        const date = new Date(price[0]);
+        return {
+          time: date.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            hour12: true,
+          }),
+          price: Math.round(price[1] * 100) / 100,
+          volume: data.total_volumes[index]
+            ? Math.round(data.total_volumes[index][1])
+            : 0,
+        };
+      });
+
+      setChartData(formattedData);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching chart data:", error);
+      setChartData(generateMockData(symbol));
+      setLoading(false);
     }
-
-    const data = await response.json();
-
-    const formattedData = data.prices.slice(-12).map((price, index) => {
-      const date = new Date(price[0]);
-      return {
-        time: date.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          hour12: true,
-        }),
-        price: Math.round(price[1] * 100) / 100,
-        volume: data.total_volumes[index]
-          ? Math.round(data.total_volumes[index][1])
-          : 0,
-      };
-    });
-
-    setChartData(formattedData);
-    setLoading(false);
-  } catch (error) {
-    console.error("Error fetching chart data:", error);
-    setChartData(generateMockData(symbol));
-    setLoading(false);
-  }
-};
+  };
 
 
   const fetchCoinStats = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const coinId = COIN_ID_MAP[symbol.toLowerCase()];
 
       const response = await fetch(

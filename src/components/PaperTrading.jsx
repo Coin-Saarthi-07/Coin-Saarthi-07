@@ -6,24 +6,19 @@ import {
   FaChartLine, FaCoins, FaDownload, FaTimes,
   FaSearch, FaArrowUp, FaArrowDown
 } from 'react-icons/fa';
-import axios from 'axios';
-// import './PaperTrading.css'; // Removed external CSS
+import api from '../services/api';
+import authService from '../services/authService';
 
 const PaperTrading = () => {
   const [user, setUser] = useState({
-    userId: 1,
-    name: 'John Doe',
+    userId: authService.getUserId() || null,
+    name: authService.getCurrentUser()?.userName || 'User',
     virtualBalance: 100000
   });
 
   const [portfolio, setPortfolio] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [cryptos, setCryptos] = useState([
-    { id: 1, name: 'Bitcoin', symbol: 'BTC', price: 5678234, change: 2.34 },
-    { id: 2, name: 'Ethereum', symbol: 'ETH', price: 345678, change: 1.56 },
-    { id: 3, name: 'Binance Coin', symbol: 'BNB', price: 45678, change: -0.89 },
-    { id: 4, name: 'Solana', symbol: 'SOL', price: 12345, change: 5.67 }
-  ]);
+  const [cryptos, setCryptos] = useState([]);
 
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showSellModal, setShowSellModal] = useState(false);
@@ -32,37 +27,116 @@ const PaperTrading = () => {
   const [sellQuantity, setSellQuantity] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch portfolio data
+
+
+  // Fetch initial data
   useEffect(() => {
-    fetchPortfolio();
-    fetchTransactions();
+    const currentUser = authService.getCurrentUser();
+    if (currentUser) {
+      setUser(prev => ({
+        ...prev,
+        userId: currentUser.userId,
+        name: currentUser.userName
+      }));
+      fetchInitialData(currentUser.userId);
+    }
   }, []);
 
-  const fetchPortfolio = async () => {
+  const fetchInitialData = async (userId) => {
+    setLoading(true);
+    await Promise.all([
+      fetchCryptoList(),
+      fetchPortfolio(userId),
+      fetchTransactions(userId),
+      fetchAccountInfo(userId)
+    ]);
+    setLoading(false);
+  };
+
+  const fetchCryptoList = async () => {
     try {
-      // Mock data - replace with actual API call
-      const mockPortfolio = [
-        { id: 1, cryptoId: 1, name: 'Bitcoin', symbol: 'BTC', quantity: 0.025, avgPrice: 5245000, currentPrice: 5678234 },
-        { id: 2, cryptoId: 2, name: 'Ethereum', symbol: 'ETH', quantity: 1.5, avgPrice: 320000, currentPrice: 345678 },
-        { id: 3, cryptoId: 4, name: 'Solana', symbol: 'SOL', quantity: 15, avgPrice: 11200, currentPrice: 12345 }
-      ];
-      setPortfolio(mockPortfolio);
-    } catch (error) {
-      console.error('Error fetching portfolio:', error);
+      const res = await api.get("/crypto/crypto-currency");
+
+      const flatList = Array.isArray(res.data)
+        ? res.data.map(c => ({
+          id: c.cryptoId,
+          name: c.currencyName,
+          symbol: c.currencySymbol,
+          price: c.currencyPrice,
+          change: c.dayChange || 0 // Added safety for change check
+        }))
+        : [];
+
+      setCryptos(flatList);
+    } catch (err) {
+      console.error("Crypto list error", err);
+      setCryptos([]);
     }
   };
 
-  const fetchTransactions = async () => {
+  const fetchPortfolio = async (userId) => {
     try {
-      // Mock data - replace with actual API call
-      const mockTransactions = [
-        { id: 1, date: '2024-03-15 10:30:00', type: 'BUY', asset: 'Bitcoin', quantity: 0.01, price: 5450000, total: 54500, status: 'COMPLETED' },
-        { id: 2, date: '2024-03-14 14:20:00', type: 'SELL', asset: 'Ethereum', quantity: 0.5, price: 340000, total: 170000, status: 'COMPLETED' },
-        { id: 3, date: '2024-03-13 09:15:00', type: 'BUY', asset: 'Solana', quantity: 10, price: 12000, total: 120000, status: 'COMPLETED' }
-      ];
-      setTransactions(mockTransactions);
+      const response = await api.get(`/paper/portfolio/${userId}`);
+      // Map portfolio data to ensure correct property names for UI
+      const mappedPortfolio = (response.data || []).map(item => ({
+        id: item.cryptoId, // Ensure ID is mapped if needed for keys
+        cryptoId: item.cryptoId,
+        name: item.currencyName || item.name || 'Unknown',
+        symbol: item.currencySymbol || item.symbol || '???',
+        quantity: item.quantity,
+        avgPrice: item.averagePrice,
+        currentPrice: item.currentPrice,
+        ...item
+      }));
+      setPortfolio(mappedPortfolio);
     } catch (error) {
-      console.error('Error fetching transactions:', error);
+      console.warn('Error fetching portfolio:', error);
+      setPortfolio([]);
+    }
+  };
+
+  const fetchTransactions = async (userId) => {
+    try {
+      const response = await api.get(`/paper/transactions/${userId}`);
+      setTransactions(response.data || []);
+    } catch (error) {
+      console.warn('Error fetching transactions:', error);
+      setTransactions([]);
+    }
+  };
+
+  const initializeAccount = async (userId) => {
+    try {
+      await api.post(`/paper/account/paper-trading/${userId}`);
+      // Retry fetching account info after initialization
+      const response = await api.get(`/paper/account/${userId}`);
+      if (response.data) {
+        setUser(prev => ({
+          ...prev,
+          virtualBalance: response.data.virtualBalance
+        }));
+      }
+    } catch (error) {
+      console.error('Error initializing account:', error);
+    }
+  };
+
+  const fetchAccountInfo = async (userId) => {
+    try {
+      const response = await api.get(`/paper/account/${userId}`);
+      if (response.data) {
+        setUser(prev => ({
+          ...prev,
+          virtualBalance: response.data.virtualBalance
+        }));
+      }
+    } catch (error) {
+      console.warn('Error fetching account info:', error);
+      // If account not found (404) or other error, try to initialize
+      if (error.response && (error.response.status === 404 || error.response.status === 400 || error.response.status === 500)) {
+        console.log("Attempting to initialize paper trading account...");
+        initializeAccount(userId);
+      }
     }
   };
 
@@ -82,84 +156,64 @@ const PaperTrading = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('/paper/trade/buy', {
+      const response = await api.post('/paper/trade/buy', {
         userId: user.userId,
         cryptoId: selectedCrypto.id,
         quantity: parseFloat(buyQuantity)
       });
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         alert('Buy order executed successfully!');
         setShowBuyModal(false);
         setBuyQuantity('');
         setSelectedCrypto(null);
-        // Refresh data
-        fetchPortfolio();
-        fetchTransactions();
-        // Update balance
-        const totalCost = selectedCrypto.price * parseFloat(buyQuantity);
-        setUser(prev => ({
-          ...prev,
-          virtualBalance: prev.virtualBalance - totalCost
-        }));
+        fetchInitialData(user.userId);
       }
     } catch (error) {
       console.error('Error executing buy order:', error);
-      alert('Failed to execute buy order');
+      alert('Failed to execute buy order: ' + (error.response?.data?.message || error.message || 'Internal Server Error'));
     } finally {
       setLoading(false);
     }
   };
 
   const executeSellOrder = async (crypto) => {
-    if (!sellQuantity || parseFloat(sellQuantity) <= 0) {
+    const quantityToSell = parseFloat(sellQuantity);
+    if (!quantityToSell || quantityToSell <= 0) {
       alert('Please enter valid quantity');
-      return;
-    }
-
-    const portfolioItem = portfolio.find(p => p.cryptoId === crypto.id);
-    if (!portfolioItem || parseFloat(sellQuantity) > portfolioItem.quantity) {
-      alert('Insufficient quantity in portfolio');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await axios.post('/paper/trade/sell', {
-        userId: user.userId,
-        cryptoId: crypto.id,
-        quantity: parseFloat(sellQuantity)
-      });
+      const response = await api.post(
+        '/paper/trade/sell',
+        {
+          userId: user.userId,
+          cryptoId: crypto.id,
+          quantity: quantityToSell
+        }
+      );
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         alert('Sell order executed successfully!');
         setShowSellModal(false);
         setSellQuantity('');
-        // Refresh data
-        fetchPortfolio();
-        fetchTransactions();
-        // Update balance
-        const totalAmount = crypto.price * parseFloat(sellQuantity);
-        setUser(prev => ({
-          ...prev,
-          virtualBalance: prev.virtualBalance + totalAmount
-        }));
+        fetchInitialData(user.userId);
       }
     } catch (error) {
       console.error('Error executing sell order:', error);
-      alert('Failed to execute sell order');
+      alert('Failed to execute sell order: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
   };
 
   const resetAccount = async () => {
-    if (window.confirm('Are you sure you want to reset your paper trading account? All holdings will be cleared and balance reset to ₹100,000.')) {
+    if (window.confirm('Are you sure you want to reset your paper trading account? All holdings will be cleared and balance reset.')) {
       try {
-        // Call reset API
-        await axios.post(`/paper/account/reset/${user.userId}`);
-        setUser(prev => ({ ...prev, virtualBalance: 100000 }));
-        setPortfolio([]);
+        await api.post(`/paper/account/reset/${user.userId}`);
+        fetchInitialData(user.userId);
         alert('Account reset successfully!');
       } catch (error) {
         console.error('Error resetting account:', error);
@@ -190,7 +244,7 @@ const PaperTrading = () => {
     paperTrading: {
       padding: '24px',
       color: '#fff',
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Inter', system-ui, sans-serif",
     },
     header: {
       display: 'flex',
@@ -206,12 +260,16 @@ const PaperTrading = () => {
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      color: '#fff',
+      background: 'linear-gradient(to right, #60a5fa, #a855f7)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      fontWeight: '800',
     },
     textMuted: {
       color: '#9ca3af',
       fontSize: '14px',
       margin: 0,
+      fontWeight: '500',
     },
     headerRight: {
       display: 'flex',
@@ -220,7 +278,7 @@ const PaperTrading = () => {
     },
     btn: {
       padding: '10px 20px',
-      borderRadius: '8px',
+      borderRadius: '10px',
       border: 'none',
       cursor: 'pointer',
       fontSize: '14px',
@@ -229,13 +287,15 @@ const PaperTrading = () => {
       alignItems: 'center',
       gap: '8px',
       transition: 'all 0.2s',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     },
     btnPrimary: {
       background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
       color: 'white',
+      border: 'none',
     },
     btnDanger: {
-      background: 'rgba(239, 68, 68, 0.15)',
+      background: 'rgba(239, 68, 68, 0.1)',
       color: '#ef4444',
       border: '1px solid rgba(239, 68, 68, 0.2)',
     },
@@ -251,14 +311,15 @@ const PaperTrading = () => {
       marginBottom: '32px',
     },
     statCard: {
-      background: 'linear-gradient(145deg, #1e293b, #0f172a)',
+      background: 'linear-gradient(145deg, #0f172a, #020617)',
       borderRadius: '16px',
       padding: '24px',
       display: 'flex',
       alignItems: 'center',
       gap: '20px',
-      border: '1px solid #334155',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
     },
     statIcon: {
       width: '56px',
@@ -272,10 +333,12 @@ const PaperTrading = () => {
       color: '#3b82f6',
     },
     statContentH3: {
-      fontSize: '14px',
+      fontSize: '13px',
       color: '#94a3b8',
       margin: '0 0 8px 0',
-      fontWeight: '500',
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
     },
     statContentH1: {
       fontSize: '24px',
@@ -290,9 +353,10 @@ const PaperTrading = () => {
       marginBottom: '24px',
     },
     card: {
-      background: '#1e293b',
+      background: 'linear-gradient(145deg, #0f172a, #020617)',
       borderRadius: '16px',
-      border: '1px solid #334155',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
       overflow: 'hidden',
     },
     cardHeader: {
@@ -300,8 +364,8 @@ const PaperTrading = () => {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '20px 24px',
-      borderBottom: '1px solid #334155',
-      background: 'rgba(30, 41, 59, 0.5)',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+      background: 'linear-gradient(to right, rgba(15, 23, 42, 0.5), transparent)',
     },
     cardHeaderH3: {
       fontSize: '18px',
@@ -310,6 +374,7 @@ const PaperTrading = () => {
       alignItems: 'center',
       gap: '10px',
       color: '#fff',
+      fontWeight: '600',
     },
     cardBody: {
       padding: '24px',
@@ -325,17 +390,20 @@ const PaperTrading = () => {
     },
     th: {
       textAlign: 'left',
-      padding: '12px 16px',
+      padding: '16px',
       color: '#94a3b8',
-      fontWeight: '600',
-      fontSize: '13px',
-      borderBottom: '1px solid #334155',
+      fontWeight: '700',
+      fontSize: '12px',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
     },
     td: {
       padding: '16px',
       borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
       fontSize: '14px',
       color: '#e2e8f0',
+      fontWeight: '500',
     },
     assetInfo: {
       display: 'flex',
@@ -353,6 +421,7 @@ const PaperTrading = () => {
       fontWeight: '700',
       color: 'white',
       fontSize: '14px',
+      boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
     },
     // Market Watch
     marketList: {
@@ -364,11 +433,12 @@ const PaperTrading = () => {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '12px',
+      padding: '16px',
       borderRadius: '12px',
       background: 'rgba(255, 255, 255, 0.02)',
       cursor: 'pointer',
       border: '1px solid transparent',
+      transition: 'all 0.2s ease',
     },
     // Modal
     modalOverlay: {
@@ -377,8 +447,8 @@ const PaperTrading = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(0, 0, 0, 0.75)',
-      backdropFilter: 'blur(4px)',
+      background: 'rgba(0, 0, 0, 0.8)',
+      backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -386,17 +456,17 @@ const PaperTrading = () => {
       padding: '20px',
     },
     modal: {
-      background: '#1e293b',
+      background: 'linear-gradient(145deg, #1e293b, #0f172a)',
       borderRadius: '16px',
       width: '480px',
       maxWidth: '100%',
-      border: '1px solid #334155',
-      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
       overflow: 'hidden',
     },
     modalHeader: {
       padding: '20px 24px',
-      borderBottom: '1px solid #334155',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -407,36 +477,39 @@ const PaperTrading = () => {
     },
     modalFooter: {
       padding: '20px 24px',
-      borderTop: '1px solid #334155',
+      borderTop: '1px solid rgba(255, 255, 255, 0.08)',
       display: 'flex',
       justifyContent: 'flex-end',
       gap: '12px',
     },
     formGroup: {
-      marginBottom: '16px',
+      marginBottom: '20px',
     },
     formControl: {
       width: '100%',
-      padding: '10px 14px',
-      borderRadius: '8px',
-      background: '#0f172a',
-      border: '1px solid #334155',
+      padding: '12px 16px',
+      borderRadius: '10px',
+      background: '#020617',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
       color: '#fff',
       fontSize: '14px',
       outline: 'none',
+      marginBottom: '0',
     },
     priceDisplay: {
-      padding: '10px 14px',
+      padding: '12px 16px',
       background: 'rgba(255, 255, 255, 0.05)',
-      borderRadius: '8px',
+      borderRadius: '10px',
       color: '#fff',
       fontWeight: '600',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
     },
     label: {
       display: 'block',
       color: '#94a3b8',
       marginBottom: '8px',
       fontSize: '13px',
+      fontWeight: '500',
     },
     textSuccess: { color: '#10b981' },
     textDanger: { color: '#ef4444' },
@@ -445,8 +518,8 @@ const PaperTrading = () => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '48px 0',
-      color: '#94a3b8',
+      padding: '64px 0',
+      color: '#64748b',
     },
   };
 
@@ -708,7 +781,7 @@ const PaperTrading = () => {
             </div>
             <div style={styles.modalBody}>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Select Cryptocurrency</label>
+                <label style={{ ...styles.label, color: 'white' }}>Select Cryptocurrency</label>
                 <select
                   style={styles.formControl}
                   value={selectedCrypto?.id || ''}
@@ -869,3 +942,4 @@ const PaperTrading = () => {
 };
 
 export default PaperTrading;
+

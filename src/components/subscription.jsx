@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
+import authService from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 import NavBar from './NavBar';
-import Footer from './Footer';
+
 import { fetchAllPlans, subscribeUserToPlan } from "../services/subscriptionService";
-import authService from "../services/authService";
 import { createOrder, verifyPayment } from "../services/subscriptionPaymentService";
 import axios from "axios";
 
@@ -21,6 +21,7 @@ export default function SubscriptionPage() {
   const userId = user?.userId;
   const token = authService.getToken();
   const navigate = useNavigate();
+  const { updateUser } = useAuth();
 
   // Fetch plans from backend
   useEffect(() => {
@@ -48,7 +49,6 @@ export default function SubscriptionPage() {
 
     loadPlans();
   }, []);
-
   // Hide toast after 3 seconds
   useEffect(() => {
     if (toast.show) {
@@ -68,9 +68,9 @@ export default function SubscriptionPage() {
   }, []);
   const styles = {
     container: {
-      maxWidth: '1400px',
+      maxWidth: '1200px',
       margin: '0 auto',
-      padding: '0 20px'
+      padding: '0 24px'
     },
     header: {
       textAlign: 'center',
@@ -88,113 +88,142 @@ export default function SubscriptionPage() {
       color: '#94a3b8',
       fontSize: '18px',
       maxWidth: '600px',
-      margin: '0 auto'
+      margin: '0 auto',
+      lineHeight: '1.6'
     },
     plansContainer: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '24px',
+      gap: '32px',
       marginBottom: '60px'
     },
     planCard: {
-      background: 'rgba(15, 23, 42, 0.8)',
-      backdropFilter: 'blur(20px)',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      borderRadius: '20px',
-      padding: '32px',
+      background: 'linear-gradient(145deg, #0f172a, #020617)',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+      borderRadius: '24px',
+      padding: '40px',
       display: 'flex',
-      alignItems: 'center',
-      gap: '40px',
+      //flexDirection: isMobile ? 'column' : 'row',
+      //alignItems: isMobile ? 'stretch' : 'center',
+      justifyContent: 'space-between',
+      //gap: isMobile ? '24px' : '48px',
       transition: 'all 0.3s ease',
       cursor: 'pointer',
       position: 'relative',
-      overflow: 'hidden'
+      boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+      //textAlign: isMobile ? 'center' : 'left'
     },
     selectedCard: {
-      border: '2px solid #667eea',
-      transform: 'scale(1.02)',
-      boxShadow: '0 25px 50px rgba(102, 126, 234, 0.2)'
+      border: '1px solid #667eea',
+      boxShadow: '0 20px 60px rgba(102, 126, 234, 0.15)',
+      transform: 'translateY(-4px)'
     },
-    planInfo: {
-      flex: '1',
-      minWidth: '300px'
+    planHeader: {
+      //marginBottom: isMobile ? '24px' : '0',
+      //textAlign: isMobile ? 'center' : 'left',
+      position: 'relative',
+      // minWidth: isMobile ? 'auto' : '200px',
+      // borderRight: isMobile ? 'none' : '1px solid rgba(255,255,255,0.1)',
+      // paddingRight: isMobile ? '0' : '32px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center'
     },
     planName: {
-      fontSize: '28px',
+      fontSize: '24px',
       fontWeight: '700',
       marginBottom: '8px',
-      color: '#ffffff'
+      color: '#ffffff',
+      textTransform: 'uppercase',
+      letterSpacing: '0.1em'
     },
     planPrice: {
-      fontSize: '42px',
+      display: 'flex',
+      //justifyContent: isMobile ? 'center' : 'flex-start',
+      alignItems: 'baseline',
+      gap: '4px',
+      color: '#white'
+    },
+    priceAmount: {
+      fontSize: '48px',
       fontWeight: '800',
-      color: '#667eea',
-      marginBottom: '16px'
+      background: 'linear-gradient(135deg, #fff 0%, #94a3b8 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
     },
     planPeriod: {
       fontSize: '16px',
-      color: '#94a3b8',
-      marginLeft: '8px'
+      color: '#64748b',
     },
-    planDescription: {
-      color: '#cbd5e1',
-      fontSize: '16px',
-      lineHeight: '1.6'
-    },
-    featuresGrid: {
-      flex: '2',
+    featuresList: {
+      flex: 1,
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '16px'
+      //gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(200px, 1fr))',
+      gap: '16px',
+      // marginBottom: isMobile ? '24px' : '0',
+      // paddingRight: isMobile ? '0' : '24px'
     },
     feature: {
       display: 'flex',
       alignItems: 'center',
+      //justifyContent: isMobile ? 'center' : 'flex-start',
       gap: '12px',
-      color: '#e2e8f0',
-      fontSize: '14px'
+      color: '#cbd5e1',
+      fontSize: '15px'
     },
     checkIcon: {
       color: '#10b981',
-      fontSize: '16px',
-      fontWeight: 'bold'
-    },
-    planActions: {
+      background: 'rgba(16, 185, 129, 0.1)',
+      width: '24px',
+      height: '24px',
+      borderRadius: '50%',
       display: 'flex',
-      flexDirection: 'column',
       alignItems: 'center',
-      gap: '16px',
-      minWidth: '200px'
-    },
-    badge: {
-      padding: '6px 16px',
-      borderRadius: '20px',
+      justifyContent: 'center',
       fontSize: '12px',
-      fontWeight: '600',
-      color: 'white',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px'
-    },
-    popularBadge: {
-      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
-    },
-    premiumBadge: {
-      background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)'
+      fontWeight: 'bold',
+      flexShrink: 0
     },
     selectButton: {
-      padding: '14px 32px',
+      //width: isMobile ? '100%' : '200px',
+      padding: '16px',
       borderRadius: '12px',
       border: 'none',
-      fontWeight: '600',
+      fontWeight: '700',
       fontSize: '16px',
       cursor: 'pointer',
       transition: 'all 0.3s ease',
       color: 'white',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      minWidth: '140px'
+      background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+      border: '1px solid rgba(255,255,255,0.1)',
+      //alignSelf: isMobile ? 'stretch' : 'center'
     },
     selectedButton: {
-      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      border: 'none',
+      boxShadow: '0 10px 20px rgba(118, 75, 162, 0.4)'
+    },
+    successBtn: {
+      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+      border: 'none',
+      boxShadow: '0 10px 20px rgba(16, 185, 129, 0.4)'
+    },
+    badge: {
+      position: 'absolute',
+      // top: isMobile ? '-16px' : '20px',
+      // right: isMobile ? 'auto' : '20px',
+      // left: isMobile ? '50%' : 'auto',
+      // transform: isMobile ? 'translateX(-50%)' : 'none',
+      padding: '6px 16px',
+      borderRadius: '20px',
+      fontSize: '12px',
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      color: 'white',
+      background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+      zIndex: 2
     },
     loading: {
       display: 'flex',
@@ -255,11 +284,12 @@ export default function SubscriptionPage() {
               }
             }
           );
-          const storedUser = JSON.parse(localStorage.getItem("user"));
-          const paymentId = res.data.paymentId;
+
+          // CRITICAL: Update Auth Context to reflect new role immediately
+          const storedUser = authService.getCurrentUser();
           if (storedUser) {
-            storedUser.role = res.data.role || "SUBSCRIBER";
-            localStorage.setItem("user", JSON.stringify(storedUser));
+            const updatedUser = { ...storedUser, role: res.data.role || "SUBSCRIBER" };
+            updateUser(updatedUser); // Update Context & LocalStorage via Context
           }
 
           setSubscribedPlans(prev => {
@@ -292,11 +322,29 @@ export default function SubscriptionPage() {
     }
   };
 
+  //// Handle Payment Success //////
+
+  // const handlePaymentSuccess = () => {
+  //   setShowPaymentSuccess(false);
+  //   localStorage.setItem('paymentSuccess', 'true');
+  //   navigate('/invoice', {
+  //     state: {
+  //       plan: currentPlan,
+  //       paymentDetails: {
+  //         razorpayPaymentId: `pay_${Math.random().toString(36).substr(2, 9)}`,
+  //         razorpayOrderId: `order_${Math.random().toString(36).substr(2, 9)}`,
+  //         razorpaySignature: `sig_${Math.random().toString(36).substr(2, 20)}`
+  //       }
+  //     }
+  //   });
+  // };
+
 
 
   return (
     <>
       <NavBar />
+
       <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0f1e,#141c2e)', padding: window.innerWidth <= 768 ? 12 : 24, paddingTop: window.innerWidth <= 768 ? 68 : 80, color: 'white' }}>
         <style>
           {`
@@ -312,96 +360,93 @@ export default function SubscriptionPage() {
             }
           `}
         </style>
-        <div style={styles.container}>
-          {/* Header */}
-          <div style={styles.header}>
-            <h1 style={styles.title}>Choose Your Plan</h1>
-            <p style={styles.subtitle}>Upgrade to unlock premium features and maximize your crypto trading potential</p>
-          </div>
+        {/* this is nandini */}
+        <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0f1e,#141c2e)', padding: window.innerWidth <= 768 ? 12 : 24, paddingTop: window.innerWidth <= 768 ? 68 : 100, color: 'white' }}>
+          {/* this is nandini */}
+          <div style={styles.container}>
+            {/* Header */}
+            <div style={styles.header}>
+              <h1 style={styles.title}>Choose Your Plan</h1>
+              <p style={styles.subtitle}>Unlock value-added features to enhance your crypto journey</p>
+            </div>
 
-          {/* Horizontal Plan Cards */}
-          <div style={styles.plansContainer}>
-            {plans.map((plan) => (
-              <div
-                key={plan.id}
-                style={{
-                  ...styles.planCard,
-                  ...(selectedPlan === plan.id ? styles.selectedCard : {})
-                }}
-                onClick={() => handlePlanSelect(plan.id)}
-                onMouseEnter={(e) => {
-                  if (selectedPlan !== plan.id) {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = '0 15px 30px rgba(102, 126, 234, 0.1)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (selectedPlan !== plan.id) {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }
-                }}
-              >
-                {/* Plan Info */}
-                <div style={styles.planInfo}>
-                  <h2 style={styles.planId}>{plan.planId}</h2>
-                  <h3 style={styles.planName}>{plan.name}</h3>
-                  <div>
-                    <span style={styles.planPrice}>${plan.price}</span>
-                    <span style={styles.planPeriod}>/{plan.period}</span>
-                  </div>
-                  <p style={styles.planDescription}>
-                    {plan.id === 'basic' ? 'Perfect for getting started with crypto tracking' : 'Advanced features for serious crypto traders'}
-                  </p>
-                </div>
-
-                {/* Features Grid */}
-                <div style={styles.featuresGrid}>
-                  {plan.features.map((feature, index) => (
-                    <div key={index} style={styles.feature}>
-                      <span style={styles.checkIcon}>✓</span>
-                      <span>{feature}</span>
+            {/* Vertical Cards Grid */}
+            <div style={styles.plansContainer}>
+              {plans.map((plan) => (
+                <div
+                  key={plan.id}
+                  style={{
+                    ...styles.planCard,
+                    ...(selectedPlan === plan.id ? styles.selectedCard : {})
+                  }}
+                  onClick={() => handlePlanSelect(plan.id)}
+                >
+                  {/* Plan Info */}
+                  <div style={styles.planInfo}>
+                    <h2 style={styles.planId}>{plan.planId}</h2>
+                    <h3 style={styles.planName}>{plan.name}</h3>
+                    <div>
+                      <span style={styles.planPrice}>${plan.price}</span>
+                      <span style={styles.planPeriod}>/{plan.period}</span>
                     </div>
-                  ))}
-                </div>
+                    <p style={styles.planDescription}>
+                      {plan.id === 'basic' ? 'Perfect for getting started with crypto tracking' : 'Advanced features for serious crypto traders'}
+                    </p>
+                  </div>
 
-                {/* Plan Actions */}
-                <div style={styles.planActions}>
-                  {plan.popular && (
-                    <span style={{ ...styles.badge, ...styles.popularBadge }}>Popular</span>
-                  )}
 
-                  <button
-                    style={{
-                      ...styles.selectButton,
-                      ...(subscribedPlans.has(plan.planId) ? styles.selectedButton : {})
-                    }}
-                    disabled={subscribedPlans.has(plan.planId)}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      startPayment(plan);
-                    }}
-                  >
-                    {subscribedPlans.has(plan.planId) ? "Subscribed" : "Upgrade"}
-                  </button>
+                  {/* Features Grid */}
+                  <div style={styles.featuresGrid}>
+                    {plan.features.map((feature, index) => (
+                      <div key={index} style={styles.feature}>
+                        <div style={styles.checkIcon}>✓</div>
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
 
-                  {subscribedPlans.has(plan.planId) && (
-                    <Link
-                      to="/invoice"
-                      state={{plan}}
+                  {/* Plan Actions */}
+                  <div style={styles.planActions}>
+                    {plan.popular && (
+                      <span style={{ ...styles.badge, ...styles.popularBadge }}>Popular</span>
+                    )}
+
+                    <button
                       style={{
-                        padding: '8px 16px',
-                        borderRadius: '8px',
-                        background: '#3b82f6',
-                        color: 'white',
-                        textDecoration: 'none',
-                        fontSize: '14px'
+                        ...styles.selectButton,
+                        ...(subscribedPlans.has(plan.planId) ? styles.selectedButton : {})
+                      }}
+                      disabled={subscribedPlans.has(plan.planId)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startPayment(plan);
                       }}
                     >
-                      View Invoice
-                    </Link>
-                  )}
-                  {/* <button
+                      {subscribedPlans.has(plan.planId) ? "Subscribed" : "Upgrade"}
+                    </button>
+
+                    {subscribedPlans.has(plan.planId) && (
+                      <Link
+                        to="/invoice"
+                        state={{ plan }}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '8px',
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: 'white',
+                          textDecoration: 'none',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          display: 'block',
+                          textAlign: 'center',
+                          width: '80%',
+                          marginTop: '8px'
+                        }}
+                      >
+                        Invoice
+                      </Link>
+                    )}
+                    {/* <button
                     style={{
                       ...styles.selectButton,
                       ...(subscribedPlans.has(plan.planId) ? styles.selectedButton : {})
@@ -425,79 +470,87 @@ export default function SubscriptionPage() {
                     {subscribedPlans.has(plan.planId) ? "Subscribed" : "Upgrade"}
                   </button> */}
 
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <Footer />
-
-        {/* Toast Notification */}
-        {toast.show && (
-          <div style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            background: toast.type === 'success' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-            color: 'white',
-            padding: '16px 24px',
-            borderRadius: '12px',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-            zIndex: 1001,
-            fontSize: '16px',
-            fontWeight: '600',
-            animation: 'slideIn 0.3s ease-out'
-          }}>
-            {toast.message}
-          </div>
-        )}
-
-        {/* Payment Success Modal */}
-        {showPaymentSuccess && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30,41,59,.95), rgba(15,23,42,.95))',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(34, 197, 94, 0.3)',
-              borderRadius: '20px',
-              padding: '40px',
-              width: '400px',
-              maxWidth: '90vw',
-              color: 'white',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '60px', marginBottom: '20px' }}>✅</div>
-              <h2 style={{ marginBottom: '16px', fontSize: '24px', fontWeight: '700', color: '#22c55e' }}>Payment Successful!</h2>
-              <p style={{ marginBottom: '30px', color: '#94a3b8' }}>Your subscription has been activated successfully.</p>
-              <button
-                onClick={handlePaymentSuccess}
-                style={{
-                  padding: '12px 30px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                  color: 'white',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontSize: '16px'
-                }}
-              >
-                OK
-              </button>
+              ))}
             </div>
           </div>
-        )}
+
+
+          {/* Toast Notification */}
+          {toast.show && (
+            <div style={{
+              position: 'fixed',
+              top: '20px',
+              right: '20px',
+              background: toast.type === 'success' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              color: 'white',
+              padding: '16px 24px',
+              borderRadius: '12px',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+              zIndex: 1001,
+              fontSize: '16px',
+              fontWeight: '600',
+              animation: 'slideIn 0.3s ease-out'
+            }}>
+              {toast.message}
+            </div>
+          )}
+
+          {/* Payment Success Modal */}
+          {showPaymentSuccess && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.8)',
+              backdropFilter: 'blur(5px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000
+            }}>
+              <div style={{
+                background: 'linear-gradient(145deg, #1e293b, #0f172a)',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+                borderRadius: '24px',
+                padding: '48px',
+                width: '420px',
+                maxWidth: '90vw',
+                color: 'white',
+                textAlign: 'center',
+                boxShadow: '0 25px 60px rgba(0,0,0,0.6)'
+              }}>
+                <div style={{ width: '80px', height: '80px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px auto' }}>
+                  <span style={{ fontSize: '40px' }}>✅</span>
+                </div>
+                <h2 style={{ marginBottom: '16px', fontSize: '28px', fontWeight: '800', color: 'white' }}>Success!</h2>
+                <p style={{ marginBottom: '32px', color: '#94a3b8', fontSize: '16px', lineHeight: '1.6' }}>
+                  Your <span style={{ color: '#22c55e', fontWeight: 600 }}>{currentPlan?.name}</span> subscription has been activated successfully.
+                </p>
+                <button
+                  onClick={handlePaymentSuccess}
+                  style={{
+                    width: '100%',
+                    padding: '16px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                    color: 'white',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    boxShadow: '0 8px 20px rgba(34, 197, 94, 0.3)'
+                  }}
+                >
+                  Continue to Invoice
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

@@ -27,14 +27,20 @@ ChartJS.register(
   ArcElement
 );
 
+import Spinner from './Spinner';
+
 const PortfolioDetail = () => {
   const [portfolio, setPortfolio] = useState([]);
   const [showTradeModal, setShowTradeModal] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch portfolio data
     const fetchPortfolio = async () => {
+      // Simulate loading delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
       // Mock data
       const mockData = [
         {
@@ -66,6 +72,7 @@ const PortfolioDetail = () => {
         }
       ];
       setPortfolio(mockData);
+      setLoading(false);
     };
     fetchPortfolio();
   }, []);
@@ -146,7 +153,7 @@ const PortfolioDetail = () => {
     portfolioDetail: {
       padding: '24px',
       color: '#fff',
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Inter', system-ui, sans-serif",
     },
     header: {
       display: 'flex',
@@ -162,18 +169,22 @@ const PortfolioDetail = () => {
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      color: '#fff',
+      background: 'linear-gradient(to right, #60a5fa, #a855f7)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      fontWeight: '800',
     },
     textMuted: {
       color: '#9ca3af',
       fontSize: '14px',
       margin: 0,
+      fontWeight: '500',
     },
     btnPrimary: {
       background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
       color: 'white',
       padding: '10px 20px',
-      borderRadius: '8px',
+      borderRadius: '10px',
       border: 'none',
       cursor: 'pointer',
       fontSize: '14px',
@@ -182,6 +193,7 @@ const PortfolioDetail = () => {
       alignItems: 'center',
       gap: '8px',
       transition: 'all 0.2s',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     },
     statsGrid: {
       display: 'grid',
@@ -193,7 +205,8 @@ const PortfolioDetail = () => {
       background: 'linear-gradient(145deg, #0f172a, #020617)',
       borderRadius: '16px',
       padding: '24px',
-      border: '1px solid #1e293b',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
       transition: 'transform 0.2s',
       display: 'flex',
       alignItems: 'center',
@@ -212,9 +225,11 @@ const PortfolioDetail = () => {
     },
     statContentH3: {
       color: '#9ca3af',
-      fontSize: '14px',
+      fontSize: '13px',
       margin: '0 0 12px 0',
-      fontWeight: '500',
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
     },
     statContentH1: {
       fontSize: '32px',
@@ -229,9 +244,10 @@ const PortfolioDetail = () => {
       marginBottom: '32px',
     },
     card: {
-      background: '#1e293b',
+      background: 'linear-gradient(145deg, #0f172a, #020617)',
       borderRadius: '16px',
-      border: '1px solid #334155',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
       overflow: 'hidden',
     },
     chartCard: {
@@ -249,8 +265,8 @@ const PortfolioDetail = () => {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '20px 24px',
-      borderBottom: '1px solid #334155',
-      background: 'rgba(30, 41, 59, 0.5)',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+      background: 'linear-gradient(to right, rgba(15, 23, 42, 0.5), transparent)',
     },
     cardHeaderH3: {
       fontSize: '18px',
@@ -259,6 +275,7 @@ const PortfolioDetail = () => {
       alignItems: 'center',
       gap: '10px',
       color: '#fff',
+      fontWeight: '600',
     },
     cardBody: {
       padding: '24px',
@@ -270,25 +287,24 @@ const PortfolioDetail = () => {
       width: '100%',
       borderCollapse: 'separate',
       borderSpacing: '0',
-      background: 'linear-gradient(145deg, #0f172a, #020617)',
-      borderRadius: '16px',
-      border: '1px solid #1e293b',
-      overflow: 'hidden',
     },
     th: {
-      padding: '16px 24px',
-      background: 'rgba(30, 41, 59, 0.3)',
-      fontWeight: '600',
-      color: '#9ca3af',
-      fontSize: '14px',
-      borderBottom: '1px solid #1e293b',
+      padding: '16px',
+      background: 'rgba(2, 6, 23, 0.3)',
+      fontWeight: '700',
+      color: '#94a3b8',
+      fontSize: '12px',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
       textAlign: 'left',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
     },
     td: {
-      padding: '16px 24px',
-      borderBottom: '1px solid rgba(30, 41, 59, 0.3)',
-      color: '#ffffff',
+      padding: '16px',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+      color: '#e2e8f0',
       fontSize: '14px',
+      fontWeight: '500',
     },
     assetInfo: {
       display: 'flex',
@@ -306,6 +322,7 @@ const PortfolioDetail = () => {
       fontWeight: 'bold',
       color: 'white',
       fontSize: '13px',
+      boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
     },
     // Modal
     modalOverlay: {
@@ -314,8 +331,8 @@ const PortfolioDetail = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(0, 0, 0, 0.75)',
-      backdropFilter: 'blur(4px)',
+      background: 'rgba(0, 0, 0, 0.8)',
+      backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -323,17 +340,17 @@ const PortfolioDetail = () => {
       padding: '20px',
     },
     modal: {
-      background: '#1e293b',
+      background: 'linear-gradient(145deg, #1e293b, #0f172a)',
       borderRadius: '16px',
       width: '480px',
       maxWidth: '100%',
-      border: '1px solid #334155',
-      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
       overflow: 'hidden',
     },
     modalHeader: {
       padding: '20px 24px',
-      borderBottom: '1px solid #334155',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -351,8 +368,8 @@ const PortfolioDetail = () => {
     tradeBtn: {
       padding: '20px',
       borderRadius: '12px',
-      border: '1px solid #334155',
-      background: '#0f172a',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
+      background: 'rgba(255, 255, 255, 0.02)',
       color: '#fff',
       fontSize: '18px',
       fontWeight: '600',
@@ -367,7 +384,7 @@ const PortfolioDetail = () => {
       background: 'rgba(255, 255, 255, 0.02)',
       borderRadius: '12px',
       padding: '16px',
-      border: '1px solid #334155',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
     },
     infoRow: {
       display: 'flex',
@@ -376,6 +393,10 @@ const PortfolioDetail = () => {
       fontSize: '14px',
     },
   };
+
+  if (loading) {
+    return <Spinner />;
+  }
 
   return (
     <div style={styles.portfolioDetail}>

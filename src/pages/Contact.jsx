@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import NavBar from '../components/NavBar';
-import Footer from '../components/Footer';
+
 import './Register.css';
 
 const Contact = () => {
@@ -33,9 +33,9 @@ const Contact = () => {
         <div className="auth-card" style={{ width: '600px', maxWidth: '90vw' }}>
           <div className="p-4">
             <h2 className="text-center mb-4 fw-bold">Contact Us</h2>
-            
+
             {success && <Alert variant="success">{success}</Alert>}
-            
+
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
                 <Form.Label>Name</Form.Label>
@@ -48,7 +48,7 @@ const Contact = () => {
                   required
                 />
               </Form.Group>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label>Email</Form.Label>
                 <Form.Control
@@ -60,7 +60,7 @@ const Contact = () => {
                   required
                 />
               </Form.Group>
-              
+
               {/* <Form.Group className="mb-3">
                 <Form.Label>Subject</Form.Label>
                 <Form.Control
@@ -72,7 +72,7 @@ const Contact = () => {
                   required
                 />
               </Form.Group> */}
-              
+
               <Form.Group className="mb-3">
                 <Form.Label>Message</Form.Label>
                 <Form.Control
@@ -85,17 +85,17 @@ const Contact = () => {
                   required
                 />
               </Form.Group>
-              
+
               <Button variant="primary" type="submit" className="w-100 mt-2">
                 Send Message
               </Button>
             </Form>
 
-            
+
           </div>
         </div>
       </div>
-      <Footer />
+
     </>
   );
 };

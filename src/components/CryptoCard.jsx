@@ -115,7 +115,7 @@ export default function AlertPanel() {
       alert('Please enter a target price');
       return;
     }
-    
+
     setIsCreating(true);
     // Simulate API call
     setTimeout(() => {
@@ -155,8 +155,8 @@ export default function AlertPanel() {
       </h2>
 
       <div>
-        <label style={styles.label}>Select Cryptocurrency</label>
-        <select 
+        <label style={{ ...styles.label, color: '#fff' }}>Select Cryptocurrency</label>
+        <select
           style={styles.select}
           value={selectedCrypto}
           onChange={(e) => setSelectedCrypto(e.target.value)}
@@ -166,8 +166,8 @@ export default function AlertPanel() {
           onMouseLeave={(e) => e.target.style.borderColor = '#334155'}
         >
           {cryptoOptions.map((crypto) => (
-            <option 
-              key={crypto.value} 
+            <option
+              key={crypto.value}
               value={crypto.value}
               style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
             >
@@ -232,7 +232,7 @@ export default function AlertPanel() {
         />
       </div>
 
-      <button 
+      <button
         style={{
           ...styles.button,
           opacity: isCreating ? 0.7 : 1,

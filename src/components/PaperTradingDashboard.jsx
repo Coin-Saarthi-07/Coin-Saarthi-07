@@ -38,15 +38,15 @@ const PaperTradingDashboard = () => {
     dashboard: {
       display: 'flex',
       minHeight: '100vh',
-      background: '#0f172a', // bg-dark
+      background: 'linear-gradient(135deg, #0a0f1e 0%, #141c2e 100%)',
       position: 'relative',
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Inter', system-ui, sans-serif",
       color: '#fff',
     },
     sidebar: {
       width: '280px',
-      background: '#1e293b', // bg-card
-      borderRight: '1px solid #334155',
+      background: '#020617', // Darker background for sidebar
+      borderRight: '1px solid rgba(255, 255, 255, 0.05)',
       display: 'flex',
       flexDirection: 'column',
       position: 'fixed',
@@ -56,14 +56,14 @@ const PaperTradingDashboard = () => {
       zIndex: 100,
       transition: 'transform 0.3s ease',
       transform: isMobile && !sidebarOpen ? 'translateX(-100%)' : 'translateX(0)',
-      boxShadow: isMobile ? '4px 0 20px rgba(0, 0, 0, 0.4)' : 'none',
+      boxShadow: isMobile ? '4px 0 20px rgba(0, 0, 0, 0.6)' : 'none',
     },
     logo: {
       padding: '24px',
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      borderBottom: '1px solid #334155',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
       color: '#fff',
     },
     logoIcon: {
@@ -91,16 +91,17 @@ const PaperTradingDashboard = () => {
       gap: '16px',
       padding: '12px 16px',
       color: active ? 'white' : '#94a3b8',
-      borderRadius: '8px',
+      borderRadius: '10px',
       fontWeight: '500',
       textDecoration: 'none',
       background: active ? 'linear-gradient(135deg, #3b82f6, #2563eb)' : 'transparent',
       boxShadow: active ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none',
       transition: 'all 0.2s ease',
+      border: active ? 'none' : '1px solid transparent',
     }),
     divider: {
       height: '1px',
-      background: '#334155',
+      background: 'rgba(255, 255, 255, 0.05)',
       margin: '16px 0',
     },
     backLink: {
@@ -108,8 +109,8 @@ const PaperTradingDashboard = () => {
     },
     accountSummary: {
       padding: '24px',
-      borderTop: '1px solid #334155',
-      background: 'rgba(255, 255, 255, 0.02)',
+      borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+      background: 'rgba(255, 255, 255, 0.01)',
     },
     accountBalance: {
       display: 'flex',
@@ -145,17 +146,17 @@ const PaperTradingDashboard = () => {
       flex: 1,
       marginLeft: isMobile ? '0' : '280px',
       padding: isMobile ? '80px 16px 16px 16px' : '32px',
-      background: '#0f172a',
+      // background: '#0f172a', // Removed to let gradient shine through
       minHeight: '100vh',
       width: isMobile ? '100%' : 'calc(100% - 280px)',
     },
     mobileHeader: {
       display: isMobile ? 'flex' : 'none',
-      background: '#1e293b',
+      background: '#020617',
       padding: '16px',
       alignItems: 'center',
       gap: '16px',
-      borderBottom: '1px solid #334155',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
       position: 'fixed',
       top: 0,
       left: 0,
@@ -174,6 +175,7 @@ const PaperTradingDashboard = () => {
     mobileHeaderH3: {
       margin: 0,
       fontSize: '18px',
+      fontWeight: '700',
       background: 'linear-gradient(to right, #60a5fa, #a855f7)',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',

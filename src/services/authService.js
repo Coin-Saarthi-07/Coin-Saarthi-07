@@ -17,16 +17,16 @@ const login = async (credentials) => {
   const res = await api.post("/auth/login", credentials);
 
   if (res.data?.token) {
-    localStorage.setItem(TOKEN_KEY, res.data.token);
+    sessionStorage.setItem(TOKEN_KEY, res.data.token);
 
     const userData = {
-      token: res.data.token,  
+      token: res.data.token,
       userId: res.data.userId,
       userName: res.data.userName,
       role: res.data.role // USER / ADMIN / SUBSCRIBER
     };
 
-    localStorage.setItem(USER_KEY, JSON.stringify(userData));
+    sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
   }
 
   return res.data;
@@ -35,18 +35,18 @@ const login = async (credentials) => {
 /* LOGOUT */
 
 const logout = () => {
-  localStorage.clear();
   sessionStorage.clear();
-  window.location.href = "/login";
+  localStorage.clear(); // Clear local storage too just in case old data exists
+  // window.location.href = "/login"; // Handled by Context/Component
 };
 
 /* TOKEN */
-const getToken = () => localStorage.getItem(TOKEN_KEY);
+const getToken = () => sessionStorage.getItem(TOKEN_KEY);
 
 /* CURRENT USER */
 const getCurrentUser = () => {
   try {
-    const user = localStorage.getItem(USER_KEY);
+    const user = sessionStorage.getItem(USER_KEY);
     if (!user) return null;
     return JSON.parse(user);
   } catch {
