@@ -32,7 +32,7 @@ public class PaperTradingAccountServiceImpl implements PaperTradingAccountServic
 	public AccountResponseDTO createAccount(Long userId) {
 
 		if (accountRepository.existsByUser_UserId(userId)) {
-			throw new ResourceNotFoundException("Paper trading account already exists for this user");
+			throw new IllegalArgumentException("Paper trading account already exists for this user");
 		}
 
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));

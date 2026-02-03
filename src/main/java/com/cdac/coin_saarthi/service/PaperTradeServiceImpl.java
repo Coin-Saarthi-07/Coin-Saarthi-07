@@ -20,6 +20,8 @@ import com.cdac.coin_saarthi.repository.PaperTradingAccountRepository;
 import com.cdac.coin_saarthi.repository.PaperTransactionLogRepository;
 import com.cdac.coin_saarthi.repository.PortfolioRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class PaperTradeServiceImpl implements PaperTradeService {
 
@@ -40,66 +42,79 @@ public class PaperTradeServiceImpl implements PaperTradeService {
 	}
 
 	// buy crypto
+	
+	@Transactional
 	@Override
 	public void buyCrypto(Long userId, Long cryptoId, BigDecimal quantity) {
 
-		PaperTradingAccount account = accountRepo.findByUser_UserId(userId)
-				.orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+	    PaperTradingAccount account = accountRepo.findByUser_UserId(userId)
+	        .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
-		CryptoCurrency crypto = cryptoRepo.findById(cryptoId)
-				.orElseThrow(() -> new ResourceNotFoundException("Crypto not found"));
+	    CryptoCurrency crypto = cryptoRepo.findById(cryptoId)
+	        .orElseThrow(() -> new ResourceNotFoundException("Crypto not found"));
 
-		BigDecimal price = BigDecimal.valueOf(crypto.getCurrencyPrice());
-		BigDecimal cost = price.multiply(quantity);
+	    BigDecimal price = BigDecimal.valueOf(crypto.getCurrencyPrice());
+	    BigDecimal cost = price.multiply(quantity);
 
-		if (account.getVirtualBalance().compareTo(cost) < 0) {
-			throw new ResourceNotFoundException("Insufficient virtual balance");
-		}
+	    if (account.getVirtualBalance().compareTo(cost) < 0) {
+	        throw new IllegalArgumentException("Insufficient virtual balance");
+	    }
 
-		// Deduct balance
-		account.setVirtualBalance(account.getVirtualBalance().subtract(cost));
-		account.setLastUpdated(LocalDateTime.now());
-		accountRepo.save(account);
+	    // 1. Deduct balance
+	    account.setVirtualBalance(account.getVirtualBalance().subtract(cost));
+	    account.setLastUpdated(LocalDateTime.now());
 
-		// Create or update portfolio
-		Portfolio portfolio = portfolioRepo
-				.findByPaperTradingAccount_AccountIdAndCryptoCurrency_CryptoId(account.getAccountId(), cryptoId)
-				.orElseGet(() -> {
-					Portfolio p = new Portfolio();
-					p.setPaperTradingAccount(account);
-					p.setCryptoCurrency(crypto);
-					p.setTotalQuantity(0.0);
-					return p;
-				});
+	    // 2. Load portfolio (LOCKED by transaction)
+	    Portfolio portfolio = portfolioRepo
+	        .findByPaperTradingAccount_AccountIdAndCryptoCurrency_CryptoId(
+	            account.getAccountId(), cryptoId
+	        )
+	        .orElse(null);
 
-		Double qty = quantity.doubleValue();
+	    if (portfolio == null) {
+	        portfolio = new Portfolio();
+	        portfolio.setPaperTradingAccount(account);
+	        portfolio.setCryptoCurrency(crypto);
+	        portfolio.setTotalQuantity(quantity.doubleValue());
+	        portfolio.setAverageBuyPrice(price.doubleValue());
+	    } else {
+	        BigDecimal oldQty = BigDecimal.valueOf(portfolio.getTotalQuantity());
+	        BigDecimal oldAvg = BigDecimal.valueOf(portfolio.getAverageBuyPrice());
 
-		portfolio.setTotalQuantity(portfolio.getTotalQuantity() + qty);
-		portfolio.setAverageBuyPrice(crypto.getCurrencyPrice()); // simple avg (can improve later)
-		portfolio.setLastUpdated(LocalDateTime.now());
+	        BigDecimal newQty = oldQty.add(quantity);
+	        BigDecimal newAvg = oldAvg.multiply(oldQty)
+	            .add(price.multiply(quantity))
+	            .divide(newQty, 8, BigDecimal.ROUND_HALF_UP);
 
-		portfolioRepo.save(portfolio);
+	        portfolio.setTotalQuantity(newQty.doubleValue());
+	        portfolio.setAverageBuyPrice(newAvg.doubleValue());
+	    }
 
-		// 3️.Create ORDER
-		PaperTradeOrder order = new PaperTradeOrder();
-		order.setAccount(account);
-		order.setCrypto(crypto);
-		order.setOrderType(OrderType.BUY);
-		order.setQuantity(quantity);
-		order.setPriceAtOrder(price);
-		order.setStatus(OrderStatus.EXECUTED);
-		order.setCreatedAt(LocalDateTime.now());
-		orderRepo.save(order);
+	    portfolio.setLastUpdated(LocalDateTime.now());
 
-		// 4️. Create TRANSACTION LOG
-		PaperTransactionLog log = new PaperTransactionLog();
-		log.setAccount(account);
-		log.setCrypto(crypto);
-		log.setTransactionType(TransactionType.BUY);
-		log.setAmount(cost);
-		log.setBalanceAfter(account.getVirtualBalance());
-		log.setCreatedAt(LocalDateTime.now());
-		transactionLogRepo.save(log);
+	    accountRepo.save(account);
+	    portfolioRepo.save(portfolio);
+
+	    // 3. Order
+	    PaperTradeOrder order = new PaperTradeOrder();
+	    order.setAccount(account);
+	    order.setCrypto(crypto);
+	    order.setOrderType(OrderType.BUY);
+	    order.setQuantity(quantity);
+	    order.setPriceAtOrder(price);
+	    order.setStatus(OrderStatus.EXECUTED);
+	    order.setCreatedAt(LocalDateTime.now());
+	    orderRepo.save(order);
+
+	    // 4. Transaction log
+	    PaperTransactionLog log = new PaperTransactionLog();
+	    log.setAccount(account);
+	    log.setCrypto(crypto);
+	    log.setTransactionType(TransactionType.BUY);
+	    log.setAmount(cost);
+	    log.setBalanceAfter(account.getVirtualBalance());
+	    log.setCreatedAt(LocalDateTime.now());
+	    transactionLogRepo.save(log);
 	}
 
 	// sell crypto
@@ -116,7 +131,7 @@ public class PaperTradeServiceImpl implements PaperTradeService {
 		BigDecimal currentQty = BigDecimal.valueOf(portfolio.getTotalQuantity());
 
 		if (currentQty.compareTo(quantity) < 0) {
-			throw new ResourceNotFoundException("Insufficient quantity");
+			throw new IllegalArgumentException("Insufficient quantity");
 		}
 
 		CryptoCurrency crypto = cryptoRepo.findById(cryptoId)

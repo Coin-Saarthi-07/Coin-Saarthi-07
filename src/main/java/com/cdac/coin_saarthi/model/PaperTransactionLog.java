@@ -30,6 +30,7 @@ public class PaperTransactionLog {
 
     @ManyToOne
     @JoinColumn(name = "account_id")
+    @lombok.ToString.Exclude
     private PaperTradingAccount account;
 
     @ManyToOne

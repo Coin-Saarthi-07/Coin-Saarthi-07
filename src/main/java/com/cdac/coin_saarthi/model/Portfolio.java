@@ -25,9 +25,10 @@ public class Portfolio {
     private Long portfolioId;
 
     @JsonIgnore
-    @OneToOne
-    @JoinColumn(name = "account_id" , nullable = false)
-    private PaperTradingAccount paperTradingAccount;   
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private PaperTradingAccount paperTradingAccount;
+
 
     @ManyToOne
     @JoinColumn(name = "crypto_id", nullable = false)

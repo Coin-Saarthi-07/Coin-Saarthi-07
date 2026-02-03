@@ -45,15 +45,23 @@ public class SecurityConfig {
 
 						// PUBLIC CRYPTO APIs (MATCH FRONTEND EXACTLY)
 						.requestMatchers("/crypto/crypto-currency/**", "/api/ai/**").permitAll()
-						// ✅ Paper trading needs login 
+						// Paper trading needs login -- this is not in use currently
 						.requestMatchers("/api/paper/**").authenticated()
+						
 						.requestMatchers("/api/subscriptions/**").authenticated()
 						.requestMatchers("/crypto/user-subscription/**").authenticated()
 						//"/api/payments/subscription"
 						.requestMatchers("/api/payments/subscription/**").authenticated()
 						.requestMatchers("/crypto/admin/invoices/**").authenticated()
 						//http://localhost:8080/crypto/admin/invoices/payment/${location.state.paymentI
-						// ✅ Everything else secured
+						// Everything else secured
+						
+						// Paper trading needs login
+						//.requestMatchers("/api/paper/**").authenticated()
+						.requestMatchers("/paper/trade/**").authenticated()
+						.requestMatchers("/paper/account/**").authenticated()
+
+						//  Everything else secured
 						.anyRequest().authenticated())
 
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
