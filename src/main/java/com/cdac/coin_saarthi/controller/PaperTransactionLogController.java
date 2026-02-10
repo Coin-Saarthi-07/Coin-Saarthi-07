@@ -31,8 +31,7 @@ public class PaperTransactionLogController {
             @PathVariable Long userId) {
 
         return ResponseEntity.ok(
-                transactionRepo.findByAccount_User_UserId(userId)
-        );
+                transactionRepo.findByAccount_User_UserId(userId));
     }
 
     // 2️⃣ Transactions by ACCOUNT
@@ -41,7 +40,6 @@ public class PaperTransactionLogController {
             @PathVariable Long accountId) {
 
         return ResponseEntity.ok(
-                transactionRepo.findByAccount_AccountId(accountId)
-        );
+                transactionRepo.findByAccount_AccountId(accountId));
     }
 }

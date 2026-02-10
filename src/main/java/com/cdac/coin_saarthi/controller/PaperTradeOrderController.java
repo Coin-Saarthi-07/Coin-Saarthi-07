@@ -29,8 +29,7 @@ public class PaperTradeOrderController {
             @PathVariable Long userId) {
 
         return ResponseEntity.ok(
-                orderRepo.findByAccount_User_UserId(userId)
-        );
+                orderRepo.findByAccount_User_UserId(userId));
     }
 
     // 2️⃣ Orders by ACCOUNT
@@ -39,7 +38,6 @@ public class PaperTradeOrderController {
             @PathVariable Long accountId) {
 
         return ResponseEntity.ok(
-                orderRepo.findByAccount_AccountId(accountId)
-        );
+                orderRepo.findByAccount_AccountId(accountId));
     }
 }

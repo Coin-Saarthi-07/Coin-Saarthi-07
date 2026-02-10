@@ -30,16 +30,15 @@ public class PaperTradingAccountController {
         return ResponseEntity.ok(service.createAccount(userId));
     }
 
-
     @GetMapping("/{userId}")
     public ResponseEntity<?> get(@PathVariable Long userId) {
         return ResponseEntity.ok(service.getAccountByUserId(userId));
     }
+
     @PostMapping("/reset/{userId}")
     public ResponseEntity<Void> reset(@PathVariable Long userId) {
         service.resetAccount(userId);
         return ResponseEntity.ok().build();
     }
-
 
 }

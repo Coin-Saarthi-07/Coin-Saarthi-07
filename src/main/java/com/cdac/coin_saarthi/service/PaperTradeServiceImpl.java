@@ -42,79 +42,89 @@ public class PaperTradeServiceImpl implements PaperTradeService {
 	}
 
 	// buy crypto
-	
+
 	@Transactional
 	@Override
 	public void buyCrypto(Long userId, Long cryptoId, BigDecimal quantity) {
+		if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
+			throw new IllegalArgumentException("Invalid Quantity");
+		}
 
-	    PaperTradingAccount account = accountRepo.findByUser_UserId(userId)
-	        .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+		PaperTradingAccount account = accountRepo.findByUser_UserId(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
-	    CryptoCurrency crypto = cryptoRepo.findById(cryptoId)
-	        .orElseThrow(() -> new ResourceNotFoundException("Crypto not found"));
+		CryptoCurrency crypto = cryptoRepo.findById(cryptoId)
+				.orElseThrow(() -> new ResourceNotFoundException("Crypto not found"));
 
-	    BigDecimal price = BigDecimal.valueOf(crypto.getCurrencyPrice());
-	    BigDecimal cost = price.multiply(quantity);
+		if (crypto.getCurrencyPrice() == null) {
+			throw new IllegalArgumentException("Crypto price is unavailable");
+		}
 
-	    if (account.getVirtualBalance().compareTo(cost) < 0) {
-	        throw new IllegalArgumentException("Insufficient virtual balance");
-	    }
+		BigDecimal price = BigDecimal.valueOf(crypto.getCurrencyPrice());
+		BigDecimal cost = price.multiply(quantity);
 
-	    // 1. Deduct balance
-	    account.setVirtualBalance(account.getVirtualBalance().subtract(cost));
-	    account.setLastUpdated(LocalDateTime.now());
+		if (account.getVirtualBalance() == null) {
+			account.setVirtualBalance(BigDecimal.ZERO); // Safeguard
+		}
 
-	    // 2. Load portfolio (LOCKED by transaction)
-	    Portfolio portfolio = portfolioRepo
-	        .findByPaperTradingAccount_AccountIdAndCryptoCurrency_CryptoId(
-	            account.getAccountId(), cryptoId
-	        )
-	        .orElse(null);
+		if (account.getVirtualBalance().compareTo(cost) < 0) {
+			throw new IllegalArgumentException("Insufficient virtual balance");
+		}
 
-	    if (portfolio == null) {
-	        portfolio = new Portfolio();
-	        portfolio.setPaperTradingAccount(account);
-	        portfolio.setCryptoCurrency(crypto);
-	        portfolio.setTotalQuantity(quantity.doubleValue());
-	        portfolio.setAverageBuyPrice(price.doubleValue());
-	    } else {
-	        BigDecimal oldQty = BigDecimal.valueOf(portfolio.getTotalQuantity());
-	        BigDecimal oldAvg = BigDecimal.valueOf(portfolio.getAverageBuyPrice());
+		// 1. Deduct balance
+		account.setVirtualBalance(account.getVirtualBalance().subtract(cost));
+		account.setLastUpdated(LocalDateTime.now());
 
-	        BigDecimal newQty = oldQty.add(quantity);
-	        BigDecimal newAvg = oldAvg.multiply(oldQty)
-	            .add(price.multiply(quantity))
-	            .divide(newQty, 8, BigDecimal.ROUND_HALF_UP);
+		// 2. Load portfolio (LOCKED by transaction)
+		Portfolio portfolio = portfolioRepo
+				.findByPaperTradingAccount_AccountIdAndCryptoCurrency_CryptoId(
+						account.getAccountId(), cryptoId)
+				.orElse(null);
 
-	        portfolio.setTotalQuantity(newQty.doubleValue());
-	        portfolio.setAverageBuyPrice(newAvg.doubleValue());
-	    }
+		if (portfolio == null) {
+			portfolio = new Portfolio();
+			portfolio.setPaperTradingAccount(account);
+			portfolio.setCryptoCurrency(crypto);
+			portfolio.setTotalQuantity(quantity.doubleValue());
+			portfolio.setAverageBuyPrice(price.doubleValue());
+		} else {
+			BigDecimal oldQty = BigDecimal.valueOf(portfolio.getTotalQuantity());
+			BigDecimal oldAvg = BigDecimal.valueOf(portfolio.getAverageBuyPrice());
 
-	    portfolio.setLastUpdated(LocalDateTime.now());
+			BigDecimal newQty = oldQty.add(quantity);
+			BigDecimal newAvg = oldAvg.multiply(oldQty)
+					.add(price.multiply(quantity))
+					.divide(newQty, 8, BigDecimal.ROUND_HALF_UP);
 
-	    accountRepo.save(account);
-	    portfolioRepo.save(portfolio);
+			portfolio.setTotalQuantity(newQty.doubleValue());
+			portfolio.setAverageBuyPrice(newAvg.doubleValue());
+		}
 
-	    // 3. Order
-	    PaperTradeOrder order = new PaperTradeOrder();
-	    order.setAccount(account);
-	    order.setCrypto(crypto);
-	    order.setOrderType(OrderType.BUY);
-	    order.setQuantity(quantity);
-	    order.setPriceAtOrder(price);
-	    order.setStatus(OrderStatus.EXECUTED);
-	    order.setCreatedAt(LocalDateTime.now());
-	    orderRepo.save(order);
+		portfolio.setLastUpdated(LocalDateTime.now());
 
-	    // 4. Transaction log
-	    PaperTransactionLog log = new PaperTransactionLog();
-	    log.setAccount(account);
-	    log.setCrypto(crypto);
-	    log.setTransactionType(TransactionType.BUY);
-	    log.setAmount(cost);
-	    log.setBalanceAfter(account.getVirtualBalance());
-	    log.setCreatedAt(LocalDateTime.now());
-	    transactionLogRepo.save(log);
+		accountRepo.save(account);
+		portfolioRepo.save(portfolio);
+
+		// 3. Order
+		PaperTradeOrder order = new PaperTradeOrder();
+		order.setAccount(account);
+		order.setCrypto(crypto);
+		order.setOrderType(OrderType.BUY);
+		order.setQuantity(quantity);
+		order.setPriceAtOrder(price);
+		order.setStatus(OrderStatus.EXECUTED);
+		order.setCreatedAt(LocalDateTime.now());
+		orderRepo.save(order);
+
+		// 4. Transaction log
+		PaperTransactionLog log = new PaperTransactionLog();
+		log.setAccount(account);
+		log.setCrypto(crypto);
+		log.setTransactionType(TransactionType.BUY);
+		log.setAmount(cost);
+		log.setBalanceAfter(account.getVirtualBalance());
+		log.setCreatedAt(LocalDateTime.now());
+		transactionLogRepo.save(log);
 	}
 
 	// sell crypto
