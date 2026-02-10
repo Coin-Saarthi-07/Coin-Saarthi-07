@@ -1,142 +1,108 @@
+
 package com.cdac.coin_saarthi.model;
 
-
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.Data;
-
 import java.time.LocalDate;
+import java.util.List;
+
+import com.cdac.coin_saarthi.enums.UserRole;
+import com.cdac.coin_saarthi.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
 @Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 
 public class User {
 
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Alert> alerts;
-//
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<WatchList> watchlists;
-//
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<UserSubscription> subscriptions;
-//
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Payment> payments;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long userId;
+
+	@NotBlank
+	@Size(min = 6, max = 50)
+	@Pattern(regexp = "^(?=.*[A-Z])[A-Za-z0-9_@]+$", message = "Username must contain at least one capital letter and may include letters, numbers, _ ,@ only.")
+	private String userName;
+
+	@NotBlank
+	@Email
+	@Size(max = 100)
+	@Email(message = "Invalid email format")
+	@Column(unique = true)
+	private String email;
 
 
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
-
-    @NotBlank
-    @Size(min = 6, max = 50)
-    @Pattern(
-            regexp = "^(?=.*[A-Z])[A-Za-z0-9_@]+$",
-            message = "Username must contain at least one capital letter and may include letters, numbers, _ ,@ only."
-    )
-    private String userName;
-
-    @NotBlank
-    @Email
-    @Size(max = 100)
-    @Pattern(
-            regexp = "^[a-zA-Z][a-zA-Z0-9]*@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$",
-            message = "Email must start with a letter and may contain numbers"
-    )
-    @Column(unique = true)
-    private String email;
-
-    @NotBlank
-    @Size(min = 8, max = 255)
-    @Pattern(
-            regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
-            message = "Must contain at least one capital letter, one number, and one special character."
-    )
-    private String password;
-
-    @NotBlank
-    @Pattern(
-            regexp = "^[6-9]\\d{9}$",
-            message = "Enter valid 10 digit Indian mobile number"
-    )
-    @Column(length = 10, unique = true)
-    private String phoneNo;
-
-    @NotNull
-    @Past
-
-    private LocalDate dob;
-
-    private Integer status = 1; // 1 = Active
-    private Integer role = 0;   // 0 = User
+	@NotBlank
+	@JsonIgnore
+	@Size(min = 8, max = 255)
+	@Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).+$", message = "Password Must contain at least one capital letter, one number, and one special character.")
+	private String password;
 
 
+	@NotBlank
+	@Pattern(regexp = "^[6-9]\\d{9}$", message = "Enter valid 10 digit Indian mobile number")
+	@Column(length = 10, unique = true)
+	private String phoneNo;
 
-    public Long getUserId() {
-        return userId;
-    }
+	@NotNull
+	@Past
+	private LocalDate dob;
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+	@AssertTrue(message = "User must be at least 18 years old")
+	public boolean isAdult() {
+	    if (dob == null) return false;
+	    return dob.plusYears(18).isBefore(LocalDate.now())
+	            || dob.plusYears(18).isEqual(LocalDate.now());
+	}	
 
-    public String getUserName() {
-        return userName;
-    }
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private UserStatus status = UserStatus.ACTIVE;
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private UserRole role = UserRole.USER;
+	
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Alert> alerts;
 
-    public String getEmail() {
-        return email;
-    }
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<WatchList> watchlists;
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserSubscription> subscriptions;
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getPhoneNo() {
-        return phoneNo;
-    }
-
-    public void setPhoneNo(String phoneNo) {
-        this.phoneNo = phoneNo;
-    }
-
-    public LocalDate getDob() {
-        return dob;
-    }
-
-    public void setDob(LocalDate dob) {
-        this.dob = dob;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Integer getRole() {
-        return role;
-    }
-
-    public void setRole(Integer role) {
-        this.role = role;
-    }
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Payment> payments;
 
 }
