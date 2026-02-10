@@ -255,11 +255,11 @@ const PaperTradingDashboard = () => {
         <div style={styles.accountSummary}>
           <div style={styles.accountBalance}>
             <span style={styles.balanceLabel}>Virtual Balance</span>
-            <span style={styles.balanceAmount}>₹1,00,000.00</span>
+            <span style={styles.balanceAmount}>$1,00,000.00</span>
           </div>
           <div style={styles.accountPnl}>
             <span style={styles.pnlLabel}>Total P&L</span>
-            <span style={styles.pnlAmount}>+₹8,456.23</span>
+            <span style={styles.pnlAmount}>+$8,456.23</span>
           </div>
         </div>
       </div>

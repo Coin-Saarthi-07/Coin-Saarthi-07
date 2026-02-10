@@ -33,11 +33,13 @@ const PriceChart = ({ symbol }) => {
   const [chartData, setChartData] = useState([]);
   const [coinStats, setCoinStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     if (symbol) {
+      setLoading(true);
+      setStatsLoading(true);
       fetchChartData();
-      fetchCoinStats();
     }
   }, [symbol]);
 
@@ -49,79 +51,97 @@ const PriceChart = ({ symbol }) => {
     doge: "dogecoin",
   };
 
+  // const fetchChartData = async () => {
+  //   try {
+  //     const coinId = COIN_ID_MAP[symbol.toLowerCase()];
+
+  //     if (!coinId) {
+  //       throw new Error("Unsupported coin symbol");
+  //     }
+
+  //     const response = await fetch(
+  //       `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`,
+  //       {
+  //         headers: { Accept: "application/json" },
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+
+  //     const data = await response.json();
+
+  //     const formattedData = data.prices.slice(-12).map((price, index) => {
+  //       const date = new Date(price[0]);
+  //       return {
+  //         time: date.toLocaleTimeString("en-US", {
+  //           hour: "numeric",
+  //           hour12: true,
+  //         }),
+  //         price: Math.round(price[1] * 100) / 100,
+  //         volume: data.total_volumes[index]
+  //           ? Math.round(data.total_volumes[index][1])
+  //           : 0,
+  //       };
+  //     });
+
+  //     setChartData(formattedData);
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.error("Error fetching chart data:", error);
+  //     setChartData(generateMockData(symbol));
+  //     setLoading(false);
+  //   }
+  // };
   const fetchChartData = async () => {
-    try {
-      const coinId = COIN_ID_MAP[symbol.toLowerCase()];
+  try {
+    const coinId = COIN_ID_MAP[symbol.toLowerCase()];
+    if (!coinId) throw new Error("Unsupported coin symbol");
 
-      if (!coinId) {
-        throw new Error("Unsupported coin symbol");
-      }
+    const targetUrl = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`;
+    
+    const response = await fetch(targetUrl, {
+      headers: { Accept: "application/json" },
+    });
 
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`,
-        {
-          headers: { Accept: "application/json" },
-        }
-      );
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    const data = await response.json();
 
-      const data = await response.json();
-
-      const formattedData = data.prices.slice(-12).map((price, index) => {
-        const date = new Date(price[0]);
-        return {
-          time: date.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            hour12: true,
-          }),
-          price: Math.round(price[1] * 100) / 100,
-          volume: data.total_volumes[index]
-            ? Math.round(data.total_volumes[index][1])
-            : 0,
-        };
-      });
-
-      setChartData(formattedData);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching chart data:", error);
-      setChartData(generateMockData(symbol));
-      setLoading(false);
+    if (!data?.prices || !data?.total_volumes) {
+      throw new Error("Invalid data structure from API");
     }
-  };
 
+    const formattedData = data.prices.slice(-12).map((price, index) => {
+      const date = new Date(price[0]);
+      return {
+        time: date.toLocaleTimeString("en-US", { hour: "numeric", hour12: true }),
+        price: Math.round(price[1] * 100) / 100,
+        volume: data.total_volumes[index] ? Math.round(data.total_volumes[index][1]) : 0,
+      };
+    });
 
-  const fetchCoinStats = async () => {
-    try {
-      const token = sessionStorage.getItem("token");
-      const coinId = COIN_ID_MAP[symbol.toLowerCase()];
+    const prices24h = data.prices.map(p => p[1]);
+    const volumes24h = data.total_volumes.map(v => v[1]);
+    const high24h = Math.max(...prices24h);
+    const low24h = Math.min(...prices24h);
+    const currentPrice = prices24h[prices24h.length - 1];
+    const startPrice = prices24h[0];
+    const change24h = ((currentPrice - startPrice) / startPrice) * 100;
+    const volume24h = volumes24h.reduce((a, b) => a + b, 0);
 
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`,
-        {
-          method: "GET",
-          headers: { Accept: "application/json" },
-        }
-      );
+    setCoinStats({ high24h, low24h, change24h, volume24h });
+    setStatsLoading(false);
+    setChartData(formattedData);
+    setLoading(false);
+  } catch (error) {
+    console.error("Error fetching chart data:", error);
+    setChartData(generateMockData(symbol));
+    setLoading(false);
+  }
+};
 
-
-      if (!res.ok) throw new Error("Stats API failed");
-
-      const coin = await res.json();
-
-      setCoinStats({
-        high24h: coin.high24h,
-        low24h: coin.low24h,
-        change24h: coin.change24h,
-        volume24h: coin.volume24h
-      });
-    } catch (error) {
-      console.error("Stats error:", error);
-    }
-  };
 
   const generateMockData = (symbol) => {
     const basePrice = {
@@ -130,10 +150,14 @@ const PriceChart = ({ symbol }) => {
 
     const data = [];
     let price = basePrice;
+    let high = basePrice;
+    let low = basePrice;
 
     for (let i = 0; i < 12; i++) {
       const change = (Math.random() - 0.5) * (basePrice * 0.02);
       price += change;
+      high = Math.max(high, price);
+      low = Math.min(low, price);
       const hour = new Date(Date.now() - (11 - i) * 60 * 60 * 1000);
 
       data.push({
@@ -142,6 +166,16 @@ const PriceChart = ({ symbol }) => {
         volume: Math.round(Math.random() * 1000000000)
       });
     }
+
+    // Generate mock stats
+    const change24h = ((price - basePrice) / basePrice) * 100;
+    setCoinStats({
+      high24h: high,
+      low24h: low,
+      change24h: change24h,
+      volume24h: Math.round(Math.random() * 50000000000)
+    });
+    setStatsLoading(false);
 
     return data;
   };
@@ -231,25 +265,25 @@ const PriceChart = ({ symbol }) => {
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 4px 0' }}>24H High</p>
           <p style={{ fontSize: '18px', fontWeight: '700', color: '#22c55e', margin: '0' }}>
-            {coinStats ? `$${coinStats.high24h.toLocaleString()}` : 'Loading...'}
+            {statsLoading ? 'Loading...' : coinStats ? `$${coinStats.high24h.toLocaleString()}` : 'N/A'}
           </p>
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 4px 0' }}>24H Low</p>
           <p style={{ fontSize: '18px', fontWeight: '700', color: '#ef4444', margin: '0' }}>
-            {coinStats ? `$${coinStats.low24h.toLocaleString()}` : 'Loading...'}
+            {statsLoading ? 'Loading...' : coinStats ? `$${coinStats.low24h.toLocaleString()}` : 'N/A'}
           </p>
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 4px 0' }}>24H Change</p>
           <p style={{ fontSize: '18px', fontWeight: '700', color: coinStats?.change24h >= 0 ? '#22c55e' : '#ef4444', margin: '0' }}>
-            {coinStats ? `${coinStats.change24h >= 0 ? '+' : ''}${coinStats.change24h.toFixed(2)}%` : 'Loading...'}
+            {statsLoading ? 'Loading...' : coinStats ? `${coinStats.change24h >= 0 ? '+' : ''}${coinStats.change24h.toFixed(2)}%` : 'N/A'}
           </p>
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 4px 0' }}>24H Volume</p>
           <p style={{ fontSize: '18px', fontWeight: '700', color: '#60a5fa', margin: '0' }}>
-            {coinStats ? formatVolume(coinStats.volume24h) : 'Loading...'}
+            {statsLoading ? 'Loading...' : coinStats ? formatVolume(coinStats.volume24h) : 'N/A'}
           </p>
         </div>
       </div>

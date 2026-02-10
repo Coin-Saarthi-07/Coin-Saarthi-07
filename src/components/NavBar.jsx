@@ -3,7 +3,7 @@
 //import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Navbar, Nav, Container, Button, Dropdown, Badge } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { FaBell } from 'react-icons/fa';
 import authService from '../services/authService';
@@ -13,9 +13,13 @@ import logo from '../assets/coinsaarthi_logo_circular.png';
 
 const NavBar = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { user, logout } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    
+    // Check if user is on admin dashboard
+    const isAdminDashboard = location.pathname.includes('/admin');
     //const user = authService.getCurrentUser();
 
 
@@ -68,8 +72,8 @@ const NavBar = () => {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
-                        <Nav.Link href="/">Home</Nav.Link>
-                        {user && (
+                        {!isAdminDashboard && <Nav.Link href="/">Home</Nav.Link>}
+                        {user && !isAdminDashboard && (
                             <>
                                 <Nav.Link href="/dashboard">Watchlist</Nav.Link>
 
@@ -85,8 +89,8 @@ const NavBar = () => {
                                 )}
                             </>
                         )}
-                        <Nav.Link href="/about">About Us</Nav.Link>
-                        <Nav.Link href="/contact">Contact Us</Nav.Link>
+                        {!isAdminDashboard && <Nav.Link href="/about">About Us</Nav.Link>}
+                        {!isAdminDashboard && <Nav.Link href="/contact">Contact Us</Nav.Link>}
                     </Nav>
                     <Nav>
                         {user ? (

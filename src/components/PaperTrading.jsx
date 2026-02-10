@@ -6,6 +6,7 @@ import {
   FaChartLine, FaCoins, FaDownload, FaTimes,
   FaSearch, FaArrowUp, FaArrowDown
 } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import api from '../services/api';
 import authService from '../services/authService';
 
@@ -168,9 +169,20 @@ const PaperTrading = () => {
 
   const executeBuyOrder = async () => {
     if (!selectedCrypto || !buyQuantity || parseFloat(buyQuantity) <= 0) {
-      alert('Please select a cryptocurrency and enter valid quantity');
+      toast.error('Please select a cryptocurrency and enter valid quantity');
       return;
     }
+
+    if (!user.userId) {
+      toast.error('User ID not found. Please log in again.');
+      return;
+    }
+
+    console.log('Executing Buy Order:', {
+      userId: user.userId,
+      cryptoId: selectedCrypto?.id,
+      quantity: buyQuantity
+    });
 
     setLoading(true);
     try {
@@ -180,7 +192,7 @@ const PaperTrading = () => {
       );
 
       if (response.status === 200 || response.status === 201) {
-        alert('Buy order executed successfully!');
+        toast.success(`Successfully bought ${buyQuantity} ${selectedCrypto.symbol}!`);
         setShowBuyModal(false);
         setBuyQuantity('');
         setSelectedCrypto(null);
@@ -188,7 +200,7 @@ const PaperTrading = () => {
       }
     } catch (error) {
       console.error('Error executing buy order:', error);
-      alert('Failed to execute buy order: ' + (error.response?.data?.message || error.message || 'Internal Server Error'));
+      toast.error(error.response?.data?.message || 'Failed to execute buy order');
     } finally {
       setLoading(false);
     }
@@ -198,18 +210,29 @@ const PaperTrading = () => {
     const qty = parseFloat(sellQuantity);
     if (!qty || qty <= 0) return;
 
+    if (!user.userId) {
+      toast.error('User ID not found.');
+      return;
+    }
+
+    console.log('Executing Sell Order:', {
+      userId: user.userId,
+      cryptoId: selectedPortfolioItem?.cryptoId,
+      quantity: sellQuantity
+    });
+
     setLoading(true);
     try {
       await api.post(`/paper/trade/sell?userId=${user.userId}&cryptoId=${selectedPortfolioItem.cryptoId}&quantity=${parseFloat(sellQuantity)}`);
 
-      alert("Sell order executed successfully!");
+      toast.success(`Successfully sold ${sellQuantity} ${selectedCrypto.symbol}!`);
       setShowSellModal(false);
       setSellQuantity("");
       setSelectedPortfolioItem(null);
       fetchInitialData(user.userId);
     } catch (error) {
       console.error("Sell error:", error);
-      alert(error.response?.data?.message || "Sell failed");
+      toast.error(error.response?.data?.message || "Sell failed");
     } finally {
       setLoading(false); // Ensure loading is turned off
     }
@@ -221,10 +244,10 @@ const PaperTrading = () => {
       try {
         await api.post(`/paper/account/reset/${user.userId}`);
         fetchInitialData(user.userId);
-        alert('Account reset successfully!');
+        toast.success('Account reset successfully!');
       } catch (error) {
         console.error('Error resetting account:', error);
-        alert('Failed to reset account');
+        toast.error('Failed to reset account');
       }
     }
   };
@@ -542,7 +565,9 @@ const PaperTrading = () => {
           </div>
           <div className="stat-content">
             <h3 style={styles.statContentH3}>Virtual Balance</h3>
-            <h1 style={{ ...styles.statContentH1, background: 'linear-gradient(to right, #60a5fa, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{formatCurrency(user.virtualBalance)}</h1>
+            <h1 style={{ ...styles.statContentH1, background: 'linear-gradient(to right, #60a5fa, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              ${user.virtualBalance}
+            </h1>
             {/* Using inline style override for gradient text since it's specific */}
             <p style={styles.textMuted}>Available for trading</p>
           </div>
@@ -555,7 +580,7 @@ const PaperTrading = () => {
           <div className="stat-content">
             <h3 style={styles.statContentH3}>Total P&L</h3>
             <h1 style={{ ...styles.statContentH1, color: calculateTotalPL() >= 0 ? '#10b981' : '#ef4444' }}>
-              {calculateTotalPL() >= 0 ? '+' : ''}{formatCurrency(calculateTotalPL())}
+              {calculateTotalPL() >= 0 ? '+' : ''}${calculateTotalPL()}
             </h1>
             <p style={styles.textMuted}>
               <span style={{ color: calculateTotalPL() >= 0 ? '#10b981' : '#ef4444' }}>
@@ -623,11 +648,11 @@ const PaperTrading = () => {
                           </div>
                         </td>
                         <td style={styles.td}>{item.quantity.toFixed(4)}</td>
-                        <td style={styles.td}>{formatCurrency(item.avgPrice)}</td>
-                        <td style={styles.td}>{formatCurrency(item.quantity * item.currentPrice)}</td>
+                        <td style={styles.td}>${item.avgPrice}</td>
+                        <td style={styles.td}>${item.quantity * item.currentPrice}</td>
                         <td style={styles.td}>
                           <span style={{ color: item.currentPrice >= item.avgPrice ? '#10b981' : '#ef4444' }}>
-                            {formatCurrency((item.currentPrice - item.avgPrice) * item.quantity)}
+                            ${(item.currentPrice - item.avgPrice) * item.quantity}
                           </span>
                         </td>
                         <td style={styles.td}>
@@ -685,7 +710,7 @@ const PaperTrading = () => {
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: '600', fontSize: '15px', color: '#fff' }}>{formatCurrency(crypto.price)}</div>
+                    <div style={{ fontWeight: '600', fontSize: '15px', color: '#fff' }}>${crypto.price}</div>
                     <div style={{ fontSize: '13px', fontWeight: '500', color: crypto.change >= 0 ? '#10b981' : '#ef4444' }}>
                       {crypto.change >= 0 ? '+' : ''}{crypto.change}%
                     </div>
@@ -802,7 +827,7 @@ const PaperTrading = () => {
                   <div style={styles.formGroup}>
                     <label style={styles.label}>Current Price</label>
                     <div style={styles.priceDisplay}>
-                      {formatCurrency(selectedCrypto.price)}
+                      ${selectedCrypto.price}
                     </div>
                   </div>
 
@@ -822,14 +847,14 @@ const PaperTrading = () => {
                   <div style={styles.formGroup}>
                     <label style={styles.label}>Total Amount</label>
                     <div style={styles.priceDisplay}>
-                      {formatCurrency((parseFloat(buyQuantity) || 0) * selectedCrypto.price)}
+                      ${(parseFloat(buyQuantity) || 0) * selectedCrypto.price}
                     </div>
                   </div>
 
                   <div style={styles.formGroup}>
                     <label style={styles.label}>Available Balance</label>
                     <div style={{ ...styles.priceDisplay, color: '#10b981' }}>
-                      {formatCurrency(user.virtualBalance)}
+                      ${user.virtualBalance}
                     </div>
                   </div>
                 </>
@@ -882,7 +907,7 @@ const PaperTrading = () => {
               <div style={styles.formGroup}>
                 <label style={styles.label}>Current Price</label>
                 <div style={styles.priceDisplay}>
-                  {formatCurrency(selectedCrypto.price)}
+                  ${selectedCrypto.price}
                 </div>
               </div>
 
@@ -910,7 +935,7 @@ const PaperTrading = () => {
               <div style={styles.formGroup}>
                 <label style={styles.label}>Total Amount</label>
                 <div style={styles.priceDisplay}>
-                  {formatCurrency((parseFloat(sellQuantity) || 0) * selectedCrypto.price)}
+                  ${(parseFloat(sellQuantity) || 0) * selectedCrypto.price}
                 </div>
               </div>
             </div>
