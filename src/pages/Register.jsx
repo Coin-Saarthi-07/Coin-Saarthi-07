@@ -7,6 +7,7 @@ import './Register.css'
 
 const Register = () => {
     const [formData, setFormData] = useState({
+
         username: '',
         email: '',
         phoneNo: '',
@@ -47,6 +48,7 @@ const Register = () => {
         const newErrors = {};
 
         // Username validation
+
         if (!formData.username) {
             newErrors.username = 'Username is required';
         } else if (formData.username.length < 6) {
@@ -55,6 +57,7 @@ const Register = () => {
             newErrors.username = 'Maximum 50 characters allowed';
         } else if (!/^(?=.*[A-Z])[A-Za-z0-9_@]+$/.test(formData.username)) {
             newErrors.username = 'Username must contain at least one capital letter and may include letters, numbers, _ ,@ only.';
+
         }
 
         // Email validation
@@ -113,16 +116,27 @@ const Register = () => {
 
         try {
             await authService.register({
-                ...formData,
-                role: "User"
+
+                userName: formData.username,   // 🔥 IMPORTANT
+                email: formData.email,
+                phoneNo: formData.phoneNo,
+                password: formData.password,
+                dob: formData.dob
             });
+
 
             setSuccess('Registration successful! Redirecting to login...');
             setTimeout(() => navigate('/login'), 1500);
+
         } catch (err) {
-            const serverMsg = err.response?.data;
-            setError(serverMsg || err.message || "Registration failed");
-        } finally {
+            const msg =
+                err.response?.data?.message ||
+                err.response?.data ||
+                err.message ||
+                "Registration failed";
+            setError(msg);
+        }
+        finally {
             setLoading(false);
         }
     };
@@ -149,6 +163,7 @@ const Register = () => {
                                 />
                                 <Form.Control.Feedback type="invalid">
                                     {errors.username}
+                                    
                                 </Form.Control.Feedback>
                             </Form.Group>
 

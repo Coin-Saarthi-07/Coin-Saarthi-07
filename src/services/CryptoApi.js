@@ -1,7 +1,9 @@
-import axios from "axios";
 
-const cryptoApi = axios.create({
-  baseURL: "https://localhost:7294/crypto",
-});
+// import axios from "axios";
 
-export default cryptoApi;
+// const cryptoApi = axios.create({
+//   baseURL: "https://localhost:7294/crypto",
+// });
+
+// export default cryptoApi;
+

@@ -197,38 +197,32 @@ const SubscriptionForm = ({ onClose, onSubmit }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      const subscriptionPlan = {
-        planName: formData.planName,
-        planPrice: parseFloat(formData.planPrice),
-        duration: formData.duration,
-        features: formData.features
-      };
-      
-      // Here you would typically make an API call
-      console.log('Creating subscription plan:', subscriptionPlan);
-      
-      if (onSubmit) {
-        onSubmit(subscriptionPlan);
-      }
-      
-      // Reset form
-      setFormData({
-        planName: '',
-        planPrice: '',
-        duration: '30',
-        features: ''
-      });
-      setErrors({});
-      
-      if (onClose) {
-        onClose();
-      }
-    }
-  };
+ const handleSubmit = (e) => {
+  e.preventDefault();
+
+  if (!validateForm()) return;
+
+  const subscriptionPlan = {
+  planName: formData.planName.trim(),
+  planPrice: Number(formData.planPrice),
+  duration: Number(formData.duration),
+  features: formData.features.trim()
+};
+
+
+  onSubmit(subscriptionPlan); // ✅ let parent handle API
+
+  // reset only after successful submit
+  setFormData({
+    planName: '',
+    planPrice: '',
+    duration: '30',
+    features: ''
+  });
+
+  setErrors({});
+};
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;

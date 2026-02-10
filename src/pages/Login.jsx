@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Form, Button, Alert, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
-import authService from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 import './Register.css';
+
 
 const Login = () => {
     const [username, setUserName] = useState('');
@@ -12,26 +13,39 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const { login, logout } = useAuth();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
         setLoading(true);
 
         try {
-            await authService.login({ username, password });
-            const user = authService.getCurrentUser();
+            const user = await login({ userName: username, password });
 
-            if (user?.role === "User") {
-                navigate("/admin/dashboard");
-            } else {
-                navigate("/dashboard");
+            if (user?.status === "BLOCKED") {
+                await logout();
+                setError("Your account has been blocked. Please contact the administrator.");
+                return;
             }
+
+            if (user?.role === "ADMIN") {
+                navigate("/admin/dashboard", { replace: true });
+            } else {
+                navigate("/dashboard", { replace: true });
+            }
+
         } catch (err) {
-            setError(err.message || err.response?.data?.message || "Login failed. Please check your credentials.");
+            setError(
+                err.response?.data?.message ||
+                err.message ||
+                "Login failed. Please check your credentials."
+            );
         } finally {
             setLoading(false);
         }
     };
+
 
 
     return (

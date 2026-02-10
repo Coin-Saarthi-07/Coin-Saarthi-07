@@ -1,7 +1,10 @@
 /* Bootstrap Navbar Styling Override */
 .navbar {
   background: linear-gradient(90deg, #0b0f1a, #0e1529) !important;
-  padding: 6px 40px;
+  padding: 10px 40px;
+  /* Increased padding */
+  min-height: 80px;
+  /* Explicit height */
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
